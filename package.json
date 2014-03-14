@@ -1,0 +1,15 @@
+{
+  "name": "ChatApp",
+  "version": "0.0.0",
+  "description": "ChatApp",
+  "main": "app.js",
+  "author": {
+    "name": "bmancini",
+    "email": ""
+  },
+  "dependencies": {
+    "express": "~3.5.0",
+    "socket.io": "~0.9.16",
+    "mongoose": "~3.8.8"
+  }
+}
