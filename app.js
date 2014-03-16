@@ -42,11 +42,34 @@ app.post('/api/rooms', function(req, res) {
   room.save(function(err, room, numberAffected) {
     if(err) {
       res.send({ success: false, results: null });
+    } else {
+      res.send({ success: true, results: room });
     }
-    res.send({ success: true, results: room });
   });
 
 });
+
+app.get('/api/messages', function(req, res) {
+
+  var idroom  = req.query.idroom
+    , ObjectId = require('mongoose').Types.ObjectId;
+
+  models.Message
+    .find({ idroom: new ObjectId(idroom) })
+    .limit(25)
+    .sort({ created: -1})
+    .exec(function(err, messages) {
+      if(err) {
+        res.send({ success: false, results: null, error: err });
+      } else {
+
+        messages = messages.reverse();
+        res.send({ success: true, results: messages });
+      }
+    });
+
+});
+
 
 var rooms = [];
 
@@ -63,7 +86,20 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('message', function(data) {
-    io.sockets["in"](socket.room).emit("message", data);
+
+    var message = new models.Message({
+      idroom: socket.room,
+      message: data
+    });
+
+    // save the message and broadcast if we successfully saved the message
+    message.save(function(err) {
+      if(err) {
+
+      } else {
+        io.sockets["in"](socket.room).emit("message", data);
+      }
+    });
   });
 
   socket.on('disconnect', function() {
