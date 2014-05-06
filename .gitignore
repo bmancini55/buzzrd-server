@@ -1,3 +1,6 @@
 
 node_modules
+config.js
+
+/* Visual Studio */
 *.suo

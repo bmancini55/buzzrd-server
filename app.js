@@ -1,18 +1,22 @@
-var express = require('express')
-  , db = require('./models/db.js')
-  , models = require('./models/index.js')
 
+// Module dependencies
+var express       = require('express')
+  , bodyParser    = require('body-parser')
+  , models        = require('./models')
+  , dbhelper      = require('./common/dbhelper')
+  , configHelper  = require('./common/confighelper')
 
+// Local variables
+  , config = configHelper.env()
   , app = express()
   , server = require('http').createServer(app)
   , io = require('socket.io').listen(server);
 
-
-server.listen(8055);
-
+// Start listening on the server
+server.listen(config.express.port);
 
 app.use('/files', express.static(__dirname + '/files'));
-app.use(express.bodyParser());
+app.use(bodyParser());
 
 app.get('/', function(req, res) {
   res.sendfile(__dirname + '/index.html');

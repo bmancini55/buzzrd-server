@@ -1,15 +1,16 @@
 {
-  "name": "ChatApp",
-  "version": "0.0.0",
-  "description": "ChatApp",
-  "main": "app.js",
+  "name": "buzzrd-server",
+  "version": "0.0.1",
+  "description": "buzzrd-server",
+  "main": "start.js",
   "author": {
-    "name": "bmancini",
-    "email": ""
+    "name": "Brian Mancini",
+    "email": "bmancini@gmail.com"
   },
   "dependencies": {
-    "express": "~3.5.0",
+    "express": "~4.0.0",
     "socket.io": "~0.9.16",
-    "mongoose": "~3.8.8"
+    "mongoose": "~3.8.8",
+    "body-parser": "~1.0.2"
   }
 }
