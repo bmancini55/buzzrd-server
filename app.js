@@ -2,9 +2,12 @@
 // Module dependencies
 var express       = require('express')
   , bodyParser    = require('body-parser')
-  , models        = require('./models')
+
   , dbhelper      = require('./common/dbhelper')
   , configHelper  = require('./common/confighelper')
+
+  , models        = require('./models')
+  , controllers   = require('./controllers')
 
 // Local variables
   , config = configHelper.env()
@@ -15,64 +18,19 @@ var express       = require('express')
 // Start listening on the server
 server.listen(config.express.port);
 
-app.use('/files', express.static(__dirname + '/files'));
+// Enable POST body parsing
 app.use(bodyParser());
 
+// Temporarily add a debug page for connecting
+app.use('/files', express.static(__dirname + '/files'));
 app.get('/', function(req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-// Finds the rooms based on a users lon / lat location
-app.get('/api/rooms', function(req, res) {
-  
-  var lon = req.query.lon
-    , lat = req.query.lat;
-
-  models.Room.find(function(err, rooms) {
-    console.log('Found %s rooms', rooms);
-    res.send({ success: true, results: rooms });
-  });
-
-});
-
-app.post('/api/rooms', function(req, res) {
-
-  var room = new models.Room({
-    name: req.body.name,
-    lon: req.body.lon,
-    lat: req.body.lat
-  });
-
-  room.save(function(err, room, numberAffected) {
-    if(err) {
-      res.send({ success: false, results: null });
-    } else {
-      res.send({ success: true, results: room });
-    }
-  });
-
-});
-
-app.get('/api/messages', function(req, res) {
-
-  var idroom  = req.query.idroom
-    , ObjectId = require('mongoose').Types.ObjectId;
-
-  models.Message
-    .find({ idroom: new ObjectId(idroom) })
-    .limit(25)
-    .sort({ created: -1})
-    .exec(function(err, messages) {
-      if(err) {
-        res.send({ success: false, results: null, error: err });
-      } else {
-
-        messages = messages.reverse();
-        res.send({ success: true, results: messages });
-      }
-    });
-
-});
+// Room API
+app.get ('/api/rooms', controllers.rooms.findByLocation);
+app.post('/api/rooms', controllers.rooms.create);
+app.get ('/api/rooms/:idroom/messages', controllers.rooms.findMessages);
 
 
 var rooms = [];
