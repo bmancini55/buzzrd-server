@@ -8,10 +8,12 @@ var JsonResponse  = require('../common/jsonresponse')
 // Finds a room by the users current location
 exports.findByLocation = function(req, res) {
   
-  var lon = req.query.lon
+  var page = Math.max(req.query.page || 1, 1)
+    , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
+    , lon = req.query.lon
     , lat = req.query.lat;
 
-  Room.findAll(function(err, rooms) {
+  Room.findAll(page, pagesize, function(err, rooms) {
     if(err) {
       res.send(500, new JsonResposne(err));
     } else {
