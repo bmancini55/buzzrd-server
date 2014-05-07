@@ -91,7 +91,7 @@
                     socketUrl: 'http://derpturkey.listmill.com:5050',
                     apiUrl:    'http://derpturkey.listmill.com:5050'
                 },
-                templates = {
+                Templates = {
                     home:           Handlebars.compile($('#app-template').html()),
                     roomListRow:    Handlebars.compile($('#roomlist-row-template').html()),
                     chat:           Handlebars.compile($('#chat-template').html()),
@@ -209,7 +209,7 @@
             // Main view for the application
             Views.App = Backbone.View.extend({
                 el: '.app',
-                template: templates.home,
+                template: Templates.home,
                 render: function () {
                     var html = this.template({});
                     this.$el.html(html);
@@ -241,7 +241,7 @@
 
             // View for displaying a single room in the list
             Views.RoomListRow = Backbone.View.extend({
-                template: templates.roomListRow,
+                template: Templates.roomListRow,
                 tagName: 'li',
                 className: 'room list-group-item',
 
@@ -263,7 +263,7 @@
             // View for the chat area
             Views.Chat = Backbone.View.extend({
                 el: '.chat-container',
-                template: templates.chat,
+                template: Templates.chat,
 
                 events: {
                     'submit': 'sendMessage',
@@ -313,7 +313,7 @@
 
             // View for a single message row
             Views.MessageListRow = Backbone.View.extend({
-                template: templates.messageListRow,
+                template: Templates.messageListRow,
                 tagName: 'li',
                 className: 'mesage',
                 render: function () {
@@ -328,7 +328,7 @@
                 Models: Models,
                 Collections: Collections,
                 Views: Views,
-                templates: templates
+                Templates: Templates
             }
         }());
 
