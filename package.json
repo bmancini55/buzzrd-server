@@ -11,6 +11,7 @@
     "express": "~4.0.0",
     "socket.io": "~0.9.16",
     "mongoose": "~3.8.8",
-    "body-parser": "~1.0.2"
+    "body-parser": "~1.0.2",
+    "serve-static": "~1.1.0"
   }
 }

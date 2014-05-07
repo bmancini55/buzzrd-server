@@ -2,6 +2,7 @@
 // Module dependencies
 var express       = require('express')
   , bodyParser    = require('body-parser')
+  , serverStatic        = require('serve-static')
 
   , dbhelper      = require('./common/dbhelper')
   , configHelper  = require('./common/confighelper')
@@ -22,7 +23,7 @@ server.listen(config.express.port);
 app.use(bodyParser());
 
 // Temporarily add a debug page for connecting
-app.use('/files', express.static(__dirname + '/files'));
+app.use('/public', serverStatic(__dirname + '/public'));
 app.get('/', function(req, res) {
   res.sendfile(__dirname + '/index.html');
 });

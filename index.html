@@ -1,18 +1,340 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Buzzrd Demo</title>
 </head>
 <body>
 
+    <div class="app"></div>
+
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.min.js"></script>
+    <script src="http://underscorejs.org/underscore-min.js"></script>
+    <script src="http://backbonejs.org/backbone-min.js"></script>
+    <script src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v1.3.0.js"></script>
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+    <!-- Automatically created by Socket.io -->
     <script src="/socket.io/socket.io.js"></script>
+
+
+    <style type="text/css">
+        body { padding-top: 60px; }
+        .room { cursor: pointer; }
+        .room:hover { background-color: #fff2df; }
+    </style>
+    
+
+
+    <script id="app-template" type="text/x-handlebars-template">
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Buzzrd Web Test</a>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <ul class="rooms"></ul>
+                </div>
+                <div class="col-lg-9">
+                    <div class="chat-container"></div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="roomlist-row-template" type="text/x-handlebars-template">
+        {{name}}
+    </script>
+
+    <script id="chat-template" type="text/x-handlebars-template">
+        <div class="col-lg-6">
+
+            <div class="panel panel-default">
+                <div class="panel-heading"><h2>{{name}}</h2></div>
+                <div class="panel-body">
+                    <ul class="messages list-group"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <form role="form">
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea class="form-control" id="message" placeholder="Enter a message" />
+                </div>  
+                <button type="submit" class="btn btn-default">Send</button>
+            </form>
+        </div>
+    </script>
+
+    <script id="message-list-row-template" type="text/x-handlebars-template">
+        <pre>{{content}}</pre>
+    </script>
+
     <script>
 
-        var socket = io.connect('http://localhost');
+        var buzzrd = (function () {
+            'use strict';
 
-        socket.on('message', function (data) {
-            console.log(data);
-            socket.emit('my other event', { my: 'data' });
+            ///
+            /// Main variable declarations
+            ///
+            var config = {
+                    socketUrl: 'http://derpturkey.listmill.com:5050',
+                    apiUrl:    'http://derpturkey.listmill.com:5050'
+                },
+                templates = {
+                    home:           Handlebars.compile($('#app-template').html()),
+                    roomListRow:    Handlebars.compile($('#roomlist-row-template').html()),
+                    chat:           Handlebars.compile($('#chat-template').html()),
+                    messageListRow: Handlebars.compile($('#message-list-row-template').html())
+                },
+                Models      = {},
+                Collections = {},
+                Views       = {},
+                app,
+                socket;
+
+            ///
+            /// Controllers
+            ///
+
+            // Main controller 
+            app = {
+                rooms: null,
+                messages: null,
+                appView: null,
+                roomsView: null,
+                chatView: null,
+                messagesView: null,
+                currentRoom: null,
+                start: function () {
+
+                    this.appView = new Views.App();
+                    this.appView.render();
+
+                    this.rooms = new Collections.Rooms();
+                    this.roomsView = new Views.RoomList({ collection: this.rooms });
+                    this.rooms.fetch();
+
+                    socket.initialize();
+                    Backbone.on('socket:message', this.recieveMessage, this);
+                },
+                joinRoom: function (room) {
+                    this.currentRoom = room;
+
+                    this.chatView = new Views.Chat({ model: room });
+                    this.chatView.render();
+
+                    this.messages = new Collections.Messages();
+                    this.messageView = new Views.MessageList({ collection: this.messages });
+
+                    socket.joinRoom(room.get('_id'));
+                },
+                sendMessage: function (message) {
+                    // this is currently duplicating since we're rebroadcasting our message...
+                    //this.messages.add(message); 
+                    socket.sendMessage(message.get('content'));
+                },
+                recieveMessage: function (content) {
+                    var message = new Models.Message({ content: content });
+                    this.messages.add(message);
+                }
+            }
+
+
+            // Socket controller
+            socket = {
+                socket: null,
+                initialize: function () {
+                    this.socket = io.connect(config.socketUrl);
+                    this.socket.on('message', this.onMessage);
+                },
+                onMessage: function (data) {
+                    Backbone.trigger('socket:message', data);
+                },
+                joinRoom: function(id) {
+                    this.socket.emit('join', id);
+                },
+                sendMessage: function(content) {
+                    if (content) {
+                        this.socket.emit('message', content);
+                    }
+                }
+            }
+
+
+            ///
+            /// Models
+            ///
+
+            // Represents a room
+            Models.Room = Backbone.Model.extend({ });
+
+            // Represents a single message
+            Models.Message = Backbone.Model.extend({ })
+
+
+            ///
+            /// Collections
+            ///
+
+            // Represents a collection of rooms
+            Collections.Rooms = Backbone.Collection.extend({
+                model: Models.Room,
+                url: config.apiUrl + '/api/rooms',
+                parse: function (response, options) {
+                    return response.results;
+                }
+            });
+
+            // Represents a collection of messages
+            Collections.Messages = Backbone.Collection.extend({
+                model: Models.Message
+            })
+
+
+            /// 
+            /// Views
+            ///
+
+            // Main view for the application
+            Views.App = Backbone.View.extend({
+                el: '.app',
+                template: templates.home,
+                render: function () {
+                    var html = this.template({});
+                    this.$el.html(html);
+                    return this;
+                }
+            })
+
+            // View for displaying a list of rooms
+            Views.RoomList = Backbone.View.extend({
+                el: '.rooms',
+
+                initialize: function () {
+                    var rooms = this.collection;
+                    rooms.on('reset', this.render, this);
+                    rooms.on('add', this.addRoom, this);
+                },
+
+                render: function () {
+                    this.$el.html('');
+                    this.collection.each(this.addRoom, this);
+                    return this;
+                },
+
+                addRoom: function (room) {
+                    var roomView = new Views.RoomListRow({ model: room });
+                    this.$el.append(roomView.render().el);
+                }
+            });
+
+            // View for displaying a single room in the list
+            Views.RoomListRow = Backbone.View.extend({
+                template: templates.roomListRow,
+                tagName: 'li',
+                className: 'room list-group-item',
+
+                events: {
+                    'click': 'join'
+                },
+
+                render: function () {
+                    var html = this.template(this.model.attributes);
+                    this.$el.html(html);
+                    return this;
+                },
+
+                join: function () {
+                    app.joinRoom(this.model);
+                }
+            });
+
+            // View for the chat area
+            Views.Chat = Backbone.View.extend({
+                el: '.chat-container',
+                template: templates.chat,
+
+                events: {
+                    'submit': 'sendMessage',
+                },
+
+                render: function () {
+                    var html = this.template(this.model.attributes);
+                    this.$el.html(html);
+                    return this;
+                },
+
+                sendMessage: function (e) {
+                    e.preventDefault();
+                    var textbox = this.$el.find('#message'),
+                        content = textbox.val(),
+                        message = new Models.Message({ content: content });
+
+                    textbox.val('');
+                    textbox.focus();
+                    app.sendMessage(message);
+                }
+            });
+
+            // View for the list of messages
+            Views.MessageList = Backbone.View.extend({
+                el: '.messages',
+
+                initialize: function () {
+                    var messages = this.collection;
+                    this.listenTo(messages, 'add', this.addMessage, this);
+                    this.listenTo(messages, 'reset', this.render, this);
+                },
+
+                render: function () {
+                    this.$el.html('');
+                    this.collection.each(this.addMessage, this);
+                    return this;
+                },
+
+                addMessage: function (message) {
+                    var view = new Views.MessageListRow({ model: message }),
+                        html = view.render().$el;
+                    this.$el.append(html);
+                }
+                
+            });
+
+            // View for a single message row
+            Views.MessageListRow = Backbone.View.extend({
+                template: templates.messageListRow,
+                tagName: 'li',
+                className: 'mesage',
+                render: function () {
+                    var html = this.template(this.model.attributes);
+                    this.$el.html(html);
+                    return this;
+                }
+            });
+
+            return {
+                app: app,
+                Models: Models,
+                Collections: Collections,
+                Views: Views,
+                templates: templates
+            }
+        }());
+
+        $(function () {
+            // Fire it up!
+            buzzrd.app.start();
         });
     </script>
 
