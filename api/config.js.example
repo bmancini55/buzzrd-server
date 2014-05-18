@@ -1,0 +1,30 @@
+﻿
+
+var config;
+
+config = {
+
+  // Development specific configuration values
+  development: {
+    express: {
+      port: 8080
+    },
+    mongo: {
+      db: 'mongodb://some-host/some-db',
+    }
+  },
+
+  // Production specific configuration values
+  // that will be applied when node is launched with
+  // 
+  produdction: {
+    express: {
+      port: 8080
+    },
+    mongo: {
+      db: 'mongodb://some-host/some-db',
+    },
+  }
+};
+
+module.exports=config;

@@ -31,8 +31,7 @@ app.get('/', function(req, res) {
 // Room API
 app.get ('/api/rooms', controllers.rooms.findByLocation);
 app.post('/api/rooms', controllers.rooms.create);
-app.get ('/api/rooms/:idroom/messages', controllers.messages.findByRoom);
-
+app.get ('/api/rooms/:idroom/messages', controllers.rooms.findMessages);
 
 
 var rooms = [];

@@ -39,3 +39,17 @@ exports.create = function(req, res) {
   });
 
 };
+
+
+// Finds the messages for a room
+exports.findMessages = function(req, res) {
+  var idroom  = req.param.idroom
+
+  Message.findByRoom(idroom, function(err, rooms) {
+    if(err) {
+      res.send(500, new JsonResponse(err));
+    } else {
+      res.send(new JsonResponse(null, rooms));
+    }
+  });
+};
