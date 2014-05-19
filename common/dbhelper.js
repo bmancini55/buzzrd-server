@@ -1,6 +1,8 @@
-﻿var mongoose = require('mongoose')
+﻿var mongoose      = require('mongoose')
+  , configHelper  = require('../common/confighelper')
+  , config        = configHelper.env()
 
-  , url = 'mongodb://192.168.0.152/chatapp';
+  , url = config.mongo.db;
 
 mongoose.connect(url);
 
