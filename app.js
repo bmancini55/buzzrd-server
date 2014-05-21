@@ -33,6 +33,9 @@ app.get ('/api/rooms', controllers.rooms.findByLocation);
 app.post('/api/rooms', controllers.rooms.create);
 app.get ('/api/rooms/:idroom/messages', controllers.messages.findByRoom);
 
+// User API
+app.get ('/api/users', controllers.users.findAll);
+app.post('/api/users', controllers.users.create);
 
 
 var rooms = [];
