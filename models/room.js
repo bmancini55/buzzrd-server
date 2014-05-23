@@ -15,7 +15,7 @@ var RoomSchema = new Schema({
 });
 
 
-/// 
+///
 /// Static methods
 ///
 
@@ -37,5 +37,6 @@ RoomSchema.statics.findByLocation = function(lon, lat, next) {
 
 ///
 /// Create and export the model
+///
 var roomModel = mongoose.model('Room', RoomSchema);
 module.exports = roomModel;

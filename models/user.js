@@ -1,6 +1,7 @@
 
 // Module dependencies
-var mongoose = require("mongoose")
+var mongoose = require('mongoose')
+  , crypto = require('crypto')
   , Schema = mongoose.Schema;
 
 ///
@@ -9,6 +10,9 @@ var mongoose = require("mongoose")
 var UserSchema = new Schema({
   username: String,
   password: String,
+  salt: Number,
+  created: { type: Date, default: Date.now },
+  updated: { type: Date, default: Date.now },
   firstName: String,
   lastName: String,
   sex: String
@@ -16,9 +20,18 @@ var UserSchema = new Schema({
 });
 
 
-/// 
+
+///
 /// Static methods
 ///
+
+// Hashes a password using PBKDF2
+// Callback gets two arguments (err, derivedKey)
+UserSchema.statics.hashPassword = function(password, salt, next) {
+  var iterations  = 100000
+    , keyLength   = 64;
+  crypto.pbkdf2(password, salt, iterations, keyLength, next);
+}
 
 // Finds all users, likely an admin function
 // and being used for testing purposes now
@@ -30,7 +43,25 @@ UserSchema.statics.findAll = function(page, pagesize, next) {
     .exec(next);
 }
 
+
+
+///
+/// Instance methods
+///
+
+// Verifies the supplied password against the user's password
+// with callbback arguments (err, valid) where valid is a boolean.
+UserSchema.methods.verifyPassword = function(password, next) {
+  var me = this;
+  UserSchema.statics.hashPassword(function(err, derivedKey) {
+    var result = (me.password === derivedKey);
+    next(err, result);
+  });
+}
+
+
 ///
 /// Create and export the model
+///
 var userModel = mongoose.model('User', UserSchema);
 module.exports = userModel;
