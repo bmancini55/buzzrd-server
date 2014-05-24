@@ -17,7 +17,7 @@ var express       = require('express')
   , app = express()
   , server = require('http').createServer(app)
   , io = require('socket.io').listen(server)
-  , NODE_ENV = process.env.NODE_ENV || 'development'
+  , debug = process.env.NODE_ENV || 'development'
   , oauth;
 
 // Start listening on the server
@@ -37,7 +37,7 @@ app.oauth = oauth = OAuthServer({
     model: new OAuthModel(),
     grants: ['password'],
     accessTokenLifetime: null,
-    debug: true
+    debug: debug
   });
 
 // OAuth API
@@ -52,12 +52,15 @@ app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.
 app.post('/api/users', controllers.Users.create);
 
 
-// DEV ONLY MOUNTS
-if(NODE_ENV === 'development') {
+// DEBUG ONLY MOUNTS
+if(debug) {
+
+  // OAuth API
   app.get('/oauth/clients', controllers.OAuthClients.findAll);
   app.post('/oauth/clients', controllers.OAuthClients.create);
   app.get('/oauth/tokens', controllers.OAuthAccessTokens.findAll);
 
+  // User API
   app.get ('/api/users', controllers.Users.findAll);
 }
 
