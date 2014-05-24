@@ -88,8 +88,8 @@
             /// Main variable declarations
             ///
             var config = {
-                    socketUrl: 'http://derpturkey.listmill.com:5050',
-                    apiUrl:    'http://derpturkey.listmill.com:5050'
+                    socketUrl: 'http://devapi.buzzrd.io:5050',
+                    apiUrl:    'http://devapi.buzzrd.io:5050'
                 },
                 Templates = {
                     home:           Handlebars.compile($('#app-template').html()),
@@ -102,6 +102,12 @@
                 Views       = {},
                 app,
                 socket;
+
+            $.ajaxSetup({
+                headers: {
+                    'Authorization': 'Bearer 4acec7ac032ae54febf48eec749f4076523625ae'
+                }
+            })
 
             ///
             /// Controllers
