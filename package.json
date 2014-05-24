@@ -13,6 +13,7 @@
     "mongoose": "~3.8.8",
     "node-oauth2-server": "^2.1.0",
     "serve-static": "~1.1.0",
-    "socket.io": "~0.9.16"
+    "socket.io": "~0.9.16",
+    "debug": "~0.8.1"
   }
 }

@@ -38,7 +38,7 @@ UserSchema.statics.generateSalt = function(next) {
 UserSchema.statics.hashPassword = function(password, salt, next) {
   var ITERATIONS  = 100000
     , KEY_LENGTH  = 128
-    , saltBuffer  = new Buffer(salt, "hex");
+    , saltBuffer  = new Buffer(salt, 'hex');
   crypto.pbkdf2(password, saltBuffer, ITERATIONS, KEY_LENGTH, function(err, buffer) {
     if(err) next(err);
     else next(null, buffer.toString('hex'));
@@ -62,10 +62,11 @@ UserSchema.statics.findAll = function(page, pagesize, next) {
 ///
 
 // Verifies the supplied password against the user's password
-// with callbback arguments (err, valid) where valid is a boolean.
+// with callback arguments (err, valid) where valid is a boolean.
 UserSchema.methods.verifyPassword = function(password, next) {
-  var me = this;
-  UserSchema.statics.hashPassword(function(err, derivedKey) {
+  var me = this
+    , salt = me.salt;
+  UserSchema.statics.hashPassword(password, salt, function(err, derivedKey) {
     var result = (me.password === derivedKey);
     next(err, result);
   });

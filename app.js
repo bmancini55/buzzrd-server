@@ -41,22 +41,28 @@ app.oauth = oauth = OAuthServer({
   });
 
 // OAuth API
-app.post('/oauth/token', oauth.grant());
+app.post('/oauth/grant', oauth.grant());
 
+// Room API
+app.get ('/api/rooms', oauth.authorise(), controllers.Rooms.findByLocation);
+app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
+app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
+
+// User API
+app.post('/api/users', controllers.Users.create);
+
+
+// DEV ONLY MOUNTS
 if(NODE_ENV === 'development') {
   app.get('/oauth/clients', controllers.OAuthClients.findAll);
   app.post('/oauth/clients', controllers.OAuthClients.create);
+  app.get('/oauth/tokens', controllers.OAuthAccessTokens.findAll);
+
+  app.get ('/api/users', controllers.Users.findAll);
 }
 
-// Room API
-app.get ('/api/rooms', controllers.Rooms.findByLocation);
-app.post('/api/rooms', controllers.Rooms.create);
-app.get ('/api/rooms/:idroom/messages', controllers.Messages.findByRoom);
-
-// User API
-app.get ('/api/users', controllers.Users.findAll);
-app.post('/api/users', controllers.Users.create);
-
+// TODO - write custom code for managing this that uses JsonResponse
+app.use(oauth.errorHandler());
 
 var rooms = [];
 
