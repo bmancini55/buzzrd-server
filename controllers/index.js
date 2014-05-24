@@ -1,10 +1,12 @@
 ﻿// Module dependencies
-var rooms = require('./rooms')
-  , messages = require('./messages')
-  , users = require('./users');
-  
+var Rooms         = require('./rooms')
+  , Messages      = require('./messages')
+  , Users         = require('./users')
+  , OAuthClients  = require('./oauthclients');
+
 module.exports = {
-  rooms: rooms,
-  messages: messages,
-  users: users
+  Rooms: Rooms,
+  Messages: Messages,
+  Users: Users,
+  OAuthClients: OAuthClients
 }
