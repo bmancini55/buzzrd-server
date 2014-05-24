@@ -19,7 +19,7 @@ exports.create = function(req, res) {
 
       var client = new OAuthClient({
           clientId: clientId,
-          clietnSecret: clientSecret,
+          clientSecret: clientSecret,
           clientName: clientName,
           redirectUri: redirectUri
       });

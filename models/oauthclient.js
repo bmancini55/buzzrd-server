@@ -10,8 +10,8 @@ var mongoose  = require('mongoose')
 var OAuthClientSchema = new Schema({
   clientId: { type: String, required: true },
   clientSecret: { type: String, required: true },
+  clientName: { type: String, required: true },
   redirectUri: { type: String },
-  name: { type: String, required: true },
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now }
 });
@@ -21,12 +21,20 @@ var OAuthClientSchema = new Schema({
 /// Static methods
 ///
 
+OAuthClientSchema.statics.generateClientId = function(next) {
+  var CLIENT_ID_LENGTH = 16
+  crypto.randomBytes(CLIENT_ID_LENGTH, function(err, buffer) {
+    if(err) next(err);
+    else next(null, buffer.toString('hex'));
+  });
+}
+
 // Generates a cryptographically secure client secret
 OAuthClientSchema.statics.generateClientSecret = function(next) {
   var CLIENT_SECRET_LENGTH = 64
   crypto.randomBytes(CLIENT_SECRET_LENGTH, function(err, buffer) {
     if(err) next(err);
-    else next(null, buffer.toString());
+    else next(null, buffer.toString('hex'));
   });
 }
 
