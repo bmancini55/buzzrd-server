@@ -28,24 +28,28 @@ exports.create = function(req, res) {
   //lastName: String,
   //sex: String
 
-  var salt        = new Date().getTime()
-    , rawPassword = req.body.password;
+  var rawPassword = req.body.password;
 
-  User.hashPassword(rawPassword, salt, function(err, derivedKey) {
-    var user = new User({
-      username: req.body.username,
-      password: derivedKey,
-      salt: salt,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      sex: req.body.sex
-    });
-    user.save(function(err, user) {
-      if(err) {
-        res.send(500, new JsonResponse(err));
-      } else {
-        res.send(new JsonResponse(null, user));
-      }
+  User.generateSalt(function(err, salt) {
+    if(err) res.send(500, new JsonResponse(err));
+
+    User.hashPassword(rawPassword, salt, function(err, derivedKey) {
+      var user = new User({
+        username: req.body.username,
+        password: derivedKey,
+        salt: salt,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        sex: req.body.sex
+      });
+      user.save(function(err, user) {
+        if(err) {
+          res.send(500, new JsonResponse(err));
+        } else {
+          res.send(new JsonResponse(null, user));
+        }
+      });
+
     });
 
   });

@@ -10,7 +10,7 @@ var mongoose = require('mongoose')
 var UserSchema = new Schema({
   username: String,
   password: String,
-  salt: Number,
+  salt: String,
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
   firstName: String,
@@ -25,12 +25,24 @@ var UserSchema = new Schema({
 /// Static methods
 ///
 
+UserSchema.statics.generateSalt = function(next) {
+  var SALT_LENGTH = 8;
+  crypto.randomBytes(SALT_LENGTH, function(err, buffer) {
+    if(err) next(err);
+    else next(null, buffer.toString('hex'));
+  });
+}
+
 // Hashes a password using PBKDF2
 // Callback gets two arguments (err, derivedKey)
 UserSchema.statics.hashPassword = function(password, salt, next) {
-  var iterations  = 100000
-    , keyLength   = 64;
-  crypto.pbkdf2(password, salt, iterations, keyLength, next);
+  var ITERATIONS  = 100000
+    , KEY_LENGTH  = 128
+    , saltBuffer  = new Buffer(salt, "hex");
+  crypto.pbkdf2(password, saltBuffer, ITERATIONS, KEY_LENGTH, function(err, buffer) {
+    if(err) next(err);
+    else next(null, buffer.toString('hex'));
+  });
 }
 
 // Finds all users, likely an admin function
