@@ -3,12 +3,15 @@
   , User              = require('./user')
 
   , OAuthAccessToken  = require('./oauthaccesstoken')
-  , OAuthClient       = require('./oauthclient');
+  , OAuthClient       = require('./oauthclient')
+
+  , Venue             = require('./venue')
 
 module.exports = {
   Room: Room,
   Message: Message,
   User: User,
   OAuthAccessToken: OAuthAccessToken,
-  OAuthClient: OAuthClient
+  OAuthClient: OAuthClient,
+  Venue: Venue
 }

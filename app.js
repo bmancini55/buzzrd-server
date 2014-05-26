@@ -62,6 +62,9 @@ if(debug) {
 
   // User API
   app.get ('/api/users', controllers.Users.findAll);
+
+  // Venues API
+  app.get('/api/venues', controllers.Venues.findByLocation);
 }
 
 // TODO - write custom code for managing this that uses JsonResponse

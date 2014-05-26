@@ -10,8 +10,7 @@ var RoomSchema = new Schema({
   name: String,
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
-  lon: Number,
-  lat: Number
+  venueId: Schema.Types.ObjectId
 });
 
 
