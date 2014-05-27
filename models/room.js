@@ -10,7 +10,8 @@ var RoomSchema = new Schema({
   name: String,
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
-  venueId: Schema.Types.ObjectId
+  venueId: Schema.Types.ObjectId,
+  userCount: { type: Number, default: 0 }
 });
 
 
@@ -18,8 +19,11 @@ var RoomSchema = new Schema({
 /// Static methods
 ///
 
-// Finds all rooms, likely an admin function
-// and being used for testing purposes now
+/**
+ * findAll
+ * Finds all rooms, likely an admin function
+ * and being used for testing purposes now
+ */
 RoomSchema.statics.findAll = function(page, pagesize, next) {
   this.find()
     .skip((page - 1) * pagesize)
@@ -28,14 +32,21 @@ RoomSchema.statics.findAll = function(page, pagesize, next) {
     .exec(next);
 }
 
-// Finds nearby rooms
-RoomSchema.statics.findByLocation = function(lon, lat, next) {
-  // TODO
+/** 
+ * findByVenue
+ * Finds rooms belonging to a specific venue
+ */
+RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
+  this.find({ venueId: new mongoose.Types.ObjectId(venueId) })
+  .skip((page - 1) * pagesize)
+  .limit(pagesize)
+  .sort({ userCount: -1, name: 1 })
+  .exec(next);
 }
 
 
 ///
 /// Create and export the model
 ///
-var roomModel = mongoose.model('Room', RoomSchema);
-module.exports = roomModel;
+var model = mongoose.model('Room', RoomSchema);
+module.exports = model;

@@ -34,7 +34,8 @@ var VenueSchema = new Schema({
   verified: Boolean,
   referralId: String,
   created: { type: Date, default: Date.now },
-  updated: { type: Date, default: Date.now }
+  updated: { type: Date, default: Date.now },
+  roomCount: { type: Number, default: 0 }
 });
 
 
@@ -46,11 +47,9 @@ var VenueSchema = new Schema({
 /** 
  * findNearby
  * Finds locations near a  latitude, longitude coordinate within
- * the specified number of meters of that coordinate
+ * the specified number of meters of that coordinate ordered by proximity
  */
 VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
-
-
   this.find({ 
     "coord": { 
       "$near" : { 
@@ -58,7 +57,29 @@ VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
         "$maxDistance" : meters 
       }
     }
-  }, next);
+  })
+  //.sort({ roomCount: - 1 })
+  .limit(25)
+  .exec(next);
+}
+
+/**
+ * findInRadius
+ * Finds locations near a long, lat coordinate within
+ * the specified number of meters of that coordinate
+ * sorted by rooms stats
+ */
+VenueSchema.statics.findInRadius = function(lat, lng, meters, next) {
+  this.find({ 
+    "coord": { 
+      "$geoWithin": { 
+        "$centerSphere": [ [ lng, lat ], meters / 1000 / 6371 ] 
+      } 
+    } 
+  })
+  .sort({ roomCount: -1 })
+  .limit(25)
+  .exec(next);
 }
 
 /** 
@@ -78,9 +99,12 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
       categories: venue.categories,
       verified: venue.verified,
       referralId: venue.referralId,
-      updated: Date.now(),
       coord: [ venue.location.lng, venue.location.lat ],
-      $setOnInsert: { created: Date.now() }
+      updated: Date.now(),
+      $setOnInsert: { 
+        created: Date.now(), 
+        roomCount: 0 
+      }
     }    
     promises.push(Q.ninvoke(Venue, "findOneAndUpdate", { id: venue.id }, data, { upsert: true }));
   });
