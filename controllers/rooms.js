@@ -19,22 +19,25 @@ exports.findNearby = function(req, res) {
   Q.ninvoke(Venue, "findNearby", lat, lng, radius)
   .then(function(venues) {
 
-    console.log('Found %s venues', venues.length);
-
-    // construct room queries
+    // construct room join
     var promises = [];
-    venues.forEach(function(venue) {
-      promises.push(Q.ninvoke(Room, "findByVenue", venue._id.toString(), 1, 5));
+    venues.forEach(function(venue) {      
+      var id = venue.id
+        , page = 1
+        , pagesize = 5;
+      venue = venue.toObject();
+      promises.push(
+        Q.ninvoke(Room, "findByVenue", id, page, pagesize)
+        .then(function(rooms) {          
+          venue.rooms = rooms;
+          return venue;
+        })      
+      );
     });
 
     Q.all(promises)
-    .then(function(roomArrays) {
-
-      console.log('Found %s arrays', roomArrays.length);
-      var results = [];
-      results.concat.apply(results, roomArrays);
+    .then(function(results) {
       res.send(new JsonResponse(null, results));
-
     }, function(err) {
       res.send(500, new JsonResponse(err));
     })

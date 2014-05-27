@@ -58,7 +58,7 @@ VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
       }
     }
   })
-  //.sort({ roomCount: - 1 })
+  .sort({ roomCount: - 1 })
   .limit(25)
   .exec(next);
 }
