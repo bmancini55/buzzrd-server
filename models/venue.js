@@ -70,20 +70,24 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
   var promises = [];
 
   // construct upsert data
-  venues.forEach(function(venue) {    
-    venue.updated = Date.now();
-    venue["$setOnInsert"] = { created: Date.now() };
-    venue.coord = [ venue.location.lng, venue.location.lat ];
-    promises.push(Q.ninvoke(Venue, "findOneAndUpdate", { id: venue.id }, venue, { upsert: true }));
+  venues.forEach(function(venue) {
+    var data = {
+      id: venue.id,
+      name: venue.name,
+      location: venue.location,
+      categories: venue.categories,
+      verified: venue.verified,
+      referralId: venue.referralId,
+      updated: Date.now(),
+      coord: [ venue.location.lng, venue.location.lat ],
+      $setOnInsert: { created: Date.now() }
+    }    
+    promises.push(Q.ninvoke(Venue, "findOneAndUpdate", { id: venue.id }, data, { upsert: true }));
   });
   
   // upsert all of the venues
   Q.all(promises)
-  .then(function(results) {
-    next(null, results)
-  }, function(err) {
-    next(err);
-  });
+  .then(next);
 
 }
 
