@@ -35,6 +35,7 @@ exports.findNearby = function(req, res) {
       );
     });
 
+    // execute room joins
     Q.all(promises)
     .then(function(results) {
       res.send(new JsonResponse(null, results));
@@ -43,8 +44,8 @@ exports.findNearby = function(req, res) {
     })
 
   }, function(err) {
-    res.send(500, new JsonReponse(err));
-  });
+    res.send(500, new JsonResponse(err));
+  }).done();
 }
 
 // Finds all rooms
@@ -79,3 +80,5 @@ exports.create = function(req, res) {
   });
 
 };
+
+

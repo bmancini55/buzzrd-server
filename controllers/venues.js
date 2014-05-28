@@ -2,8 +2,7 @@
 // Module dependencies
 var JsonResponse  = require('../common/jsonresponse')
   , models        = require('../models')
-  , Venue          = models.Venue
-  , FSService     = require('../services/foursquare');
+  , Venue          = models.Venue;
 
 // Finds a venue by location
 exports.findByLocation = function(req, res) {
@@ -13,7 +12,7 @@ exports.findByLocation = function(req, res) {
     , lng = req.query.lng
     , lat = req.query.lat
 
-  FSService.findNearby(lat, lng, 100, function(err, venues) {
+  Venue.findNearby(lat, lng, 100, function(err, venues) {
     if(err) res.send(500, new JsonResponse(err));
     else res.send(new JsonResponse(null, venues));
   });
