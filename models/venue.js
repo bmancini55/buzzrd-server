@@ -37,7 +37,8 @@ var VenueSchema = new Schema({
   referralId: String,
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
-  roomCount: { type: Number, default: 0 }
+  roomCount: { type: Number, default: 0 },
+  userCount: { type: Number, default: 0 }
 });
 
 
@@ -170,7 +171,8 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
       updated: Date.now(),
       $setOnInsert: { 
         created: Date.now(), 
-        roomCount: 0 
+        roomCount: 0,
+        userCount: 0
       }
     };
     promises.push(Q.ninvoke(Venue, "findOneAndUpdate", search, data, { upsert: true }));
