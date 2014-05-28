@@ -30,7 +30,6 @@ var VenueCategory = {
 };
 
 var VenueSchema = new Schema({
-  id: { type: String, index: { unique: true } },
   name: String,
   coord: { type: [ Number ], index: '2dsphere' },
   location: Location,
@@ -58,8 +57,6 @@ var VenueSchema = new Schema({
  * @param next node callback of form (err, FSVenue)
  */
 VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
-
-  console.log(config);
 
   // attempt to load from cache first
   debug('querying venue cache');
@@ -154,7 +151,10 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
   var promises = [];
 
   // construct upsert data
-  venues.forEach(function(venue) {
+  venues.forEach(function(venue) {    
+    var search = {
+      _id: mongoose.Types.ObjectId(venue.id)
+    };
     var data = {
       _id: venue.id,
       name: venue.name,
@@ -168,8 +168,8 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
         created: Date.now(), 
         roomCount: 0 
       }
-    }    
-    promises.push(Q.ninvoke(Venue, "findOneAndUpdate", { id: venue.id }, data, { upsert: true }));
+    };
+    promises.push(Q.ninvoke(Venue, "findOneAndUpdate", search, data, { upsert: true }));
   });
   
   // upsert all of the venues
