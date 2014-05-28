@@ -22,7 +22,6 @@ var Location = {
 };
 
 var VenueCategory = {
-  id: String,
   name: String,
   pluralName: String,
   shortName: String,
@@ -107,7 +106,6 @@ VenueSchema.statics.findNearbyFromFoursquare = function(lat, lng, meters, next) 
   var search = { 
     ll: util.format('%s,%s', lat, lng),
     limit:  50,
-    intent: 'browse',
     radius: meters
   };
 
@@ -155,11 +153,17 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
     var search = {
       _id: mongoose.Types.ObjectId(venue.id)
     };
+    var categories = venue.categories.map(function(category) {
+      category._id = new mongoose.Types.ObjectId(category.id);
+      delete category.id;
+      return category;
+    })
+
     var data = {
       _id: venue.id,
       name: venue.name,
       location: venue.location,
-      categories: venue.categories,
+      categories: categories,
       verified: venue.verified,
       referralId: venue.referralId,
       coord: [ venue.location.lng, venue.location.lat ],
