@@ -185,6 +185,49 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
 }
 
 
+
+///
+/// Instance methods
+///
+
+function convertMongoId(item) {
+    if(item instanceof Object && item._id) {
+      item.id = item._id;
+      delete item._id;
+    }
+  }
+  function convertObjectIds(obj) {
+    if(obj instanceof Object) {
+      convertMongoId(obj);
+
+      for(var prop in obj) {
+        if(obj.hasOwnProperty(prop)) {
+          var value = obj[prop];
+          
+          if(value instanceof Array) {
+            value.forEach(function(item) {
+              convertObjectIds(item);
+            })
+          }
+          else {
+            convertObjectIds(value);
+          }
+        }
+      }
+    }
+  }
+
+/**  
+ * toClient
+ * Converts the model document into a clean and API friendly version
+ */
+VenueSchema.methods.toClient = function() {
+  var client = this.toObject();
+  convertObjectIds(client);
+  return client;
+}
+
+
 ///
 /// Create and export the model
 ///

@@ -25,7 +25,7 @@ exports.findNearby = function(req, res) {
       var id = venue.id
         , page = 1
         , pagesize = 5;
-      venue = venue.toObject();
+      venue = venue.toClient();
       promises.push(
         Q.ninvoke(Room, "findByVenue", id, page, pagesize)
         .then(function(rooms) {          
@@ -36,16 +36,17 @@ exports.findNearby = function(req, res) {
     });
 
     // execute room joins
-    Q.all(promises)
+    return Q.all(promises)
     .then(function(results) {
       res.send(new JsonResponse(null, results));
-    }, function(err) {
-      res.send(500, new JsonResponse(err));
-    })
+    });
 
   }, function(err) {
     res.send(500, new JsonResponse(err));
-  }).done();
+  })
+  .fail(function(err) {
+    res.send(500, new JsonResponse(err));
+  });
 }
 
 // Finds all rooms
