@@ -1,9 +1,17 @@
-﻿var room = require('./room')
-  , message = require('./message')
-  , user = require('./user');
+﻿var Room              = require('./room')
+  , Message           = require('./message')
+  , User              = require('./user')
+
+  , OAuthAccessToken  = require('./oauthaccesstoken')
+  , OAuthClient       = require('./oauthclient')
+
+  , Venue             = require('./venue')
 
 module.exports = {
-  Room: room,
-  Message: message,
-  User: user
+  Room: Room,
+  Message: Message,
+  User: User,
+  OAuthAccessToken: OAuthAccessToken,
+  OAuthClient: OAuthClient,
+  Venue: Venue
 }

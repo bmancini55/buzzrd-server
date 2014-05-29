@@ -11,6 +11,10 @@ config = {
     },
     mongo: {
       db: 'mongodb://some-host/some-db',
+    },
+    foursquare: {
+      clientId: '',
+      clientSecret: ''
     }
   },
 
@@ -24,6 +28,10 @@ config = {
     mongo: {
       db: 'mongodb://some-host/some-db',
     },
+    foursquare: {
+      clientId: '',
+      clientSecret: ''
+    }
   }
 };
 

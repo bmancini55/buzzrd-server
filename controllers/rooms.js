@@ -1,17 +1,59 @@
 ﻿
 // Module dependencies
-var JsonResponse  = require('../common/jsonresponse')
+var Q             = require('Q')
+  , JsonResponse  = require('../common/jsonresponse')
   , models        = require('../models')
   , Room          = models.Room
+  , Venue         = models.Venue
   , Message       = models.Message;
 
-// Finds a room by the users current location
-exports.findByLocation = function(req, res) {
-  
+// Finds nearby rooms
+exports.findNearby = function(req, res) {
+
   var page = Math.max(req.query.page || 1, 1)
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
-    , lon = req.query.lon
-    , lat = req.query.lat;
+    , lng = req.query.lng
+    , lat = req.query.lat
+    , radius = req.query.radius || 400
+
+  Q.ninvoke(Venue, "findNearby", lat, lng, radius)
+  .then(function(venues) {
+
+    // construct room join
+    var promises = [];
+    venues.forEach(function(venue) {      
+      var id = venue.id
+        , page = 1
+        , pagesize = 5;
+      venue = venue.toClient();
+      promises.push(
+        Q.ninvoke(Room, "findByVenue", id, page, pagesize)
+        .then(function(rooms) {          
+          venue.rooms = rooms;
+          return venue;
+        })      
+      );
+    });
+
+    // execute room joins
+    return Q.all(promises)
+    .then(function(results) {
+      res.send(new JsonResponse(null, results));
+    });
+
+  }, function(err) {
+    res.send(500, new JsonResponse(err));
+  })
+  .fail(function(err) {
+    res.send(500, new JsonResponse(err));
+  });
+}
+
+// Finds all rooms
+exports.findAll = function(req, res) {
+  
+  var page = Math.max(req.query.page || 1, 1)
+    , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000);
 
   Room.findAll(page, pagesize, function(err, rooms) {
     if(err) {
@@ -20,7 +62,7 @@ exports.findByLocation = function(req, res) {
       res.send(new JsonResponse(null, rooms));
     }
   });
-};
+}
 
 // Creates a new room
 exports.create = function(req, res) {
@@ -39,3 +81,5 @@ exports.create = function(req, res) {
   });
 
 };
+
+
