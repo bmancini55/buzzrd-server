@@ -1,4 +1,3 @@
-
 // Module dependencies
 var JsonResponse  = require('../common/jsonresponse')
   , models        = require('../models')
@@ -49,6 +48,10 @@ exports.create = function(req, res) {
           res.send(new JsonResponse(null, user));
         }
       });
+
+    });
+
+  });
 };
 
 // Returns the user with the provided username
@@ -59,16 +62,14 @@ exports.usernameExists = function(req, res) {
   var username = req.body.username;
 
   User.findByUsername(username, function(err, user) {
-      if (err) {
-        res.send(new JsonResponse(null, err));
+    if (err) {
+      res.send(new JsonResponse(null, err));
+    } else {
+      if (user) {
+        res.send(new JsonResponse(null, true)); 
       } else {
-
-        if (user) {
-          res.send(new JsonResponse(null, true)); 
-        } else {
-          res.send(new JsonResponse(null, false));
-        }
+        res.send(new JsonResponse(null, false));
       }
-    });
+    }
   });
 };

@@ -50,9 +50,9 @@ app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
 app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
 
 // User API
-app.get ('/api/users', controllers.users.findAll);
-app.post('/api/users', controllers.users.create);
-app.post('/api/users/usernameExists', controllers.users.usernameExists);
+app.post('/api/users', controllers.Users.create);
+app.get ('/api/users', controllers.Users.findAll);
+app.post('/api/users/usernameExists', controllers.Users.usernameExists);
 
 // DEBUG ONLY MOUNTS
 if(debug) {
