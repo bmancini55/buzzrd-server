@@ -36,7 +36,7 @@ app.get ('/api/rooms/:idroom/messages', controllers.messages.findByRoom);
 // User API
 app.get ('/api/users', controllers.users.findAll);
 app.post('/api/users', controllers.users.create);
-
+app.post('/api/users/usernameExists', controllers.users.usernameExists);
 
 var rooms = [];
 

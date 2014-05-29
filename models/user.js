@@ -30,6 +30,11 @@ UserSchema.statics.findAll = function(page, pagesize, next) {
     .exec(next);
 }
 
+// Finds the user with the provided username
+UserSchema.statics.findByUsername = function(username, next) {
+  this.findOne({ username: username }, next);
+}
+
 ///
 /// Create and export the model
 var userModel = mongoose.model('User', UserSchema);

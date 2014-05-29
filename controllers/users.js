@@ -45,3 +45,27 @@ exports.create = function(req, res) {
   });
 
 };
+
+// Returns the user with the provided username
+exports.usernameExists = function(req, res) {
+  
+  //username: String
+
+  var username = req.body.username;
+
+
+  //res.send(new JsonResponse(null, user));
+
+  User.findByUsername(username, function(err, user) {
+    if (err) {
+      res.send(new JsonResponse(null, err));
+    } else {
+
+      if (user) {
+        res.send(new JsonResponse(null, true)); 
+      } else {
+        res.send(new JsonResponse(null, false));
+      }
+    }
+  });
+};

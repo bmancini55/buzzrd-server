@@ -1,0 +1,655 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', '-g', 'node-inspector' ]
+2 info using npm@1.4.9
+3 info using node@v0.10.28
+4 verbose cache add [ 'node-inspector', null ]
+5 verbose cache add name=undefined spec="node-inspector" args=["node-inspector",null]
+6 verbose parsed url { protocol: null,
+6 verbose parsed url   slashes: null,
+6 verbose parsed url   auth: null,
+6 verbose parsed url   host: null,
+6 verbose parsed url   port: null,
+6 verbose parsed url   hostname: null,
+6 verbose parsed url   hash: null,
+6 verbose parsed url   search: null,
+6 verbose parsed url   query: null,
+6 verbose parsed url   pathname: 'node-inspector',
+6 verbose parsed url   path: 'node-inspector',
+6 verbose parsed url   href: 'node-inspector' }
+7 silly lockFile 4198ef9e-node-inspector node-inspector
+8 verbose lock node-inspector /Users/robertbeck/.npm/4198ef9e-node-inspector.lock
+9 silly lockFile 4198ef9e-node-inspector node-inspector
+10 silly lockFile 4198ef9e-node-inspector node-inspector
+11 verbose addNamed [ 'node-inspector', '' ]
+12 verbose addNamed [ null, '*' ]
+13 silly lockFile e68b88da-node-inspector node-inspector@
+14 verbose lock node-inspector@ /Users/robertbeck/.npm/e68b88da-node-inspector.lock
+15 silly addNameRange { name: 'node-inspector', range: '*', hasData: false }
+16 verbose url raw node-inspector
+17 verbose url resolving [ 'https://registry.npmjs.org/', './node-inspector' ]
+18 verbose url resolved https://registry.npmjs.org/node-inspector
+19 info trying registry request attempt 1 at 21:29:11
+20 http GET https://registry.npmjs.org/node-inspector
+21 http 200 https://registry.npmjs.org/node-inspector
+22 silly registry.get cb [ 200,
+22 silly registry.get   { date: 'Thu, 29 May 2014 01:29:14 GMT',
+22 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R14B04)',
+22 silly registry.get     etag: '"AL49T949UKIH27X8F6N7XGW1W"',
+22 silly registry.get     'content-type': 'application/json',
+22 silly registry.get     via: '1.1 varnish',
+22 silly registry.get     'cache-control': 'max-age=1',
+22 silly registry.get     'content-length': '71183',
+22 silly registry.get     'accept-ranges': 'bytes',
+22 silly registry.get     age: '7761',
+22 silly registry.get     'x-served-by': 'cache-v44-ASH, cache-iad2131-IAD',
+22 silly registry.get     'x-cache': 'HIT, MISS',
+22 silly registry.get     'x-cache-hits': '1, 0',
+22 silly registry.get     'x-timer': 'S1401326952.134463,VS0,VE2446',
+22 silly registry.get     vary: 'Accept',
+22 silly registry.get     'keep-alive': 'timeout=10, max=50',
+22 silly registry.get     connection: 'Keep-Alive' } ]
+23 silly addNameRange number 2 { name: 'node-inspector', range: '*', hasData: true }
+24 silly addNameRange versions [ 'node-inspector',
+24 silly addNameRange   [ '0.0.1',
+24 silly addNameRange     '0.0.2',
+24 silly addNameRange     '0.0.3',
+24 silly addNameRange     '0.0.4',
+24 silly addNameRange     '0.1.0',
+24 silly addNameRange     '0.1.1',
+24 silly addNameRange     '0.1.2',
+24 silly addNameRange     '0.1.3',
+24 silly addNameRange     '0.1.4',
+24 silly addNameRange     '0.1.5',
+24 silly addNameRange     '0.1.6',
+24 silly addNameRange     '0.1.7',
+24 silly addNameRange     '0.1.8',
+24 silly addNameRange     '0.1.9',
+24 silly addNameRange     '0.1.10',
+24 silly addNameRange     '0.3.0',
+24 silly addNameRange     '0.3.1',
+24 silly addNameRange     '0.3.2',
+24 silly addNameRange     '0.3.3',
+24 silly addNameRange     '0.3.4',
+24 silly addNameRange     '0.4.0',
+24 silly addNameRange     '0.5.0',
+24 silly addNameRange     '0.6.0',
+24 silly addNameRange     '0.6.1',
+24 silly addNameRange     '0.6.2',
+24 silly addNameRange     '0.7.0-1',
+24 silly addNameRange     '0.2.0-beta1',
+24 silly addNameRange     '0.2.0-beta2',
+24 silly addNameRange     '0.2.0-beta3',
+24 silly addNameRange     '0.2.0-beta4',
+24 silly addNameRange     '0.3.0-preview1',
+24 silly addNameRange     '0.7.0-2',
+24 silly addNameRange     '0.7.0',
+24 silly addNameRange     '0.7.1',
+24 silly addNameRange     '0.7.2',
+24 silly addNameRange     '0.7.3' ] ]
+25 verbose addNamed [ 'node-inspector', '0.7.3' ]
+26 verbose addNamed [ '0.7.3', '0.7.3' ]
+27 silly lockFile c96c2310-node-inspector-0-7-3 node-inspector@0.7.3
+28 verbose lock node-inspector@0.7.3 /Users/robertbeck/.npm/c96c2310-node-inspector-0-7-3.lock
+29 silly lockFile f6e9f316-spector-node-inspector-0-7-3-tgz https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz
+30 verbose lock https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz /Users/robertbeck/.npm/f6e9f316-spector-node-inspector-0-7-3-tgz.lock
+31 verbose addRemoteTarball [ 'https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz',
+31 verbose addRemoteTarball   '988317f9a7e645d1bb78e40bb2289db82a077e73' ]
+32 info retry fetch attempt 1 at 21:29:14
+33 verbose fetch to= /var/folders/_z/626nfl6n1dg4k5z4gqyl_8mc0000gn/T/npm-32881-_xSFpV7Z/1401326954725-0.8169188187457621/tmp.tgz
+34 http GET https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz
+35 http 200 https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz
+36 verbose tar unpack /var/folders/_z/626nfl6n1dg4k5z4gqyl_8mc0000gn/T/npm-32881-_xSFpV7Z/1401326954725-0.8169188187457621/tmp.tgz
+37 silly lockFile 22dd7ab4-npm-node-inspector-0-7-3-package tar:///Users/robertbeck/.npm/node-inspector/0.7.3/package
+38 verbose lock tar:///Users/robertbeck/.npm/node-inspector/0.7.3/package /Users/robertbeck/.npm/22dd7ab4-npm-node-inspector-0-7-3-package.lock
+39 silly lockFile 14f4add8-54725-0-8169188187457621-tmp-tgz tar:///var/folders/_z/626nfl6n1dg4k5z4gqyl_8mc0000gn/T/npm-32881-_xSFpV7Z/1401326954725-0.8169188187457621/tmp.tgz
+40 verbose lock tar:///var/folders/_z/626nfl6n1dg4k5z4gqyl_8mc0000gn/T/npm-32881-_xSFpV7Z/1401326954725-0.8169188187457621/tmp.tgz /Users/robertbeck/.npm/14f4add8-54725-0-8169188187457621-tmp-tgz.lock
+41 silly gunzTarPerm modes [ '755', '644' ]
+42 silly gunzTarPerm extractEntry package.json
+43 silly gunzTarPerm extractEntry README.md
+44 silly gunzTarPerm extractEntry LICENSE
+45 silly gunzTarPerm extractEntry index.js
+46 silly gunzTarPerm extractEntry .jshintignore
+47 silly gunzTarPerm extractEntry AUTHORS
+48 silly gunzTarPerm extractEntry bin/inspector.js
+49 silly gunzTarPerm extractEntry bin/node-debug.js
+50 silly gunzTarPerm extractEntry bin/run-repl.js
+51 silly gunzTarPerm extractEntry .jshintrc
+52 silly gunzTarPerm extractEntry docs/embedding.md
+53 silly gunzTarPerm extractEntry front-end/AdvancedSearchController.js
+54 silly gunzTarPerm extractEntry front-end/Linkifier.js
+55 silly gunzTarPerm extractEntry front-end/LiveEditSupport.js
+56 silly gunzTarPerm extractEntry front-end/MemoryStatistics.js
+57 silly gunzTarPerm extractEntry front-end/MetricsSidebarPane.js
+58 silly gunzTarPerm extractEntry front-end/LayersPanelDescriptor.js
+59 silly gunzTarPerm extractEntry front-end/NavigatorOverlayController.js
+60 silly gunzTarPerm extractEntry front-end/NavigatorView.js
+61 silly gunzTarPerm extractEntry front-end/NetworkItemView.js
+62 silly gunzTarPerm extractEntry front-end/NetworkLog.js
+63 silly gunzTarPerm extractEntry front-end/NetworkManager.js
+64 silly gunzTarPerm extractEntry front-end/LayersPanel.js
+65 silly gunzTarPerm extractEntry front-end/NetworkPanel.js
+66 silly gunzTarPerm extractEntry front-end/Layers3DView.js
+67 silly gunzTarPerm extractEntry front-end/NetworkPanelDescriptor.js
+68 silly gunzTarPerm extractEntry front-end/LayerTreeModel.js
+69 silly gunzTarPerm extractEntry front-end/NetworkRequest.js
+70 silly gunzTarPerm extractEntry front-end/LayerTree.js
+71 silly gunzTarPerm extractEntry front-end/NetworkUISourceCodeProvider.js
+72 silly gunzTarPerm extractEntry front-end/LayerDetailsView.js
+73 silly gunzTarPerm extractEntry front-end/jsdifflib.js
+74 silly gunzTarPerm extractEntry front-end/KeyboardShortcut.js
+75 silly gunzTarPerm extractEntry front-end/Object.js
+76 silly gunzTarPerm extractEntry front-end/JavaScriptSourceFrame.js
+77 silly gunzTarPerm extractEntry front-end/ObjectPopoverHelper.js
+78 silly gunzTarPerm extractEntry front-end/JavaScriptFormatter.js
+79 silly gunzTarPerm extractEntry front-end/ObjectPropertiesSection.js
+80 silly gunzTarPerm extractEntry front-end/JSHeapSnapshot.js
+81 silly gunzTarPerm extractEntry front-end/OverridesSupport.js
+82 silly gunzTarPerm extractEntry front-end/IsolatedFileSystemManager.js
+83 silly gunzTarPerm extractEntry front-end/OverridesView.js
+84 silly gunzTarPerm extractEntry front-end/IsolatedFileSystem.js
+85 silly gunzTarPerm extractEntry front-end/OverviewGrid.js
+86 silly gunzTarPerm extractEntry front-end/InspectorView.js
+87 silly gunzTarPerm extractEntry front-end/Panel.js
+88 silly gunzTarPerm extractEntry front-end/InspectorFrontendHostStub.js
+89 silly gunzTarPerm extractEntry front-end/ParsedURL.js
+90 silly gunzTarPerm extractEntry front-end/InspectorFrontendAPI.js
+91 silly gunzTarPerm extractEntry front-end/Placard.js
+92 silly gunzTarPerm extractEntry front-end/InspectorBackendCommands.js
+93 silly gunzTarPerm extractEntry front-end/ApplicationCacheItemsView.js
+94 silly gunzTarPerm extractEntry front-end/InspectorBackend.js
+95 silly gunzTarPerm extractEntry front-end/Popover.js
+96 silly gunzTarPerm extractEntry front-end/InspectElementModeController.js
+97 silly gunzTarPerm extractEntry front-end/PresentationConsoleMessageHelper.js
+98 silly gunzTarPerm extractEntry front-end/IndexedDBViews.js
+99 silly gunzTarPerm extractEntry front-end/ProfileDataGridTree.js
+100 silly gunzTarPerm extractEntry front-end/IndexedDBModel.js
+101 silly gunzTarPerm extractEntry front-end/ProfileLauncherView.js
+102 silly gunzTarPerm extractEntry front-end/treeoutline.js
+103 silly gunzTarPerm extractEntry front-end/ProfilesPanel.js
+104 silly gunzTarPerm extractEntry front-end/ImageView.js
+105 silly gunzTarPerm extractEntry front-end/ProfilesPanelDescriptor.js
+106 silly gunzTarPerm extractEntry front-end/HelpScreen.js
+107 silly gunzTarPerm extractEntry front-end/Progress.js
+108 silly gunzTarPerm extractEntry front-end/HeapSnapshotWorkerDispatcher.js
+109 silly gunzTarPerm extractEntry front-end/ProgressIndicator.js
+110 silly gunzTarPerm extractEntry front-end/HeapSnapshotWorker.js
+111 silly gunzTarPerm extractEntry front-end/PropertiesSection.js
+112 silly gunzTarPerm extractEntry front-end/HeapSnapshotView.js
+113 silly gunzTarPerm extractEntry front-end/PropertiesSidebarPane.js
+114 silly gunzTarPerm extractEntry front-end/HeapSnapshotProxy.js
+115 silly gunzTarPerm extractEntry front-end/RawSourceCode.js
+116 silly gunzTarPerm extractEntry front-end/HeapSnapshotLoader.js
+117 silly gunzTarPerm extractEntry front-end/RemoteObject.js
+118 silly gunzTarPerm extractEntry front-end/HeapSnapshotGridNodes.js
+119 silly gunzTarPerm extractEntry front-end/RequestCookiesView.js
+120 silly gunzTarPerm extractEntry front-end/HeapSnapshotDataGrids.js
+121 silly gunzTarPerm extractEntry front-end/RequestHTMLView.js
+122 silly gunzTarPerm extractEntry front-end/HeapSnapshot.js
+123 silly gunzTarPerm extractEntry front-end/RequestHeadersView.js
+124 silly gunzTarPerm extractEntry front-end/HandlerRegistry.js
+125 silly gunzTarPerm extractEntry front-end/RequestJSONView.js
+126 silly gunzTarPerm extractEntry front-end/HAREntry.js
+127 silly gunzTarPerm extractEntry front-end/RequestPreviewView.js
+128 silly gunzTarPerm extractEntry front-end/GoToLineDialog.js
+129 silly gunzTarPerm extractEntry front-end/RequestResponseView.js
+130 silly gunzTarPerm extractEntry front-end/FontView.js
+131 silly gunzTarPerm extractEntry front-end/RequestTimingView.js
+132 silly gunzTarPerm extractEntry front-end/FlameChart.js
+133 silly gunzTarPerm extractEntry front-end/RequestView.js
+134 silly gunzTarPerm extractEntry front-end/FilteredItemSelectionDialog.js
+135 silly gunzTarPerm extractEntry front-end/Resource.js
+136 silly gunzTarPerm extractEntry front-end/FileUtils.js
+137 silly gunzTarPerm extractEntry front-end/ResourceScriptMapping.js
+138 silly gunzTarPerm extractEntry front-end/FileSystemView.js
+139 silly gunzTarPerm extractEntry front-end/ResourceTreeModel.js
+140 silly gunzTarPerm extractEntry front-end/FileSystemProjectDelegate.js
+141 silly gunzTarPerm extractEntry front-end/ResourceType.js
+142 silly gunzTarPerm extractEntry front-end/FileSystemModel.js
+143 silly gunzTarPerm extractEntry front-end/ResourceUtils.js
+144 silly gunzTarPerm extractEntry front-end/FileSystemMapping.js
+145 silly gunzTarPerm extractEntry front-end/ResourceView.js
+146 silly gunzTarPerm extractEntry front-end/FilePathScoreFunction.js
+147 silly gunzTarPerm extractEntry front-end/ResourceWebSocketFrameView.js
+148 silly gunzTarPerm extractEntry front-end/FileManager.js
+149 silly gunzTarPerm extractEntry front-end/ResourcesPanel.js
+150 silly gunzTarPerm extractEntry front-end/FileContentView.js
+151 silly gunzTarPerm extractEntry front-end/RevisionHistoryView.js
+152 silly gunzTarPerm extractEntry front-end/ExtensionView.js
+153 silly gunzTarPerm extractEntry front-end/RuntimeModel.js
+154 silly gunzTarPerm extractEntry front-end/ExtensionServer.js
+155 silly gunzTarPerm extractEntry front-end/SASSSourceMapping.js
+156 silly gunzTarPerm extractEntry front-end/ExtensionRegistryStub.js
+157 silly gunzTarPerm extractEntry front-end/ScopeChainSidebarPane.js
+158 silly gunzTarPerm extractEntry front-end/ExtensionPanel.js
+159 silly gunzTarPerm extractEntry front-end/ScreencastView.js
+160 silly gunzTarPerm extractEntry front-end/ExtensionAuditCategory.js
+161 silly gunzTarPerm extractEntry front-end/Script.js
+162 silly gunzTarPerm extractEntry front-end/ExtensionAPI.js
+163 silly gunzTarPerm extractEntry front-end/ScriptFormatter.js
+164 silly gunzTarPerm extractEntry front-end/EventListenersSidebarPane.js
+165 silly gunzTarPerm extractEntry front-end/ScriptFormatterWorker.js
+166 silly gunzTarPerm extractEntry front-end/EmptyView.js
+167 silly gunzTarPerm extractEntry front-end/ScriptSnippetModel.js
+168 silly gunzTarPerm extractEntry front-end/ElementsTreeOutline.js
+169 silly gunzTarPerm extractEntry front-end/ScriptsNavigator.js
+170 silly gunzTarPerm extractEntry front-end/ElementsPanelDescriptor.js
+171 silly gunzTarPerm extractEntry front-end/ScriptsPanel.js
+172 silly gunzTarPerm extractEntry front-end/ElementsPanel.js
+173 silly gunzTarPerm extractEntry front-end/ScriptsPanelDescriptor.js
+174 silly gunzTarPerm extractEntry front-end/EditFileSystemDialog.js
+175 silly gunzTarPerm extractEntry front-end/ScriptsSearchScope.js
+176 silly gunzTarPerm extractEntry front-end/Drawer.js
+177 silly gunzTarPerm extractEntry front-end/SearchController.js
+178 silly gunzTarPerm extractEntry front-end/DockController.js
+179 silly gunzTarPerm extractEntry front-end/Section.js
+180 silly gunzTarPerm extractEntry front-end/DirectoryContentView.js
+181 silly gunzTarPerm extractEntry front-end/Settings.js
+182 silly gunzTarPerm extractEntry front-end/Dialog.js
+183 silly gunzTarPerm extractEntry front-end/SettingsScreen.js
+184 silly gunzTarPerm extractEntry front-end/DevToolsExtensionAPI.js
+185 silly gunzTarPerm extractEntry front-end/ShortcutsScreen.js
+186 silly gunzTarPerm extractEntry front-end/DefaultScriptMapping.js
+187 silly gunzTarPerm extractEntry front-end/ShowMoreDataGridNode.js
+188 silly gunzTarPerm extractEntry front-end/DebuggerScriptMapping.js
+189 silly gunzTarPerm extractEntry front-end/SidebarOverlay.js
+190 silly gunzTarPerm extractEntry front-end/DebuggerModel.js
+191 silly gunzTarPerm extractEntry front-end/SidebarPane.js
+192 silly gunzTarPerm extractEntry front-end/DatabaseTableView.js
+193 silly gunzTarPerm extractEntry front-end/SidebarTreeElement.js
+194 silly gunzTarPerm extractEntry front-end/DatabaseQueryView.js
+195 silly gunzTarPerm extractEntry front-end/SidebarView.js
+196 silly gunzTarPerm extractEntry front-end/Database.js
+197 silly gunzTarPerm extractEntry front-end/SimpleWorkspaceProvider.js
+198 silly gunzTarPerm extractEntry front-end/DataGrid.js
+199 silly gunzTarPerm extractEntry front-end/SnippetStorage.js
+200 silly gunzTarPerm extractEntry front-end/DOMSyntaxHighlighter.js
+201 silly gunzTarPerm extractEntry front-end/SoftContextMenu.js
+202 silly gunzTarPerm extractEntry front-end/DOMStorageItemsView.js
+203 silly gunzTarPerm extractEntry front-end/SourceFrame.js
+204 silly gunzTarPerm extractEntry front-end/DOMStorage.js
+205 silly gunzTarPerm extractEntry front-end/SourceMap.js
+206 silly gunzTarPerm extractEntry front-end/DOMPresentationUtils.js
+207 silly gunzTarPerm extractEntry front-end/SourceMapping.js
+208 silly gunzTarPerm extractEntry front-end/DOMExtension.js
+209 silly gunzTarPerm extractEntry front-end/Spectrum.js
+210 silly gunzTarPerm extractEntry front-end/DOMCountersGraph.js
+211 silly gunzTarPerm extractEntry front-end/SplitView.js
+212 silly gunzTarPerm extractEntry front-end/DOMBreakpointsSidebarPane.js
+213 silly gunzTarPerm extractEntry front-end/StatusBarButton.js
+214 silly gunzTarPerm extractEntry front-end/DOMAgent.js
+215 silly gunzTarPerm extractEntry front-end/StyleSheetOutlineDialog.js
+216 silly gunzTarPerm extractEntry front-end/CookiesTable.js
+217 silly gunzTarPerm extractEntry front-end/StylesSidebarPane.js
+218 silly gunzTarPerm extractEntry front-end/CookieParser.js
+219 silly gunzTarPerm extractEntry front-end/StylesSourceMapping.js
+220 silly gunzTarPerm extractEntry front-end/CookieItemsView.js
+221 silly gunzTarPerm extractEntry front-end/SuggestBox.js
+222 silly gunzTarPerm extractEntry front-end/ContextMenu.js
+223 silly gunzTarPerm extractEntry front-end/TabbedEditorContainer.js
+224 silly gunzTarPerm extractEntry front-end/ContentProviders.js
+225 silly gunzTarPerm extractEntry front-end/TabbedPane.js
+226 silly gunzTarPerm extractEntry front-end/ContentProviderBasedProjectDelegate.js
+227 silly gunzTarPerm extractEntry front-end/TestController.js
+228 silly gunzTarPerm extractEntry front-end/ContentProvider.js
+229 silly gunzTarPerm extractEntry front-end/Tests.js
+230 silly gunzTarPerm extractEntry front-end/ConsoleView.js
+231 silly gunzTarPerm extractEntry front-end/TextEditor.js
+232 silly gunzTarPerm extractEntry front-end/ConsolePanel.js
+233 silly gunzTarPerm extractEntry front-end/TextPrompt.js
+234 silly gunzTarPerm extractEntry front-end/ConsoleModel.js
+235 silly gunzTarPerm extractEntry front-end/TextRange.js
+236 silly gunzTarPerm extractEntry front-end/ConsoleMessage.js
+237 silly gunzTarPerm extractEntry front-end/TextUtils.js
+238 silly gunzTarPerm extractEntry front-end/CompletionDictionary.js
+239 silly gunzTarPerm extractEntry front-end/TimelineFrameController.js
+240 silly gunzTarPerm extractEntry front-end/CompilerScriptMapping.js
+241 silly gunzTarPerm extractEntry front-end/TimelineGrid.js
+242 silly gunzTarPerm extractEntry front-end/Color.js
+243 silly gunzTarPerm extractEntry front-end/TimelineManager.js
+244 silly gunzTarPerm extractEntry front-end/CodeMirrorUtils.js
+245 silly gunzTarPerm extractEntry front-end/TimelineModel.js
+246 silly gunzTarPerm extractEntry front-end/CodeMirrorTextEditor.js
+247 silly gunzTarPerm extractEntry front-end/TimelineOverviewPane.js
+248 silly gunzTarPerm extractEntry front-end/Checkbox.js
+249 silly gunzTarPerm extractEntry front-end/TimelinePanel.js
+250 silly gunzTarPerm extractEntry front-end/CanvasReplayStateView.js
+251 silly gunzTarPerm extractEntry front-end/TimelinePanelDescriptor.js
+252 silly gunzTarPerm extractEntry front-end/CanvasProfileView.js
+253 silly gunzTarPerm extractEntry front-end/TimelinePresentationModel.js
+254 silly gunzTarPerm extractEntry front-end/CallStackSidebarPane.js
+255 silly gunzTarPerm extractEntry front-end/Toolbar.js
+256 silly gunzTarPerm extractEntry front-end/CSSStyleSheetMapping.js
+257 silly gunzTarPerm extractEntry front-end/TopDownProfileDataGridTree.js
+258 silly gunzTarPerm extractEntry front-end/CSSStyleModel.js
+259 silly gunzTarPerm extractEntry front-end/TracingAgent.js
+260 silly gunzTarPerm extractEntry front-end/CSSNamedFlowView.js
+261 silly gunzTarPerm extractEntry front-end/UISourceCode.js
+262 silly gunzTarPerm extractEntry front-end/CSSNamedFlowCollectionsView.js
+263 silly gunzTarPerm extractEntry front-end/UISourceCodeFrame.js
+264 silly gunzTarPerm extractEntry front-end/CSSMetadata.js
+265 silly gunzTarPerm extractEntry front-end/UIString.js
+266 silly gunzTarPerm extractEntry front-end/CPUProfileView.js
+267 silly gunzTarPerm extractEntry front-end/UIUtils.js
+268 silly gunzTarPerm extractEntry front-end/BreakpointsSidebarPane.js
+269 silly gunzTarPerm extractEntry front-end/inspector.js
+270 silly gunzTarPerm extractEntry front-end/BreakpointManager.js
+271 silly gunzTarPerm extractEntry front-end/UserMetrics.js
+272 silly gunzTarPerm extractEntry front-end/BottomUpProfileDataGridTree.js
+273 silly gunzTarPerm extractEntry front-end/View.js
+274 silly gunzTarPerm extractEntry front-end/AuditsPanel.js
+275 silly gunzTarPerm extractEntry front-end/ViewportControl.js
+276 silly gunzTarPerm extractEntry front-end/AuditRules.js
+277 silly gunzTarPerm extractEntry front-end/WatchExpressionsSidebarPane.js
+278 silly gunzTarPerm extractEntry front-end/AuditResultView.js
+279 silly gunzTarPerm extractEntry front-end/WorkerManager.js
+280 silly gunzTarPerm extractEntry front-end/AuditLauncherView.js
+281 silly gunzTarPerm extractEntry front-end/WorkersSidebarPane.js
+282 silly gunzTarPerm extractEntry front-end/AuditFormatters.js
+283 silly gunzTarPerm extractEntry front-end/Workspace.js
+284 silly gunzTarPerm extractEntry front-end/AuditController.js
+285 silly gunzTarPerm extractEntry front-end/WorkspaceController.js
+286 silly gunzTarPerm extractEntry front-end/AuditCategories.js
+287 silly gunzTarPerm extractEntry front-end/externs.js
+288 silly gunzTarPerm extractEntry front-end/ApplicationCacheModel.js
+289 silly gunzTarPerm extractEntry front-end/buildSystemOnly.js
+290 silly gunzTarPerm extractEntry front-end/NativeBreakpointsSidebarPane.js
+291 silly gunzTarPerm extractEntry front-end/utilities.js
+292 silly gunzTarPerm extractEntry front-end/PlatformFontsSidebarPane.js
+293 silly gunzTarPerm extractEntry front-end/breakpointsList.css
+294 silly gunzTarPerm extractEntry front-end/canvasProfiler.css
+295 silly gunzTarPerm extractEntry front-end/cm/LICENSE
+296 silly gunzTarPerm extractEntry front-end/cm/python.js
+297 silly gunzTarPerm extractEntry front-end/cm/codemirror.js
+298 silly gunzTarPerm extractEntry front-end/cm/coffeescript.js
+299 silly gunzTarPerm extractEntry front-end/cm/comment.js
+300 silly gunzTarPerm extractEntry front-end/cm/shell.js
+301 silly gunzTarPerm extractEntry front-end/cm/php.js
+302 silly gunzTarPerm extractEntry front-end/cm/htmlembedded.js
+303 silly gunzTarPerm extractEntry front-end/cm/htmlmixed.js
+304 silly gunzTarPerm extractEntry front-end/cm/javascript.js
+305 silly gunzTarPerm extractEntry front-end/cm/markselection.js
+306 silly gunzTarPerm extractEntry front-end/cm/closebrackets.js
+307 silly gunzTarPerm extractEntry front-end/cm/matchbrackets.js
+308 silly gunzTarPerm extractEntry front-end/cm/clike.js
+309 silly gunzTarPerm extractEntry front-end/cm/overlay.js
+310 silly gunzTarPerm extractEntry front-end/cm/css.js
+311 silly gunzTarPerm extractEntry front-end/cm/xml.js
+312 silly gunzTarPerm extractEntry front-end/cm/headlesscodemirror.js
+313 silly gunzTarPerm extractEntry front-end/cm/LICENSE_python
+314 silly gunzTarPerm extractEntry front-end/cm/codemirror.css
+315 silly gunzTarPerm extractEntry front-end/cm/cmdevtools.css
+316 silly gunzTarPerm extractEntry front-end/cssNamedFlows.css
+317 silly gunzTarPerm extractEntry front-end/dataGrid.css
+318 silly gunzTarPerm extractEntry front-end/dialog.css
+319 silly gunzTarPerm extractEntry front-end/elementsPanel.css
+320 silly gunzTarPerm extractEntry front-end/auditsPanel.css
+321 silly gunzTarPerm extractEntry front-end/filteredItemSelectionDialog.css
+322 silly gunzTarPerm extractEntry front-end/flameChart.css
+323 silly gunzTarPerm extractEntry front-end/heapProfiler.css
+324 silly gunzTarPerm extractEntry front-end/helpScreen.css
+325 silly gunzTarPerm extractEntry front-end/indexedDBViews.css
+326 silly gunzTarPerm extractEntry front-end/inspector.css
+327 silly gunzTarPerm extractEntry front-end/inspector.html
+328 silly gunzTarPerm extractEntry front-end/UglifyJS/parse-js.js
+329 silly gunzTarPerm extractEntry front-end/inspectorCommon.css
+330 silly gunzTarPerm extractEntry front-end/inspectorSyntaxHighlight.css
+331 silly gunzTarPerm extractEntry front-end/OWNERS
+332 silly gunzTarPerm extractEntry front-end/breadcrumbList.css
+333 silly gunzTarPerm extractEntry front-end/navigatorView.css
+334 silly gunzTarPerm extractEntry front-end/networkLogView.css
+335 silly gunzTarPerm extractEntry front-end/networkPanel.css
+336 silly gunzTarPerm extractEntry front-end/panelEnablerView.css
+337 silly gunzTarPerm extractEntry front-end/popover.css
+338 silly gunzTarPerm extractEntry front-end/profilesPanel.css
+339 silly gunzTarPerm extractEntry front-end/resourceView.css
+340 silly gunzTarPerm extractEntry front-end/resourcesPanel.css
+341 silly gunzTarPerm extractEntry front-end/revisionHistory.css
+342 silly gunzTarPerm extractEntry front-end/screencastView.css
+343 silly gunzTarPerm extractEntry front-end/scriptsPanel.css
+344 silly gunzTarPerm extractEntry front-end/sidebarPane.css
+345 silly gunzTarPerm extractEntry front-end/spectrum.css
+346 silly gunzTarPerm extractEntry front-end/splitView.css
+347 silly gunzTarPerm extractEntry front-end/tabbedPane.css
+348 silly gunzTarPerm extractEntry front-end/test-runner.html
+349 silly gunzTarPerm extractEntry front-end/textPrompt.css
+350 silly gunzTarPerm extractEntry front-end/timelinePanel.css
+351 silly gunzTarPerm extractEntry front-end/Images/resourcePlainIcon.png
+352 silly gunzTarPerm extractEntry front-end/Images/addIcon.png
+353 silly gunzTarPerm extractEntry front-end/Images/back.png
+354 silly gunzTarPerm extractEntry front-end/Images/breakpoint2.png
+355 silly gunzTarPerm extractEntry front-end/Images/breakpoint2_2x.png
+356 silly gunzTarPerm extractEntry front-end/Images/breakpointBorder.png
+357 silly gunzTarPerm extractEntry front-end/Images/breakpointConditional2.png
+358 silly gunzTarPerm extractEntry front-end/Images/breakpointConditional2_2x.png
+359 silly gunzTarPerm extractEntry front-end/Images/breakpointConditionalBorder.png
+360 silly gunzTarPerm extractEntry front-end/Images/breakpointConditionalCounterBorder.png
+361 silly gunzTarPerm extractEntry front-end/Images/breakpointCounterBorder.png
+362 silly gunzTarPerm extractEntry front-end/Images/checker.png
+363 silly gunzTarPerm extractEntry front-end/Images/cookie.png
+364 silly gunzTarPerm extractEntry front-end/Images/database.png
+365 silly gunzTarPerm extractEntry front-end/Images/databaseTable.png
+366 silly gunzTarPerm extractEntry front-end/Images/deleteIcon.png
+367 silly gunzTarPerm extractEntry front-end/Images/domain.png
+368 silly gunzTarPerm extractEntry front-end/Images/fileSystem.png
+369 silly gunzTarPerm extractEntry front-end/Images/forward.png
+370 silly gunzTarPerm extractEntry front-end/Images/frame.png
+371 silly gunzTarPerm extractEntry front-end/Images/glossyHeader.png
+372 silly gunzTarPerm extractEntry front-end/Images/glossyHeaderPressed.png
+373 silly gunzTarPerm extractEntry front-end/Images/glossyHeaderSelected.png
+374 silly gunzTarPerm extractEntry front-end/Images/glossyHeaderSelectedPressed.png
+375 silly gunzTarPerm extractEntry front-end/Images/graphLabelCalloutLeft.png
+376 silly gunzTarPerm extractEntry front-end/Images/graphLabelCalloutRight.png
+377 silly gunzTarPerm extractEntry front-end/Images/indexedDB.png
+378 silly gunzTarPerm extractEntry front-end/Images/indexedDBIndex.png
+379 silly gunzTarPerm extractEntry front-end/Images/indexedDBObjectStore.png
+380 silly gunzTarPerm extractEntry front-end/Images/localStorage.png
+381 silly gunzTarPerm extractEntry front-end/Images/namedFlowOverflow.png
+382 silly gunzTarPerm extractEntry front-end/Images/paneAddButtons.png
+383 silly gunzTarPerm extractEntry front-end/Images/paneElementStateButtons.png
+384 silly gunzTarPerm extractEntry front-end/Images/paneFilterButtons.png
+385 silly gunzTarPerm extractEntry front-end/Images/paneRefreshButtons.png
+386 silly gunzTarPerm extractEntry front-end/Images/paneSettingsButtons.png
+387 silly gunzTarPerm extractEntry front-end/Images/popoverArrows.png
+388 silly gunzTarPerm extractEntry front-end/Images/popoverBackground.png
+389 silly gunzTarPerm extractEntry front-end/Images/profileGroupIcon.png
+390 silly gunzTarPerm extractEntry front-end/Images/profileIcon.png
+391 silly gunzTarPerm extractEntry front-end/Images/profileSmallIcon.png
+392 silly gunzTarPerm extractEntry front-end/Images/programCounterBorder.png
+393 silly gunzTarPerm extractEntry front-end/Images/radioDot.png
+394 silly gunzTarPerm extractEntry front-end/Images/regionEmpty.png
+395 silly gunzTarPerm extractEntry front-end/Images/regionFit.png
+396 silly gunzTarPerm extractEntry front-end/Images/regionOverset.png
+397 silly gunzTarPerm extractEntry front-end/Images/resourceCSSIcon.png
+398 silly gunzTarPerm extractEntry front-end/Images/resourceDocumentIcon.png
+399 silly gunzTarPerm extractEntry front-end/Images/resourceDocumentIconSmall.png
+400 silly gunzTarPerm extractEntry front-end/Images/resourceJSIcon.png
+401 silly gunzTarPerm extractEntry front-end/Images/applicationCache.png
+402 silly gunzTarPerm extractEntry front-end/Images/resourcePlainIconSmall.png
+403 silly gunzTarPerm extractEntry front-end/Images/resourcesTimeGraphIcon.png
+404 silly gunzTarPerm extractEntry front-end/Images/searchNext.png
+405 silly gunzTarPerm extractEntry front-end/Images/searchPrev.png
+406 silly gunzTarPerm extractEntry front-end/Images/searchSmallBlue.png
+407 silly gunzTarPerm extractEntry front-end/Images/searchSmallBrightBlue.png
+408 silly gunzTarPerm extractEntry front-end/Images/searchSmallGray.png
+409 silly gunzTarPerm extractEntry front-end/Images/searchSmallWhite.png
+410 silly gunzTarPerm extractEntry front-end/Images/segment.png
+411 silly gunzTarPerm extractEntry front-end/Images/segmentEnd.png
+412 silly gunzTarPerm extractEntry front-end/Images/segmentHover.png
+413 silly gunzTarPerm extractEntry front-end/Images/segmentHoverEnd.png
+414 silly gunzTarPerm extractEntry front-end/Images/segmentSelected.png
+415 silly gunzTarPerm extractEntry front-end/Images/segmentSelectedEnd.png
+416 silly gunzTarPerm extractEntry front-end/Images/sessionStorage.png
+417 silly gunzTarPerm extractEntry front-end/Images/settingsListRemove.png
+418 silly gunzTarPerm extractEntry front-end/Images/settingsListRemove_2x.png
+419 silly gunzTarPerm extractEntry front-end/Images/spinner.gif
+420 silly gunzTarPerm extractEntry front-end/Images/spinnerActive.gif
+421 silly gunzTarPerm extractEntry front-end/Images/spinnerActiveSelected.gif
+422 silly gunzTarPerm extractEntry front-end/Images/spinnerInactive.gif
+423 silly gunzTarPerm extractEntry front-end/Images/spinnerInactiveSelected.gif
+424 silly gunzTarPerm extractEntry front-end/Images/src/breakpoints2.svg
+425 silly gunzTarPerm extractEntry front-end/Images/src/settingListRemove.svg
+426 silly gunzTarPerm extractEntry front-end/Images/src/statusbarButtonGlyphs.svg
+427 silly gunzTarPerm extractEntry front-end/Images/statusbarButtonGlyphs.png
+428 silly gunzTarPerm extractEntry front-end/Images/statusbarButtonGlyphs2x.png
+429 silly gunzTarPerm extractEntry front-end/Images/statusbarResizerHorizontal.png
+430 silly gunzTarPerm extractEntry front-end/Images/statusbarResizerVertical.png
+431 silly gunzTarPerm extractEntry front-end/Images/thumbActiveHoriz.png
+432 silly gunzTarPerm extractEntry front-end/Images/thumbActiveVert.png
+433 silly gunzTarPerm extractEntry front-end/Images/thumbHoriz.png
+434 silly gunzTarPerm extractEntry front-end/Images/thumbHoverHoriz.png
+435 silly gunzTarPerm extractEntry front-end/Images/thumbHoverVert.png
+436 silly gunzTarPerm extractEntry front-end/Images/thumbVert.png
+437 silly gunzTarPerm extractEntry front-end/Images/timelineHollowPillBlue.png
+438 silly gunzTarPerm extractEntry front-end/Images/timelineHollowPillGray.png
+439 silly gunzTarPerm extractEntry front-end/Images/timelineHollowPillGreen.png
+440 silly gunzTarPerm extractEntry front-end/Images/timelineHollowPillOrange.png
+441 silly gunzTarPerm extractEntry front-end/Images/timelineHollowPillPurple.png
+442 silly gunzTarPerm extractEntry front-end/Images/timelineHollowPillRed.png
+443 silly gunzTarPerm extractEntry front-end/Images/timelineHollowPillYellow.png
+444 silly gunzTarPerm extractEntry front-end/Images/timelinePillBlue.png
+445 silly gunzTarPerm extractEntry front-end/Images/timelinePillGray.png
+446 silly gunzTarPerm extractEntry front-end/Images/timelinePillGreen.png
+447 silly gunzTarPerm extractEntry front-end/Images/timelinePillOrange.png
+448 silly gunzTarPerm extractEntry front-end/Images/timelinePillPurple.png
+449 silly gunzTarPerm extractEntry front-end/Images/timelinePillRed.png
+450 silly gunzTarPerm extractEntry front-end/Images/timelinePillYellow.png
+451 silly gunzTarPerm extractEntry front-end/Images/toolbarItemSelected.png
+452 silly gunzTarPerm extractEntry front-end/Images/trackHoriz.png
+453 silly gunzTarPerm extractEntry front-end/Images/trackVert.png
+454 silly gunzTarPerm extractEntry front-end/layersPanel.css
+455 silly gunzTarPerm extractEntry front-end-node/Overrides.js
+456 silly gunzTarPerm extractEntry ChangeLog
+457 silly gunzTarPerm extractEntry lib/BreakEventHandler.js
+458 silly gunzTarPerm extractEntry lib/FrontendCommandHandler.js
+459 silly gunzTarPerm extractEntry lib/NetworkAgent.js
+460 silly gunzTarPerm extractEntry lib/PageAgent.js
+461 silly gunzTarPerm extractEntry lib/FrontendClient.js
+462 silly gunzTarPerm extractEntry lib/ScriptFileStorage.js
+463 silly gunzTarPerm extractEntry lib/ScriptManager.js
+464 silly gunzTarPerm extractEntry lib/callback.js
+465 silly gunzTarPerm extractEntry lib/config.js
+466 silly gunzTarPerm extractEntry lib/convert.js
+467 silly gunzTarPerm extractEntry lib/DebuggerClient.js
+468 silly gunzTarPerm extractEntry lib/debug-server.js
+469 silly gunzTarPerm extractEntry lib/DebuggerAgent.js
+470 silly gunzTarPerm extractEntry lib/debugger.js
+471 silly gunzTarPerm extractEntry lib/CallFramesProvider.js
+472 silly gunzTarPerm extractEntry lib/session.js
+473 silly gunzTarPerm extractEntry lib/RuntimeAgent.js
+474 silly gunzTarPerm extractEntry config.json
+475 silly lockFile 22dd7ab4-npm-node-inspector-0-7-3-package tar:///Users/robertbeck/.npm/node-inspector/0.7.3/package
+476 silly lockFile 22dd7ab4-npm-node-inspector-0-7-3-package tar:///Users/robertbeck/.npm/node-inspector/0.7.3/package
+477 silly lockFile 14f4add8-54725-0-8169188187457621-tmp-tgz tar:///var/folders/_z/626nfl6n1dg4k5z4gqyl_8mc0000gn/T/npm-32881-_xSFpV7Z/1401326954725-0.8169188187457621/tmp.tgz
+478 silly lockFile 14f4add8-54725-0-8169188187457621-tmp-tgz tar:///var/folders/_z/626nfl6n1dg4k5z4gqyl_8mc0000gn/T/npm-32881-_xSFpV7Z/1401326954725-0.8169188187457621/tmp.tgz
+479 silly lockFile f6e9f316-spector-node-inspector-0-7-3-tgz https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz
+480 silly lockFile f6e9f316-spector-node-inspector-0-7-3-tgz https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz
+481 silly lockFile c96c2310-node-inspector-0-7-3 node-inspector@0.7.3
+482 silly lockFile c96c2310-node-inspector-0-7-3 node-inspector@0.7.3
+483 silly lockFile e68b88da-node-inspector node-inspector@
+484 silly lockFile e68b88da-node-inspector node-inspector@
+485 silly resolved [ { name: 'node-inspector',
+485 silly resolved     version: '0.7.3',
+485 silly resolved     description: 'Web Inspector based nodeJS debugger',
+485 silly resolved     homepage: 'http://github.com/node-inspector/node-inspector',
+485 silly resolved     author: { name: 'Danny Coates', email: 'dannycoates@gmail.com' },
+485 silly resolved     keywords: [ 'debug', 'debugger', 'inspector', 'profiler' ],
+485 silly resolved     repository:
+485 silly resolved      { type: 'git',
+485 silly resolved        url: 'http://github.com/node-inspector/node-inspector.git' },
+485 silly resolved     engines: { node: '>=0.8.0' },
+485 silly resolved     bin:
+485 silly resolved      { 'node-inspector': './bin/inspector.js',
+485 silly resolved        'node-debug': './bin/node-debug.js' },
+485 silly resolved     dependencies:
+485 silly resolved      { express: '~3.5',
+485 silly resolved        async: '~0.4',
+485 silly resolved        glob: '~3.2.1',
+485 silly resolved        rc: '~0.3.0',
+485 silly resolved        'strong-data-uri': '~0.1.0',
+485 silly resolved        debug: '~0.8',
+485 silly resolved        ws: '~0.4.31',
+485 silly resolved        opener: '~1.3.0',
+485 silly resolved        yargs: '~1.1.2',
+485 silly resolved        which: '~1.0.5' },
+485 silly resolved     devDependencies:
+485 silly resolved      { mocha: 'latest',
+485 silly resolved        chai: 'latest',
+485 silly resolved        jshint: '^2.4.4',
+485 silly resolved        'fs-extra': '~0.8.1' },
+485 silly resolved     preferGlobal: true,
+485 silly resolved     scripts: { pretest: 'jshint .', test: 'mocha' },
+485 silly resolved     contributors:
+485 silly resolved      [ [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object],
+485 silly resolved        [Object] ],
+485 silly resolved     readme: '# Node Inspector\n\n[![Build Status](https://travis-ci.org/node-inspector/node-inspector.png?branch=master)](https://travis-ci.org/node-inspector/node-inspector)\n[![Dependency Status](https://gemnasium.com/node-inspector/node-inspector.png)](https://gemnasium.com/node-inspector/node-inspector)\n[![NPM version](https://badge.fury.io/js/node-inspector.png)](http://badge.fury.io/js/node-inspector)\n\n\n## Overview\n\nNode Inspector is a debugger interface for Node.js applications that uses the\nBlink Developer Tools (formerly WebKit Web Inspector).\n\nThe project maintenance and support is sponsored by\n[StrongLoop](http://strongloop.com).\n\n### Table of Content\n\n * [Quick Start](#quick-start)\n * [Features](#features)\n * [Known Issues](#known-issues)\n * [Troubleshooting](#troubleshooting)\n * [Advanced Use](#advanced-use)\n * [Configuration](#configuration)\n * [Contributing](#contributing-code)\n * [Credits](#credits)\n\n## Quick Start\n\n#### Install\n\n```sh\n$ npm install -g node-inspector\n```\n\n#### Start\n\n```sh\n$ node-debug app.js\n```\n\nwhere ```app.js``` is the name of your main Node application JavaScript file.\n\n#### Debug\n\nThe `node-debug` command will load Node Inspector in your default browser.\n\n> **NOTE:** Node Inspector works in Chrome and Opera only. You have to re-open\nthe inspector page in one of those browsers if another browser\nis your default web browser (e.g. Safari or Internet Explorer).\n\nNode Inspector works almost exactly as the Chrome Developer Tools. Read the\nexcellent\n[DevTools overview](http://code.google.com/chrome/devtools/docs/scripts.html)\nto get started.\n\nOther useful resources:\n - Documentation specific to Node Inspector provided by StrongLoop:\n  [Running Node Inspector](http://docs.strongloop.com/display/DOC/Running+Node+Inspector)\n - Miroslav\'s talk\n  [How to Debug Node Apps with Node Inspector](https://vimeo.com/77870960)\n - Danny\'s [screencasts](http://www.youtube.com/view_play_list?p=A5216AC29A41EFA8)\n   (most likely outdated by now)\n - [Getting Started from scratch](http://github.com/node-inspector/node-inspector/wiki/Getting-Started---from-scratch)\n   on wiki (most likely outdated by now)\n\n## Features\n\nThe Blink DevTools debugger is a powerful JavaScript debugger interface.\nNode Inspector supports almost all of the debugging features of DevTools, including:\n\n* Navigate in your source files\n* Set breakpoints (and specify trigger conditions)\n* Step over, step in, step out, resume (continue)\n* Inspect scopes, variables, object properties\n* Hover your mouse over an expression in your source to display its value in\n  a tooltip\n* Edit variables and object properties\n* Continue to location\n* Break on exceptions\n* Disable/enable all breakpoints\n\n### Cool stuff\n* Node Inspector uses WebSockets, so no polling for breaks.\n* Remote debugging\n* [Live edit of running code](http://github.com/node-inspector/node-inspector/wiki/LiveEdit),\n  optionally persisting changes back to the file-system.\n* Set breakpoints in files that are not loaded into V8 yet - useful for\n  debugging module loading/initialization.\n* Javascript from top to bottom :)\n* Embeddable in other applications - see [Embedding HOWTO](docs/embedding.md)\n  for more details.\n\n## Known Issues\n\n* Be careful about viewing the contents of Buffer objects,\n  each byte is displayed as an individual array element;\n  for most Buffers this will take too long to render.\n* While not stopped at a breakpoint the console doesn\'t always\n  behave as you might expect. See the\n  [issue #146](https://github.com/node-inspector/node-inspector/issues/146).\n* Profiler is not implemented yet. Have a look at\n  [node-webkit-agent](https://github.com/c4milo/node-webkit-agent)\n  in the meantime.\n* Break on uncaught exceptions does not work in all Node versions,\n  you need at least v0.11.3 (see\n  [node#5713](https://github.com/joyent/node/pull/5713)).\n* Debugging multiple processes (e.g. cluster) is cumbersome.\n  Read the following blog post for instructions:\n  [Debugging Clustered Apps with Node-Inspector](http://strongloop.com/strongblog/whats-new-nodejs-v0-12-debugging-clusters/)\n\n## Troubleshooting\n\n#### My script runs too fast to attach the debugger.\n\nThe debugged process must be started with `--debug-brk`, this way the script is paused on the first line.\n\nNote: `node-debug` adds this option for you by default.\n\n#### I got the UI in a weird state.\n\nWhen in doubt, refresh the page in browser\n\n#### Can I debug remotely?\n\nYes. Node Inspector must be running on the same machine, but your browser can be anywhere.\nJust make sure port 8080 is accessible.\n\n#### How do I specify files to hide?\n\nCreate a JSON-encoded array.  You must escape quote characters when using a command-line option.\n\n```sh\n$ node-inspector --hidden=\'["node_modules/framework"]\'\n```\n\nNote that the array items are interpreted as regular expressions.\n\n#### UI doesn\'t load or doesn\'t work and refresh didn\'t help\n\nMake sure that you have adblock disabled as well as any other content blocking scripts and plugins.\n\n#### How can I (selectively) delete debug session metadata?\n\nYou may want to delete debug session metadata if for example Node Inspector gets in a bad state with some\nwatch variables that were function calls (possibly into some special c-bindings).  In such cases, even restarting\nthe application/debug session may not fix the problem.\n\nNode Inspector stores debug session metadata in the HTML5 local storage.\nYou can inspect the contents of local storage and remove any items as\nneeded. In Google Chrome, you can execute any of the following in the JavaScript console:\n\n```js\n// Remove all\nwindow.localStorage.clear()\n// Or, to list keys so you can selectively remove them with removeItem()\nwindow.localStorage\n// Remove all the watch expressions\nwindow.localStorage.removeItem(\'watchExpressions\')\n// Remove all the breakpoints\nwindow.localStorage.removeItem(\'breakpoints\')\n```\n\nWhen you are done cleaning up, hit refresh in the browser.\n\n#### Node Inspector takes a long time to start up.\n\nTry setting --no-preload to true. This option disables searching disk for *.js at startup.\n\n#### How do I debug Mocha unit-tests?\n\nYou have to start `_mocha` as the debugged process and make sure\nthe execution pauses on the first line. This way you have enough\ntime to set your breakpoints before the tests are run.\n\n```sh\n$ node-debug _mocha\n```\n\n## Advanced Use\n\nWhile running `node-debug` is a convenient way to start your debugging\nsession, there may come time when you need to tweak the default setup.\n\nThere are three steps needed to get you up and debugging:\n\n#### 1. Start the Node Inspector server\n\n```sh\n$ node-inspector\n```\n\nYou can leave the server running in background, it\'s possible to debug\nmultiple processes using the same server instance.\n\n#### 2. Enable debug mode in your Node process\n\nYou can either start Node with a debug flag like:\n\n```sh\n$ node --debug your/node/program.js\n```\n\nor, to pause your script on the first line:\n\n```sh\n$ node --debug-brk your/short/node/script.js\n```\n\nOr you can enable debugging on a node that is already running by sending\nit a signal:\n\n1. Get the PID of the node process using your favorite method.\n`pgrep` or `ps -ef` are good\n\n    ```sh\n    $ pgrep -l node\n    2345 node your/node/server.js\n    ```\n\n2. Send it the USR1 signal\n\n    ```sh\n    $ kill -s USR1 2345\n    ```\n\n##### Windows\n\nWindows does not support UNIX signals. To enable debugging, you can use\nan undocumented API function `process._debugProcess(pid)`:\n\n1. Get the PID of the node process using your favorite method, e.g.\n\n    ```sh\n    > tasklist /FI "IMAGENAME eq node.exe"\n\n    Image Name                     PID Session Name        Session#    Mem Usage\n    ========================= ======== ================ =========== ============\n    node.exe                      3084 Console                    1     11,964 K\n    ```\n\n2. Call the API:\n\n    ```sh\n    > node -e "process._debugProcess(3084)"\n    ```\n\n#### 3. Load the debugger UI\n\nOpen http://127.0.0.1:8080/debug?port=5858 in the Chrome browser.\n\n## Configuration\n\n### node-debug\n\nCommand line options:\n\n```\n--debug-brk, -b         Break on the first line (`node --debug-brk`) [default: true]\n--web-port, -p, --port  Node Inspector port (`node-inspector --web-port={port}`)\n--debug-port, -d        Node/V8 debugger port (`node --debug={port}`)\n--cli, -c               CLI mode, do not open browser.\n--version, -v           Print Node Inspector\'s version.\n--help, -h              Show this help.\n```\n\n### node-inspector\n\nnode-inspector uses [rc](https://npmjs.org/package/rc)\n[[github]](https://github.com/dominictarr/rc) module to collect options.\n\nPlaces for configuration:\n* command line arguments (parsed by optimist)\n* enviroment variables prefixed with ```node-inspector_```\n* if you passed an option ```--config file``` then from that file\n* a local ```.node-inspectorrc``` or the first found looking in ```./ ../ ../../\n ../../../``` etc.\n* ```$HOME/.node-inspectorrc```\n* ```$HOME/.node-inspector/config```\n* ```$HOME/.config/node-inspector```\n* ```$HOME/.config/node-inspector/config```\n* ```/etc/node-inspectorrc```\n* ```/etc/node-inspector/config```\n* options from ```config.json``` for backward compatibility\n* defaults described in Node Inspector`s [./lib/config.js](lib/config.js).\n\nAll configuration sources that where found will be flattened into one object,\nso that sources earlier in this list override later ones.\n\nUse dashed option names in RC files. Sample config file:\n```js\n{\n  "web-port": 8088,\n  "web-host": null,\n  "debug-port": 5858,\n  "save-live-edit": true,\n  "no-preload": true,\n  "hidden": [],\n  "stack-trace-limit": 50\n}\n```\n\nList of predefined options:\n```\n       Option            Default                  Description\n--help               |             | Print information about options\n--web-port           |    8080     | Port to host the inspector\n--web-host           |  127.0.0.1  | Host to listen on\n--debug-port         |    5858     | Port to connect to the debugging app\n--save-live-edit     |    false    | Save live edit changes to disk\n                     |             |   (update the edited files)\n--no-preload         |    false    | Disables preloading *.js to speed up startup\n--hidden             |     []      | Array of files to hide from the UI\n                     |             |   (breakpoints in these files will be ignored)\n--stack-trace-limit  |     50      | Number of stack frames to show on a breakpoint\n```\n\n## Contributing Code\n\nMaking Node Inspector the best debugger for node.js cannot be achieved without\nthe help of the community. The following resources should help you to get\nstarted.\n\n* [Contributing](https://github.com/node-inspector/node-inspector/wiki/Contributing)\n* [Developer\'s Guide](https://github.com/node-inspector/node-inspector/wiki/Developer%27s-Guide)\n* [Easy Picks](https://github.com/node-inspector/node-inspector/issues?direction=asc&labels=Easy+Pick&page=1&sort=updated&state=open)\n\n## Credits\n\nMaintainers\n - [Danny Coates](https://github.com/dannycoates) - the original author\n   and a sole maintainer for several years.\n - [Miroslav Bajtoš](https://github.com/bajtos) - the current maintainer,\n   sponsored by [StrongLoop](http://strongloop.com).\n\nBig thanks to the many contributors to the project, see [AUTHORS](AUTHORS).\n',
+485 silly resolved     readmeFilename: 'README.md',
+485 silly resolved     bugs: { url: 'https://github.com/node-inspector/node-inspector/issues' },
+485 silly resolved     _id: 'node-inspector@0.7.3',
+485 silly resolved     _shasum: '988317f9a7e645d1bb78e40bb2289db82a077e73',
+485 silly resolved     _from: 'node-inspector@',
+485 silly resolved     _resolved: 'https://registry.npmjs.org/node-inspector/-/node-inspector-0.7.3.tgz' } ]
+486 info install node-inspector@0.7.3 into /usr/local/lib
+487 info installOne node-inspector@0.7.3
+488 info /usr/local/lib/node_modules/node-inspector unbuild
+489 verbose tar unpack /Users/robertbeck/.npm/node-inspector/0.7.3/package.tgz
+490 silly lockFile 6e6fbd08--lib-node-modules-node-inspector tar:///usr/local/lib/node_modules/node-inspector
+491 verbose lock tar:///usr/local/lib/node_modules/node-inspector /Users/robertbeck/.npm/6e6fbd08--lib-node-modules-node-inspector.lock
+492 silly lockFile 879656cb-node-inspector-0-7-3-package-tgz tar:///Users/robertbeck/.npm/node-inspector/0.7.3/package.tgz
+493 verbose lock tar:///Users/robertbeck/.npm/node-inspector/0.7.3/package.tgz /Users/robertbeck/.npm/879656cb-node-inspector-0-7-3-package-tgz.lock
+494 silly gunzTarPerm modes [ '755', '644' ]
+495 error Error: EACCES, mkdir '/usr/local/lib/node_modules/node-inspector'
+495 error  { [Error: EACCES, mkdir '/usr/local/lib/node_modules/node-inspector']
+495 error   errno: 3,
+495 error   code: 'EACCES',
+495 error   path: '/usr/local/lib/node_modules/node-inspector',
+495 error   fstream_type: 'Directory',
+495 error   fstream_path: '/usr/local/lib/node_modules/node-inspector',
+495 error   fstream_class: 'DirWriter',
+495 error   fstream_stack:
+495 error    [ '/usr/local/lib/node_modules/npm/node_modules/fstream/lib/dir-writer.js:36:23',
+495 error      '/usr/local/lib/node_modules/npm/node_modules/mkdirp/index.js:37:53',
+495 error      'Object.oncomplete (fs.js:107:15)' ] }
+496 error Please try running this command again as root/Administrator.
+497 error System Darwin 13.1.0
+498 error command "node" "/usr/local/bin/npm" "install" "-g" "node-inspector"
+499 error cwd /Users/robertbeck/Documents/Buzzrd/buzzrd-server
+500 error node -v v0.10.28
+501 error npm -v 1.4.9
+502 error path /usr/local/lib/node_modules/node-inspector
+503 error fstream_path /usr/local/lib/node_modules/node-inspector
+504 error fstream_type Directory
+505 error fstream_class DirWriter
+506 error code EACCES
+507 error errno 3
+508 error stack Error: EACCES, mkdir '/usr/local/lib/node_modules/node-inspector'
+509 error fstream_stack /usr/local/lib/node_modules/npm/node_modules/fstream/lib/dir-writer.js:36:23
+509 error fstream_stack /usr/local/lib/node_modules/npm/node_modules/mkdirp/index.js:37:53
+509 error fstream_stack Object.oncomplete (fs.js:107:15)
+510 verbose exit [ 3, true ]
