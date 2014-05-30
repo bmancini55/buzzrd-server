@@ -144,43 +144,51 @@ VenueSchema.statics.findInRadius = function(lat, lng, meters, next) {
  * Insert or updates the venues
  * @param [Venue] venues
  * @param function(err, [Venue]) callback function
+ * @remarks This fires off an upsert for each venue in the list
+ *          and has the potential to be very costly for large
+ *          lists of venues. Use with caution... possibly add
+ *          a check to throw an exception if array is too large
  */ 
 VenueSchema.statics.upsertVenues = function(venues, next) {
   debug('upserting %s venues', venues.length);
-  var promises = [];
-
-  // construct upsert data
-  venues.forEach(function(venue) {    
-    var search = {
-      _id: mongoose.Types.ObjectId(venue.id)
-    };
-    var categories = venue.categories.map(function(category) {
-      category._id = new mongoose.Types.ObjectId(category.id);
-      delete category.id;
-      return category;
-    })
-
-    var data = {
-      _id: venue.id,
-      name: venue.name,
-      location: venue.location,
-      categories: categories,
-      verified: venue.verified,
-      referralId: venue.referralId,
-      coord: [ venue.location.lng, venue.location.lat ],
-      updated: Date.now(),
-      $setOnInsert: { 
-        created: Date.now(), 
-        roomCount: 0,
-        userCount: 0
-      }
-    };
-    promises.push(Q.ninvoke(Venue, "findOneAndUpdate", search, data, { upsert: true }));
-  });
   
   // upsert all of the venues
-  Q.all(promises)
-  .then(next);
+  Q.all(
+
+    // create a promise for each venue
+    venues.map(function(venue) {    
+      var search = {
+          _id: mongoose.Types.ObjectId(venue.id)
+        },
+        categories = venue.categories.map(function(category) {
+          category._id = new mongoose.Types.ObjectId(category.id);
+          delete category.id;
+          return category;
+        }),
+        data = {
+          _id: venue.id,
+          name: venue.name,
+          location: venue.location,
+          categories: categories,
+          verified: venue.verified,
+          referralId: venue.referralId,
+          coord: [ venue.location.lng, venue.location.lat ],
+          updated: Date.now(),
+          $setOnInsert: { 
+            created: Date.now(), 
+            roomCount: 0,
+            userCount: 0
+          }
+        };      
+      return Q.ninvoke(Venue, "findOneAndUpdate", search, data, { upsert: true });
+    })
+  )
+  .then(function(venue) {
+    next(null, venue);
+  })
+  .fail(function(err) {
+    next(err);
+  });
 
 }
 
