@@ -37,6 +37,7 @@ exports.findNearby = function(req, res) {
           } 
 
           // otherwise create a new default room
+          // NOTE: this should probably be moved to venue caching
           else {
             var newRoom = new Room({ 
               name: 'Default',
