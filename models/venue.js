@@ -200,6 +200,32 @@ VenueSchema.methods.toClient = function() {
   return client;
 }
 
+/**
+ *  addRoom
+ * Adds a room to avenue
+ */
+VenueSchema.methods.addRoom = function(room, next) {
+  var venue = this;
+  
+  // save the room
+  Q.ninvoke(room, 'save')
+  .then(function(saveResult) {
+
+    // save callback has two args, get the raw value
+    var room = saveResult[0];
+
+    // increment the venue's room count
+    return Q.ninvoke(Venue, 'update', { _id: venue._id }, { $inc: { roomCount: 1 }})
+    .then(function() {
+      next(null, room);
+    });
+
+  })
+  .fail(function(err) {
+    next(err);
+  })
+}
+
 
 ///
 /// Create and export the model

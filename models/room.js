@@ -11,6 +11,7 @@ var RoomSchema = new Schema({
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
   venueId: Schema.Types.ObjectId,
+  venueDefault: { type: Boolean, default: false },
   userCount: { type: Number, default: 0 }
 });
 

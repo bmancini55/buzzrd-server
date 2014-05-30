@@ -18,31 +18,48 @@ exports.findNearby = function(req, res) {
 
   Q.ninvoke(Venue, "findNearby", lat, lng, radius)
   .then(function(venues) {
-
-    // construct room join
     var promises = [];
-    venues.forEach(function(venue) {      
-      var id = venue.id
-        , page = 1
-        , pagesize = 5;
-      venue = venue.toClient();
-      promises.push(
-        Q.ninvoke(Room, "findByVenue", id, page, pagesize)
-        .then(function(rooms) {          
-          venue.rooms = rooms;
-          return venue;
+
+    // join rooms
+    return Q.all(
+
+      // map each venue into a promise
+      // that loads the rooms for that venue
+      venues.map(function(venue) {
+        var id = venue._id.toString();
+        
+        return Q.ninvoke(Room, "findByVenue", id, 1, 5)        
+        .then(function(rooms) {
+
+          // return rooms if we have then
+          if(rooms.length > 0 ) {
+            return rooms;        
+          } 
+
+          // otherwise create a new default room
+          else {
+            var newRoom = new Room({ 
+              name: 'Default',
+              venueId: id,
+              venueDefault: true
+            });
+            return Q.ninvoke(venue, 'addRoom', newRoom)
+            .then(function(room) {
+              return [ room ];
+            })
+          }
         })      
-      );
-    });
-
-    // execute room joins
-    return Q.all(promises)
-    .then(function(results) {
-      res.send(new JsonResponse(null, results));
-    });
-
-  }, function(err) {
-    res.send(500, new JsonResponse(err));
+        .then(function(rooms) {
+          venue = venue.toClient();
+          venue.roomsCount = venue.roomsCount === 0 ? 1 : venue.roomsCount;
+          venue.rooms = rooms;  
+          return venue;
+        });
+      })
+    );
+  })
+  .then(function(venues) {
+    res.send(new JsonResponse(null, venues));
   })
   .fail(function(err) {
     res.send(500, new JsonResponse(err));
