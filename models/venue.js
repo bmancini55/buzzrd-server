@@ -190,13 +190,18 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
 /// Instance methods
 ///
 
-/**  
+/** 
  * toClient
- * Converts the model document into a clean and API friendly version
+ * @override
+ * To client method that will also include rooms if they are available
  */
 VenueSchema.methods.toClient = function() {
-  var client = this.toObject();
-  mongoose.Model.convertIds(client);
+  var client = mongoose.Model.prototype.toClient.call(this);
+  if(this.rooms) {
+    client.rooms = this.rooms.map(function(room) {
+      return room.toClient();
+    });
+  }
   return client;
 }
 
@@ -232,3 +237,4 @@ VenueSchema.methods.addRoom = function(room, next) {
 ///
 var model = Venue = mongoose.model("Venue", VenueSchema);
 module.exports = model;
+

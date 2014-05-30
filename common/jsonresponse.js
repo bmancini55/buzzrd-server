@@ -22,9 +22,25 @@ var JsonResponse = function(err, results) {
 
   } else {
     this.success = true;
-    this.error = null;
-    this.results = results;
+    this.error = null;      
+    this.results = convertToClient(results);    
   }
 }
+
+function convertToClient(results) {
+  if(results.toClient) {
+    results = results.toClient();
+  } 
+  else if(util.isArray(results)) {    
+    results = results.map(function(result) {
+      if(result.toClient) {
+        result = result.toClient();
+      }
+      return result;
+    })
+  }  
+  return results;
+}
+
 
 module.exports = JsonResponse;

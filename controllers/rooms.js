@@ -45,14 +45,13 @@ exports.findNearby = function(req, res) {
             });
             return Q.ninvoke(venue, 'addRoom', newRoom)
             .then(function(room) {
+              venue.roomCount += 1;
               return [ room ];
             })
           }
         })      
         .then(function(rooms) {
-          venue = venue.toClient();
-          venue.roomsCount = venue.roomsCount === 0 ? 1 : venue.roomsCount;
-          venue.rooms = rooms;  
+          venue.rooms = rooms;
           return venue;
         });
       })
