@@ -39,16 +39,7 @@ exports.findNearby = function(req, res) {
           // otherwise create a new default room
           // NOTE: this should probably be moved to venue caching
           else {
-            var newRoom = new Room({ 
-              name: 'Default',
-              venueId: id,
-              venueDefault: true
-            });
-            return Q.ninvoke(venue, 'addRoom', newRoom)
-            .then(function(room) {
-              venue.roomCount += 1;
-              return [ room ];
-            })
+            return Q.ninvoke(venue, 'createDefaultRoom');
           }
         })      
         .then(function(rooms) {
@@ -65,6 +56,7 @@ exports.findNearby = function(req, res) {
     res.send(500, new JsonResponse(err));
   });
 }
+
 
 // Finds all rooms
 exports.findAll = function(req, res) {

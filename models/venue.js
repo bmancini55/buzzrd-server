@@ -6,7 +6,8 @@ var util        = require('util')
   , Schema      = mongoose.Schema
   , debug       = require('debug')('venue')
   , config      = require('../common/confighelper').env()
-  , foursquare  = require('node-foursquare-venues')(config.foursquare.clientId, config.foursquare.clientSecret);
+  , foursquare  = require('node-foursquare-venues')(config.foursquare.clientId, config.foursquare.clientSecret)
+  , Room        = require('./room');
 
 ///
 /// Schema definition
@@ -214,29 +215,33 @@ VenueSchema.methods.toClient = function() {
 }
 
 /**
- *  addRoom
- * Adds a room to avenue
+ * createDefaultRoom
  */
-VenueSchema.methods.addRoom = function(room, next) {
-  var venue = this;
-  
+VenueSchema.methods.createDefaultRoom = function(next) {
+  var venue = this
+    , id = venue._id
+    , newRoom;
+
+  newRoom = new Room({ 
+    name: 'Default',
+    venueId: id,
+    venueDefault: true
+  });
+
   // save the room
-  Q.ninvoke(room, 'save')
-  .then(function(saveResult) {
-
-    // save callback has two args, get the raw value
-    var room = saveResult[0];
-
-    // increment the venue's room count
-    return Q.ninvoke(Venue, 'update', { _id: venue._id }, { $inc: { roomCount: 1 }})
-    .then(function() {
-      next(null, room);
-    });
-
-  })
-  .fail(function(err) {
-    next(err);
-  })
+  newRoom.save(function(err, room) {
+    if(err) next(err);
+    else {
+      // increment the venue
+      Venue.update({ _id: id }, { $inc: { roomCount: 1 }}, function(err) {
+        if(err) next(err);
+        else {
+          venue.roomCount = 1;
+          next(null, [ room ]);
+        }
+      })
+    }
+  });
 }
 
 
