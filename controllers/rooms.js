@@ -61,6 +61,19 @@ exports.findNearby = function(req, res) {
 }
 
 /**
+ * findByVenue
+ * Finds a paged list of rooms by specific venue
+ */
+exports.findByVenue = function(req, res) {
+
+  var venueId = req.param('venueid')
+    , page = Math.max(req.query.page || 1, 1)
+    , pagesize = Math.min(Math.max(req.query.pagesize || 5, 1), 1000);
+
+  Room.findByVenue(venueId, page, pagesize, JsonResponse.expressHandler(res));
+}
+
+/**
  * findAll
  * Finds all rooms
  */

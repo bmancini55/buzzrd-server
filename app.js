@@ -49,6 +49,9 @@ app.get ('/api/rooms/nearby', oauth.authorise(), controllers.Rooms.findNearby);
 app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
 app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
 
+// Venue API
+app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.findByVenue)
+
 // User API
 app.post('/api/users', controllers.Users.create);
 app.get ('/api/users', controllers.Users.findAll);
