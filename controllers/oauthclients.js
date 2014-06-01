@@ -5,7 +5,10 @@ var JsonResponse  = require('../common/jsonresponse')
   , OAuthClient   = Models.OAuthClient
 
 
-// Creates a new client
+/** 
+ * create
+ * Creates a new client
+ */
 exports.create = function(req, res) {
 
   var clientName  = req.body.clientName
@@ -24,23 +27,20 @@ exports.create = function(req, res) {
           redirectUri: redirectUri
       });
 
-      client.save(function(err, client) {
-        if(err) res.send(new JsonResponse(err));
-        else res.send(new JsonResponse(null, client));
-      });
+      client.save(JsonResponse.expressHandler(res));
     })
   })
 }
 
-// Finds all clients
+/** 
+ * findAll
+ * Finds all clients
+ */
 exports.findAll = function(req, res) {
 
   var page = Math.max(req.query.page || 1, 1)
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000);
 
-  OAuthClient.findAll(page, pagesize, function(err, clients) {
-    if(err) res.send(500, new JsonResponse(err));
-    else res.send(new JsonResponse(null, clients));
-  })
+  OAuthClient.findAll(page, pagesize, JsonResponse.expressHandler(res))
 
 }

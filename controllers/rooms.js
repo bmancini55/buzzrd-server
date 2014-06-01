@@ -7,7 +7,10 @@ var Q             = require('Q')
   , Venue         = models.Venue
   , Message       = models.Message;
 
-// Finds nearby rooms
+/**
+ * findNearby
+ * Finds rooms near the supplied locations
+ */
 exports.findNearby = function(req, res) {
 
   var page = Math.max(req.query.page || 1, 1)
@@ -57,23 +60,22 @@ exports.findNearby = function(req, res) {
   });
 }
 
-
-// Finds all rooms
+/**
+ * findAll
+ * Finds all rooms
+ */
 exports.findAll = function(req, res) {
   
   var page = Math.max(req.query.page || 1, 1)
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000);
 
-  Room.findAll(page, pagesize, function(err, rooms) {
-    if(err) {
-      res.send(500, new JsonResposne(err));
-    } else {
-      res.send(new JsonResponse(null, rooms));
-    }
-  });
+  Room.findAll(page, pagesize, JsonResponse.expressHandler(res));
 }
 
-// Creates a new room
+/** 
+ * create
+ * Creates a new room
+ */ 
 exports.create = function(req, res) {
   
   var room = new Room({
@@ -81,13 +83,7 @@ exports.create = function(req, res) {
     lon: req.body.lon,
     lat: req.body.lat
   });
-  room.save(function(err, room) {
-    if(err) {
-      res.send(500, new JsonResponse(err));
-    } else {
-      res.send(new JsonResponse(null, room));
-    }
-  });
+  room.save(JsonResponse.expressHandler(res));
 
 };
 

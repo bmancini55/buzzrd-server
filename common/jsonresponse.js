@@ -27,6 +27,16 @@ var JsonResponse = function(err, results) {
   }
 }
 
+JsonResponse.expressHandler = function(res) {
+  return function(err, value) {
+    if(err) {
+      res.send(500, new JsonResponse(err));
+    } else {
+      res.send(new JsonResponse(null, value));
+    }
+  }
+}
+
 function convertToClient(results) {
   if(results.toClient) {
     results = results.toClient();

@@ -5,7 +5,10 @@ var JsonResponse  = require('../common/jsonresponse')
   , Message       = Models.Message
 
 
-// Finds messages for the room
+/** 
+ * findByRoom
+ * Finds messages for a room
+ */
 exports.findByRoom = function(req, res) {
 
   var idroom = req.param('idroom')
@@ -15,9 +18,7 @@ exports.findByRoom = function(req, res) {
   if(!idroom) {
     res.send(new JsonResponse('Room must be supplied'));
   } else {
-    Message.findByRoom(idroom, page, pagesize, function(err, messages) {
-      res.send(new JsonResponse(err, messages));
-    });
+    Message.findByRoom(idroom, page, pagesize, JsonResponse.expressHandler(res));
   }
 
 }

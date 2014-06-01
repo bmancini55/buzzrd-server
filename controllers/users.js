@@ -9,13 +9,7 @@ exports.findAll = function(req, res) {
   var page = Math.max(req.query.page || 1, 1)
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000);
 
-  User.findAll(page, pagesize, function(err, users) {
-    if(err) {
-      res.send(500, new JsonResposne(err));
-    } else {
-      res.send(new JsonResponse(null, users));
-    }
-  });
+  User.findAll(page, pagesize, JsonResponse.expressHandler(res));
 };
 
 // Creates a new user
@@ -41,13 +35,7 @@ exports.create = function(req, res) {
         lastName: req.body.lastName,
         sex: req.body.sex
       });
-      user.save(function(err, user) {
-        if(err) {
-          res.send(500, new JsonResponse(err));
-        } else {
-          res.send(new JsonResponse(null, user));
-        }
-      });
+      user.save(JsonResponse.expressHandler(res));
 
     });
 
@@ -63,7 +51,7 @@ exports.usernameExists = function(req, res) {
 
   User.findByUsername(username, function(err, user) {
     if (err) {
-      res.send(new JsonResponse(null, err));
+      res.send(new JsonResponse(err));
     } else {
       if (user) {
         res.send(new JsonResponse(null, true)); 
