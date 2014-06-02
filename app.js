@@ -70,6 +70,7 @@ if(debug) {
 
   // Venues API
   app.get('/api/venues', controllers.Venues.findByLocation);
+  app.get('/api/venues/foursquare', controllers.Venues.findNearbyFromFoursquare);
 }
 
 // TODO - write custom code for managing this that uses JsonResponse
