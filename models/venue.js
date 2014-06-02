@@ -64,7 +64,7 @@ VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
   Venue.findNearbyFromCache(lat, lng, meters, function(err, venues) {
 
     // return venues if we have them...
-    if(venues && venues.length > 10) {
+    if(venues && venues.length > 25) {
       debug('cache hit, %s venues found', venues.length);
       next(null, venues);
     }

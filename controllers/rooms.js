@@ -17,7 +17,7 @@ exports.findNearby = function(req, res) {
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
     , lng = req.query.lng
     , lat = req.query.lat
-    , radius = req.query.radius || 400
+    , radius = req.query.radius || 100
 
   Q.ninvoke(Venue, "findNearby", lat, lng, radius)
   .then(function(venues) {
