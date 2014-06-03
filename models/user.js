@@ -2,7 +2,9 @@
 // Module dependencies
 var mongoose = require('mongoose')
   , crypto = require('crypto')
-  , Schema = mongoose.Schema;
+  , debug       = require('debug')('users')
+  , Schema = mongoose.Schema
+  , ObjectId = Schema.ObjectId;
 
 ///
 /// Schema definition
@@ -15,7 +17,8 @@ var UserSchema = new Schema({
   updated: { type: Date, default: Date.now },
   firstName: String,
   lastName: String,
-  sex: String
+  sex: String,
+  profilePic: String
   //image: Read GridFs documentation
 });
 
@@ -71,8 +74,15 @@ UserSchema.methods.verifyPassword = function(password, next) {
     , salt = me.salt;
   UserSchema.statics.hashPassword(password, salt, function(err, derivedKey) {
     var result = (me.password === derivedKey);
-    next(err, result);
+    next(err, result);  
   });
+}
+
+UserSchema.statics.updateProfilePic = function(userId, profilePic, next) {
+  var select = { _id: new mongoose.Types.ObjectId(userId) },
+     updates = { $set: { profilePic: profilePic } };
+
+  this.findOneAndUpdate(select, updates, next);
 }
 
 ///

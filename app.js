@@ -56,6 +56,10 @@ app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.find
 app.post('/api/users', controllers.Users.create);
 app.get ('/api/users', controllers.Users.findAll);
 app.post('/api/users/usernameExists', controllers.Users.usernameExists);
+app.post('/api/users/updateProfilePic', controllers.Users.updateProfilePic);
+
+// Image API
+app.post('/api/images/upload', controllers.Images.upload);
 
 // DEBUG ONLY MOUNTS
 if(debug) {

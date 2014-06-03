@@ -1,7 +1,8 @@
 // Module dependencies
 var JsonResponse  = require('../common/jsonresponse')
   , models        = require('../models')
-  , User          = models.User;
+  , User          = models.User
+  , mongoose = require("mongoose");
 
 // Finds all users
 exports.findAll = function(req, res) {
@@ -58,6 +59,21 @@ exports.usernameExists = function(req, res) {
       } else {
         res.send(new JsonResponse(null, false));
       }
+    }
+  });
+};
+
+// Updates the URI for the user's profile picture
+exports.updateProfilePic = function(req, res) {
+  
+  var userId = req.body.userId,
+    profilePic = req.body.profilePic;
+  
+  User.updateProfilePic(userId, profilePic, function(err, user){
+    if(err) {
+      res.send(500, new JsonResponse(err));
+    } else {
+      res.send(new JsonResponse(null, userId));
     }
   });
 };

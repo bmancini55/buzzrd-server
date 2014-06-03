@@ -38,6 +38,7 @@
     <Compile Include="controllers\index.js" />
     <Compile Include="controllers\messages.js" />
     <Compile Include="controllers\rooms.js" />
+    <Compile Include="controllers\images.js" />
     <Compile Include="models\index.js" />
     <Compile Include="models\message.js" />
     <Compile Include="models\room.js" />
