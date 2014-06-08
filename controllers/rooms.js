@@ -1,7 +1,7 @@
 ﻿
 // Module dependencies
 var Q             = require('Q')
-  , JsonResponse  = require('../common/jsonresponse')
+  , JsonResponse  = require('jsonresponse')
   , models        = require('../models')
   , Room          = models.Room
   , Venue         = models.Venue

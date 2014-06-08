@@ -1,6 +1,6 @@
 ﻿
 // Module Dependencies
-var JsonResponse  = require('../common/jsonresponse')
+var JsonResponse  = require('jsonresponse')
   , Models        = require('../models')
   , Message       = Models.Message
 

@@ -1,6 +1,6 @@
 
 // Module dependencies
-var JsonResponse  = require('../common/jsonresponse')
+var JsonResponse  = require('jsonresponse')
   , models        = require('../models')
   , Venue          = models.Venue;
 

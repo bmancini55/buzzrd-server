@@ -1,5 +1,5 @@
 // Module dependencies
-var JsonResponse  = require('../common/jsonresponse')
+var JsonResponse  = require('jsonresponse')
   , fs = require('fs');
 
 // Upload an image into the uploads directory

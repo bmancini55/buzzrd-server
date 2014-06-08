@@ -1,5 +1,5 @@
 // Module dependencies
-var JsonResponse  = require('../common/jsonresponse')
+var JsonResponse  = require('jsonresponse')
   , models        = require('../models')
   , User          = models.User
   , mongoose = require("mongoose");
