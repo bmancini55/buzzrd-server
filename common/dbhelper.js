@@ -31,63 +31,86 @@ mongoose.connection.on('disconnected', function() {
  */
 mongoose.Model.prototype.toClient = function() {  
   var client = this.toObject({ virtuals: true, minimize: false });
-  convertIds(client);
+  toClient(client);
   return client;
 }
 
-
-/**
- * convertIds
- * Recursively converts _id to id for the root
- * object and all sub-objects
- * @param Object obj is the object to convert
+/** 
+ * Converts the object to a client
+ * @private
+ * 
  */
-function convertIds(obj) {
+function toClient(obj) {
+
+  // process objects only
   if(obj instanceof Object) {
 
-    // convert _id
-    if(obj instanceof Object && obj._id) {
-      convertId(obj);    
-    }
+    // perform conversions    
+    convertId(obj);
+    stripVersion(obj);
 
-    // process each property
-    for(var prop in obj) {
-      if(obj.hasOwnProperty(prop)) {
-        var value = obj[prop];
+    // process all properties
+    recurseProperties(obj);
+  }
+}
 
-        // handle items in array
-        if(value instanceof Array) {
-          value.forEach(function(item) {
-            convertIds(item);
-          })
-        }
+/** 
+ * Calls toClient on each property in an object
+ */
+function recurseProperties(obj) {
 
-        // handle other properties
-        else {
-          convertIds(value);
-        }
+  // process each property
+  for(var prop in obj) {
+    if(obj.hasOwnProperty(prop)) {
+
+      // get the value
+      var value = obj[prop];
+
+      // handle items in array
+      if(value instanceof Array) {
+        value.forEach(function(item) {
+          toClient(item);
+        })
+      }
+
+      // handle other properties
+      else {
+        toClient(value);
       }
     }
   }
 }
 
+
 /** 
- * convertId
  * Converts an object that has an _id property
  * to use the id property. This will also
  * reorder other properties behind the id property
+ * @private
  */
 function convertId(obj) {
-  // add id property
-  obj.id = obj._id;
-  delete obj._id;
+  if(obj instanceof Object && obj._id) {
 
-  // reorder remaining properties
-  for(var prop in obj) {
-    if(prop !== 'id') {
-      var val = obj[prop];
-      delete obj[prop];
-      obj[prop] = val;
+    // add id property
+    obj.id = obj._id;
+    delete obj._id;
+
+    // reorder remaining properties
+    for(var prop in obj) {
+      if(prop !== 'id') {
+        var val = obj[prop];
+        delete obj[prop];
+        obj[prop] = val;
+      }
     }
+
   }
+}
+
+/**
+ * Removes the __v value from object
+ * @private
+ */ 
+function stripVersion(obj) {
+  delete obj['__v'];
 }
