@@ -22,24 +22,39 @@ exports.create = function(req, res) {
   //lastName: String,
   //sex: String
 
-  var rawPassword = req.body.password;
+  User.findByUsername(req.body.username, function(err, user) {
+    if (err) {
 
-  User.generateSalt(function(err, salt) {
-    if(err) res.send(500, new JsonResponse(err));
+      res.send(new JsonResponse(err));
 
-    User.hashPassword(rawPassword, salt, function(err, derivedKey) {
-      var user = new User({
-        username: req.body.username,
-        password: derivedKey,
-        salt: salt,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        sex: req.body.sex
-      });
-      user.save(JsonResponse.expressHandler(res));
+    } else {
 
-    });
+      if (user) {
 
+        res.send(new JsonResponse("The username you entered already exists.")); 
+
+      } else {
+        
+        var rawPassword = req.body.password;
+
+        User.generateSalt(function(err, salt) {
+          if(err) res.send(500, new JsonResponse(err));
+
+          User.hashPassword(rawPassword, salt, function(err, derivedKey) {
+            var user = new User({
+              username: req.body.username,
+              password: derivedKey,
+              salt: salt,
+              firstName: req.body.firstName,
+              lastName: req.body.lastName,
+              sex: req.body.sex
+            });
+    
+            user.save(JsonResponse.expressHandler(res));
+          });
+        });
+      }
+    }
   });
 };
 
