@@ -30,21 +30,8 @@ exports.findNearby = function(req, res) {
       // that loads the rooms for that venue
       venues.map(function(venue) {
         var id = venue._id.toString();
-        
-        return Q.ninvoke(Room, "findByVenue", id, 1, 5)        
-        .then(function(rooms) {
-
-          // return rooms if we have then
-          if(rooms.length > 0 ) {
-            return rooms;        
-          } 
-
-          // otherwise create a new default room
-          // NOTE: this should probably be moved to venue caching
-          else {
-            return Q.ninvoke(venue, 'createDefaultRoom');
-          }
-        })      
+                
+        return Q.ninvoke(Room, "findByVenue", id, 1, 5)            
         .then(function(rooms) {
           venue.rooms = rooms;
           return venue;
