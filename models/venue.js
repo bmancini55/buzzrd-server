@@ -48,6 +48,18 @@ var VenueSchema = new Schema({
 /// Statics
 ///
 
+/**
+ * findById
+ * Finds a venue by identifier
+ * @param id identifier for the venue
+ */
+VenueSchema.statics.findById = function(id, next) {
+  debug('findById ' + id);
+  Venue.findOne({
+    _id: new mongoose.Types.ObjectId(id)
+  }, next);
+}
+
 /** 
  * findNearby
  * Finds locations near a  latitude, longitude coordinate within
@@ -199,6 +211,29 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
 /// Instance methods
 ///
 
+/**
+ * addRoom
+ * adds a room by saving the room and incrementing the room count
+ * @param {Room} room to add
+ */
+VenueSchema.methods.addRoom = function(room, next) {
+  var venue = this;
+
+  // save the room
+  room.save(function(err, room) {
+    if(err) next(err);
+    else {
+
+      // increment the room count
+      venue.update({ $inc: { roomCount: 1 } }, function(err) {
+        if(err) next(err);
+        else next(null, room);
+      });
+
+    }    
+  });
+}
+
 /** 
  * toClient
  * @override
@@ -212,36 +247,6 @@ VenueSchema.methods.toClient = function() {
     });
   }
   return client;
-}
-
-/**
- * createDefaultRoom
- */
-VenueSchema.methods.createDefaultRoom = function(next) {
-  var venue = this
-    , id = venue._id
-    , newRoom;
-
-  newRoom = new Room({ 
-    name: 'Default',
-    venueId: id,
-    venueDefault: true
-  });
-
-  // save the room
-  newRoom.save(function(err, room) {
-    if(err) next(err);
-    else {
-      // increment the venue
-      Venue.update({ _id: id }, { $inc: { roomCount: 1 }}, function(err) {
-        if(err) next(err);
-        else {
-          venue.roomCount = 1;
-          next(null, [ room ]);
-        }
-      })
-    }
-  });
 }
 
 

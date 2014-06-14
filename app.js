@@ -45,11 +45,11 @@ app.post('/oauth/grant', oauth.grant());
 
 // Room API
 app.get ('/api/rooms', oauth.authorise(), controllers.Rooms.findAll);
-app.get ('/api/rooms/nearby', oauth.authorise(), controllers.Rooms.findNearby);
 app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
 app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
 
 // Venue API
+app.get ('/api/venues', oauth.authorise(), controllers.Venues.find);
 app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.findByVenue)
 
 // User API

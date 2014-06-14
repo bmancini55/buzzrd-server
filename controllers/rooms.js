@@ -1,51 +1,12 @@
 ﻿
 // Module dependencies
 var Q             = require('Q')
+  , util          = require('util')
   , JsonResponse  = require('jsonresponse')
   , models        = require('../models')
   , Room          = models.Room
   , Venue         = models.Venue
   , Message       = models.Message;
-
-/**
- * findNearby
- * Finds rooms near the supplied locations
- */
-exports.findNearby = function(req, res) {
-
-  var page = Math.max(req.query.page || 1, 1)
-    , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
-    , lng = req.query.lng
-    , lat = req.query.lat
-    , radius = req.query.radius || 100
-
-  Q.ninvoke(Venue, "findNearby", lat, lng, radius)
-  .then(function(venues) {
-    var promises = [];
-
-    // join rooms
-    return Q.all(
-
-      // map each venue into a promise
-      // that loads the rooms for that venue
-      venues.map(function(venue) {
-        var id = venue._id.toString();
-                
-        return Q.ninvoke(Room, "findByVenue", id, 1, 5)            
-        .then(function(rooms) {
-          venue.rooms = rooms;
-          return venue;
-        });
-      })
-    );
-  })
-  .then(function(venues) {
-    res.send(new JsonResponse(null, venues));
-  })
-  .fail(function(err) {
-    res.send(500, new JsonResponse(err));
-  });
-}
 
 /**
  * findByVenue
@@ -76,15 +37,39 @@ exports.findAll = function(req, res) {
  * create
  * Creates a new room
  */ 
-exports.create = function(req, res) {
-  
-  var room = new Room({
-    name: req.body.name,
-    lon: req.body.lon,
-    lat: req.body.lat
-  });
-  room.save(JsonResponse.expressHandler(res));
+exports.create = function(req, res) {  
+  var name = req.body.name
+    , venueId = req.body.venueId;
 
+  Venue.findById(venueId, function(err, venue) {
+
+    if(err) res.send(new Jsonrespon(err));
+    else {
+
+      var isDefault = (venue.roomCount === 0);
+
+      // create the default room
+      if(isDefault) {
+        room = new Room({
+          name: venue.name,
+          venueId: venue._id,
+          venueDefault: true
+        });
+      } 
+
+      // create a new room
+      else {
+        room = new Room({
+          name: name || util.format('%s %s', venue.name, (venue.roomCount + 1)),
+          venueId: venue._id,
+          venueDefault: false
+        });
+      }
+
+      // add the room to the venue
+      venue.addRoom(room, JsonResponse.expressHandler(res));
+    }
+  });  
 };
 
 
