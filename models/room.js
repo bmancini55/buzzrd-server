@@ -7,7 +7,7 @@ var mongoose = require("mongoose")
 /// Schema definition
 ///
 var RoomSchema = new Schema({
-  name: String,
+  name: { type: String, required: true },
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
   venueId: Schema.Types.ObjectId,
