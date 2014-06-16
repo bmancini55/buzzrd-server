@@ -13,41 +13,18 @@ var Q             = require('Q')
  */
 exports.find = function(req, res) {
 
-  var includeRooms = req.query.includeRooms || false
+  var includeRooms = parseInt(req.query.includeRooms) === 1
     , page = Math.max(req.query.page || 1, 1)
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
     , lng = req.query.lng
     , lat = req.query.lat
-    , radius = req.query.radius || 100
+    , radius = req.query.radius || 100;
 
-  Q.ninvoke(Venue, "findNearby", lat, lng, radius)
-  .then(function(venues) {
-    var promises = [];
-
-    if(!includeRooms) {
-      return venues;
-    } else {
-      return Q.all(
-        // map each venue into a promise
-        // that loads the rooms for that venue
-        venues.map(function(venue) {
-          var id = venue._id.toString();
-                  
-          return Q.ninvoke(Room, "findByVenue", id, 1, 5)            
-          .then(function(rooms) {
-            venue.rooms = rooms;
-            return venue;
-          });
-        })
-      );
-    }
-  })
-  .then(function(venues) {
-    res.send(new JsonResponse(null, venues));
-  })
-  .fail(function(err) {
-    res.send(500, new JsonResponse(err));
-  });
+  if(includeRooms) {    
+    Venue.findWithRooms(lat, lng, radius, JsonResponse.expressHandler(res));
+  } else {
+    Venue.findNearby(lat, lng, radius, JsonResponse.expressHandler(res));
+  }
 }
 
 

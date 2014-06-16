@@ -45,19 +45,6 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
   .exec(next);
 }
 
-/** 
- * createVenueDefault
- * Creates a default room for a venue
- */
-RoomSchema.statics.createVenueDefault = function(venue, next) {
-  var room = new Room({
-    name: venue.name,
-    venueId: venue._id,
-    venueDefault: true
-  });
-  room.save(next);
-}
-
 
 ///
 /// Create and export the model

@@ -55,9 +55,73 @@ var VenueSchema = new Schema({
  */
 VenueSchema.statics.findById = function(id, next) {
   debug('findById ' + id);
+
   Venue.findOne({
     _id: new mongoose.Types.ObjectId(id)
   }, next);
+}
+
+/** 
+ * findWithRooms
+ * Finds venues with rooms near the location
+ * @param lat latitude of the coordinate
+ * @param lng longtitude of the coordinate
+ * @param meters limits result to the meter radius of coordinates
+ * @param next node callback of for (err, [Venue])
+ */
+VenueSchema.statics.findWithRooms = function(lat, lng, meters, next)  {
+  debug('findWithRooms lat %d, lng %d, %dm', lat, lng, meters);
+
+  Q.ninvoke(Venue, "findNearbyWithRooms", lat, lng, meters)
+  .then(function(venues) {  
+    return Q.all(
+      // map each venue into a promise
+      // that loads the rooms for that venue
+      venues.map(function(venue) {
+        var id = venue._id.toString();              
+
+        return Q.ninvoke(Room, "findByVenue", id, 1, 5)            
+        .then(function(rooms) {
+          venue.rooms = rooms;
+          return venue;
+        });
+
+      })
+    );  
+  })
+  .then(function(venues) {
+    debug('found %d venues', venues.length);    
+    next(null, venues);
+  })
+  .fail(function(err) {
+    next(err);
+  });
+
+}
+
+/** 
+ * findNearbyWithRooms
+ * Finds locations neara latitude, longitude coordinate within
+ * the specified number of meters 
+ * @param lat latitude part of coordinate pair
+ * @param lng longitude part of coordinate pair
+ * @param meters limits results to meter radius of coordinates
+ * @param next node callback of form (err, [Venue])
+ */
+VenueSchema.statics.findNearbyWithRooms = function(lat, lng, meters, next) {
+  debug('querying store for venues with rooms');
+
+  this.find({ 
+    "roomCount": { $gt: 1 },
+    "coord": { 
+      "$near" : { 
+        "$geometry" : { type: "Point", coordinates: [ lng, lat ] }, 
+        "$maxDistance" : meters 
+      }
+    }
+  })
+  .limit(50)
+  .exec(next);
 }
 
 /** 
@@ -67,16 +131,16 @@ VenueSchema.statics.findById = function(id, next) {
  * @param lat latitude part of coordinate pair
  * @param lng longitude part of coordinate pair
  * @param meters limits results to meter radius of coordinates
- * @param next node callback of form (err, FSVenue)
+ * @param next node callback of form (err, [Venue])
  */
 VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
+  debug('findNearby lat: %d, lng: %d, %dm', lat, lng, meters);
 
   // attempt to load from cache first
-  debug('querying venue cache');
   Venue.findNearbyFromCache(lat, lng, meters, function(err, venues) {
 
     // return venues if we have them...
-    if(venues && venues.length > 25) {
+    if(venues && venues.length > 15) {
       debug('cache hit, %s venues found', venues.length);
       next(null, venues);
     }
@@ -89,12 +153,13 @@ VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
   });
 }
 
-
 /** 
  * findNearbyFromCache
  * Retrieves the venues from the cache
  */
 VenueSchema.statics.findNearbyFromCache = function(lat, lng, meters, next) {
+  debug('querying venue cache');
+
   this.find({ 
     "coord": { 
       "$near" : { 
@@ -103,7 +168,6 @@ VenueSchema.statics.findNearbyFromCache = function(lat, lng, meters, next) {
       }
     }
   })
-  .sort({ roomCount: - 1 })
   .limit(50)
   .exec(next);
 }
@@ -163,7 +227,7 @@ VenueSchema.statics.findInRadius = function(lat, lng, meters, next) {
  *          a check to throw an exception if array is too large
  */ 
 VenueSchema.statics.upsertVenues = function(venues, next) {
-  debug('upserting %s venues', venues.length);
+  debug('upserting %d venues', venues.length);
   
   // upsert all of the venues
   Q.all(
