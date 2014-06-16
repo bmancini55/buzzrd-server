@@ -15,6 +15,9 @@ var RoomSchema = new Schema({
   userCount: { type: Number, default: 0 }
 });
 
+// Create additional unique constraints
+RoomSchema.index({ venueId: 1, name: 1 }, { unique: true });
+
 
 ///
 /// Static methods
