@@ -112,7 +112,7 @@ VenueSchema.statics.findNearbyWithRooms = function(lat, lng, meters, next) {
   debug('querying store for venues with rooms');
 
   this.find({ 
-    "roomCount": { $gt: 1 },
+    "roomCount": { $gt: 0 },
     "coord": { 
       "$near" : { 
         "$geometry" : { type: "Point", coordinates: [ lng, lat ] }, 

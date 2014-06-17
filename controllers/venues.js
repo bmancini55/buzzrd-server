@@ -18,7 +18,7 @@ exports.find = function(req, res) {
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
     , lng = req.query.lng
     , lat = req.query.lat
-    , radius = req.query.radius || 100;
+    , radius = req.query.radius || 10000;
 
   if(includeRooms) {    
     Venue.findWithRooms(lat, lng, radius, JsonResponse.expressHandler(res));
