@@ -67,7 +67,16 @@ exports.create = function(req, res) {
       }
 
       // add the room to the venue
-      venue.addRoom(room, JsonResponse.expressHandler(res));
+      venue.addRoom(room, function(err, newRoom) {
+        if(err) res.send(new JsonResponse(err));
+        else {
+          console.log(newRoom);
+          return res.send(new JsonResponse(null, {
+            venue: venue,
+            room: newRoom
+          }));
+        }
+      })
     }
   });  
 };
