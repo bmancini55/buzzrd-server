@@ -18,12 +18,18 @@ exports.find = function(req, res) {
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
     , lng = req.query.lng
     , lat = req.query.lat
-    , radius = req.query.radius || 10000;
+    , radius = req.query.radius || 10000
+    , query = req.query.query;
 
   if(includeRooms) {    
     Venue.findWithRooms(lat, lng, radius, JsonResponse.expressHandler(res));
   } else {
-    Venue.findNearby(lat, lng, radius, JsonResponse.expressHandler(res));
+    Venue.findNearby({
+      lat: lat, 
+      lng: lng, 
+      meters: radius,
+      query: query
+    }, JsonResponse.expressHandler(res));
   }
 }
 

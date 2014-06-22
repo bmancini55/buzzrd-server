@@ -128,16 +128,18 @@ VenueSchema.statics.findNearbyWithRooms = function(lat, lng, meters, next) {
  * findNearby
  * Finds locations near a  latitude, longitude coordinate within
  * the specified number of meters of that coordinate ordered by proximity
- * @param lat latitude part of coordinate pair
- * @param lng longitude part of coordinate pair
- * @param meters limits results to meter radius of coordinates
+ * @params options
+ *   @param lat latitude part of coordinate pair
+ *   @param lng longitude part of coordinate pair
+ *   @param radius limits results to meter radius of coordinates
+ *   @param search the text to search for
  * @param next node callback of form (err, [Venue])
  */
-VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
-  debug('findNearby lat: %d, lng: %d, %dm', lat, lng, meters);
+VenueSchema.statics.findNearby = function(options, next) {
+  debug('findNearby lat: %d, lng: %d, %dm', options.lat, options.lng, options.meters);
 
   // attempt to load from cache first
-  Venue.findNearbyFromCache(lat, lng, meters, function(err, venues) {
+  Venue.findNearbyFromCache(options, function(err, venues) {
 
     // return venues if we have them...
     if(venues && venues.length > 15) {
@@ -148,7 +150,7 @@ VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
     // otherwise load from foursquare
     else {
       debug('cache miss');
-      Venue.findNearbyFromFoursquare(lat, lng, meters, next);
+      Venue.findNearbyFromFoursquare(options, next);
     }
   });
 }
@@ -157,17 +159,23 @@ VenueSchema.statics.findNearby = function(lat, lng, meters, next) {
  * findNearbyFromCache
  * Retrieves the venues from the cache
  */
-VenueSchema.statics.findNearbyFromCache = function(lat, lng, meters, next) {
+VenueSchema.statics.findNearbyFromCache = function(options, next) {
   debug('querying venue cache');
 
-  this.find({ 
+  var search = { 
     "coord": { 
       "$near" : { 
-        "$geometry" : { type: "Point", coordinates: [ lng, lat ] }, 
-        "$maxDistance" : meters 
+        "$geometry" : { type: "Point", coordinates: [ options.lng, options.lat ] }, 
+        "$maxDistance" : options.meters 
       }
     }
-  })
+  };
+
+  if(options.query) {
+    search.name = new RegExp(options.query, "i");
+  }
+
+  this.find(search)
   .limit(50)
   .exec(next);
 }
@@ -177,14 +185,15 @@ VenueSchema.statics.findNearbyFromCache = function(lat, lng, meters, next) {
  * Retrieves the venues from the Foursquare API and 
  * updates the venue cache with the latest info
  */
-VenueSchema.statics.findNearbyFromFoursquare = function(lat, lng, meters, next) {
+VenueSchema.statics.findNearbyFromFoursquare = function(options, next) {
   debug('executing foursqaure venue search');
   
   // construct search
   var search = { 
-    ll: util.format('%s,%s', lat, lng),
+    ll: util.format('%s,%s', options.lat, options.lng),
     limit:  50,
-    radius: meters
+    radius: options.meters,
+    query: options.query
   };
 
   // exceute the foursquare search
