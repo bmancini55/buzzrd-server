@@ -13,6 +13,27 @@ exports.findAll = function(req, res) {
   User.findAll(page, pagesize, JsonResponse.expressHandler(res));
 };
 
+// Returns the user with the provided username
+exports.findByUsername = function(req, res) {
+
+  //username: String
+
+  var username = req.body.username;
+
+  User.findByUsername(username, function(err, user) {
+    if (err) {
+      res.send(new JsonResponse(err));
+    } else {
+      if (user) {
+        delete user['password'];
+        res.send(new JsonResponse(null, user)); 
+      } else {
+        res.send(new JsonResponse(null, false));
+      }
+    }
+  });
+};
+
 // Creates a new user
 exports.create = function(req, res) {
 
@@ -58,7 +79,7 @@ exports.create = function(req, res) {
   });
 };
 
-// Returns the user with the provided username
+// Returns a boolean indicating whether or not a user witht the provided username exists
 exports.usernameExists = function(req, res) {
   
   //username: String

@@ -47,7 +47,16 @@ OAuthModel.prototype.saveAccessToken = function(accessToken, clientId, expires, 
 OAuthModel.prototype.getUser = function(username, password, next) {
   debug('retrieving user %s', username);
   User.findOne({ username: username }, function(err, user) {
+    //err = new Error('asdfasdfasdf');
+    // debug('err = ' + err);
     if(err) next(err);
+    else if (user === null) {
+      // err = new Error('User credentials are invalid');
+      // err.code = 400;
+      // err.error = "unknown_user";
+      // next(err);
+      next(null, null);
+    }
     else {
       user.verifyPassword(password, function(err, valid) {
         if(err) next(err);
