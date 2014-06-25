@@ -19,7 +19,7 @@ exports.find = function(req, res) {
     , lng = req.query.lng
     , lat = req.query.lat
     , radius = req.query.radius || 10000
-    , query = req.query.query;
+    , search = req.query.search;
 
   if(includeRooms) {    
     Venue.findWithRooms(lat, lng, radius, JsonResponse.expressHandler(res));
@@ -28,7 +28,7 @@ exports.find = function(req, res) {
       lat: lat, 
       lng: lng, 
       meters: radius,
-      query: query
+      search: search
     }, JsonResponse.expressHandler(res));
   }
 }

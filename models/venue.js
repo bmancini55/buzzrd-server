@@ -171,8 +171,8 @@ VenueSchema.statics.findNearbyFromCache = function(options, next) {
     }
   };
 
-  if(options.query) {
-    search.name = new RegExp(options.query, "i");
+  if(options.search) {
+    search.name = new RegExp(options.search, "i");
   }
 
   this.find(search)
@@ -193,7 +193,7 @@ VenueSchema.statics.findNearbyFromFoursquare = function(options, next) {
     ll: util.format('%s,%s', options.lat, options.lng),
     limit:  50,
     radius: options.meters,
-    query: options.query
+    query: options.search
   };
 
   // exceute the foursquare search
