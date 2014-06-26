@@ -15,8 +15,11 @@ var RoomSchema = new Schema({
   userCount: { type: Number, default: 0 }
 });
 
-// Create additional unique constraints
-RoomSchema.index({ venueId: 1, name: 1 }, { unique: true });
+var DefaultRoomSchema = new Schema({
+  roomId: Schema.Types.ObjectId,
+  venueId: Schema.Types.ObjectId
+});
+DefaultRoomSchema.index({ venueId: 1 }, { unique: true });
 
 
 ///
@@ -49,8 +52,65 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
 }
 
 
+
+///
+/// Instance methods
+///
+
+/**
+ * save overrides the default functionality to add an
+ * additional index for ensuring unique default room values are store
+ * @override
+ */
+RoomSchema.methods.saveDefault = function(next) {
+
+  var me = this;
+
+  // initially downgrade default status
+  this.venueDefault = false;
+
+  // persist to ensure id is generated
+  this.save(function(err, room) {
+
+    if(err) next(err);
+    else {
+
+      // create and persist unique constraint
+      var unique = new DefaultRoom({ 
+        roomId: room._id,
+        venueId: room.venueId
+      });
+      unique.save(function(err, uniuque) {
+
+        if(err) {
+          
+          // ignore duplicate key error
+          if(err.code === 11000) {
+            next(null, room);
+          } else {
+            next(err);
+          }
+        }
+        else {
+
+          // upgrade room value to default status
+          room.venueDefault = true;
+          room.save(next);
+        }
+
+      });
+
+    }
+
+  });
+}
+
+
+
 ///
 /// Create and export the model
 ///
 var model = mongoose.model('Room', RoomSchema);
+var DefaultRoom = mongoose.model('DefaultRoom', DefaultRoomSchema);
+
 module.exports = model;

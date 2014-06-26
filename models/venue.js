@@ -293,18 +293,38 @@ VenueSchema.methods.addRoom = function(room, next) {
   var venue = this;
 
   // save the room
-  room.save(function(err, room) {
-    if(err) next(err);
-    else {
+  if(room.venueDefault) {
 
-      // increment the room count
-      venue.update({ $inc: { roomCount: 1 } }, function(err) {
-        if(err) next(err);
-        else next(null, room);
-      });
+    room.saveDefault(function(err, room) {
+      if(err) next(err);
+      else {
 
-    }    
-  });
+        // increment the room count
+        venue.update({ $inc: { roomCount: 1 } }, function(err) {
+          if(err) next(err);
+          else next(null, room);
+        });
+
+      }    
+    });
+
+
+  } else {
+
+    room.save(function(err, room) {
+      if(err) next(err);
+      else {
+
+        // increment the room count
+        venue.update({ $inc: { roomCount: 1 } }, function(err) {
+          if(err) next(err);
+          else next(null, room);
+        });
+
+      }    
+    });
+
+  }
 }
 
 /** 
