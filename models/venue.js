@@ -42,6 +42,16 @@ var VenueSchema = new Schema({
   userCount: { type: Number, default: 0 }
 });
 
+var VenueSearchSchema = new Schema({
+  lng: { type: Number },
+  lat: { type: Number },
+  search: { type: String },
+  results: { type: Number, default: 0 },
+  created: { type: Date, default: Date.now },
+  updated: { type: Date, default: Date.now }
+});
+VenueSearchSchema.index({ lng: 1, lat: 1, search: 1 }, { unique: true });
+
 
 
 ///
@@ -138,20 +148,21 @@ VenueSchema.statics.findNearbyWithRooms = function(lat, lng, meters, next) {
 VenueSchema.statics.findNearby = function(options, next) {
   debug('findNearby lat: %d, lng: %d, %dm', options.lat, options.lng, options.meters);
 
-  // attempt to load from cache first
-  Venue.findNearbyFromCache(options, function(err, venues) {
+  // check for recent searches  
+  VenueSearch.findRecentSearch(options, function(err, search) {
 
-    // return venues if we have them...
-    if(venues && venues.length > 15) {
-      debug('cache hit, %s venues found', venues.length);
-      next(null, venues);
-    }
+    // if there is a recent search
+    if(search) {
+      debug('search cache hit');
+      Venue.findNearbyFromCache(options, next);
+    } 
 
-    // otherwise load from foursquare
+    // if there isn't a recent search
     else {
-      debug('cache miss');
+      debug('search cache miss');
       Venue.findNearbyFromFoursquare(options, next);
     }
+
   });
 }
 
@@ -201,28 +212,10 @@ VenueSchema.statics.findNearbyFromFoursquare = function(options, next) {
     if(err) next(results);
     else {            
       debug('foursquare responded with %s venues', results.response.venues.length);
+      VenueSearch.logSearch(options, results.response.venues);
       Venue.upsertVenues(results.response.venues, next);
     }
   });
-}
-
-/**
- * findInRadius
- * Finds locations near a long, lat coordinate within
- * the specified number of meters of that coordinate
- * sorted by rooms stats
- */
-VenueSchema.statics.findInRadius = function(lat, lng, meters, next) {
-  this.find({ 
-    "coord": { 
-      "$geoWithin": { 
-        "$centerSphere": [ [ lng, lat ], meters / 1000 / 6371 ] 
-      } 
-    } 
-  })
-  .sort({ roomCount: -1 })
-  .limit(25)
-  .exec(next);
 }
 
 /** 
@@ -344,8 +337,97 @@ VenueSchema.methods.toClient = function() {
 
 
 ///
+/// Helper functions
+/// 
+
+/** 
+ * Rounds a float to the decimal precision
+ */
+Math.roundp = function(number, precision) {
+  return parseFloat(parseFloat(number).toFixed(precision));
+}
+
+///
+/// VenueSearch
+///
+
+/** 
+ * Finds a recent search within the last day
+ */
+VenueSearchSchema.statics.findRecentSearch = function(options, next) {
+
+  var lng = Math.roundp(options.lng, 4)
+    , lat = Math.roundp(options.lat, 4)
+    , conditions;
+
+  condition = {
+    lng: lng,
+    lat: lat,
+    search: options.search || null
+  }
+
+  this.findOne(condition, function(err, result) {
+    var daysAgo = 1
+      , pastDate = new Date();
+
+    pastDate.setDate(pastDate.getDate() - 1);
+
+    if(err) next(err);
+    else {      
+      if(!result || result.updated < pastDate) {
+        next(null, null);
+      } else {
+        next(null, result);
+      }
+    }
+  })
+
+}
+
+/** 
+ * Inserts or updates a log entry
+ */
+VenueSearchSchema.statics.logSearch = function(options, venues) {
+  debug('logging venue search');
+
+  var lng = Math.roundp(options.lng, 4) 
+    , lat = Math.roundp(options.lat, 4)
+    , search = options.search || null
+    , condition
+    , update
+    , options;
+
+  condition = { 
+    lng: lng,
+    lat: lat,
+    search: search
+  };
+
+  update = {
+    lng: lng,
+    lat: lat,
+    search: search,
+    results: venues.length,
+    updated: Date.now(),
+    $setOnInsert: { 
+      created: Date.now()          
+    }     
+  };
+
+  options = {
+    upsert: true
+  };
+
+  this.findOneAndUpdate(condition, update, options, function(err, result) {
+    if(err) console.log(err);
+  });
+}
+
+
+///
 /// Create and export the model
 ///
 var model = Venue = mongoose.model("Venue", VenueSchema);
+var VenueSearch = mongoose.model('VenueSearch', VenueSearchSchema);
 module.exports = model;
 
