@@ -85,14 +85,25 @@ var rooms = [];
 
 io.sockets.on('connection', function(socket) {
 
-  socket.on('join', function(room) {
+  socket.on('join', function(data) {
+    console.log('Joining room: ' + data.roomId);
+
+    // validate request with oauth
+    // then...
+
     if(socket.room) {
       console.log('Leaving room: ' + socket.room);
       socket.leave(socket.room);
     }
-    socket.room = room;
-    socket.join(room);
-    console.log('Joined room: ' + room);
+
+    // log entry into room
+    models.Room.addUserToRoom(data.roomId, data.userId, function() {
+      socket.room = data.roomId;
+      socket.join(data.roomId);
+
+      // log user history
+    });
+
   });
 
   socket.on('message', function(data) {
@@ -113,7 +124,9 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('disconnect', function() {
-    socket.leave(socket.room);
+    
+
+
   });
 
 });

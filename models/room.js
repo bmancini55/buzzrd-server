@@ -6,13 +6,18 @@ var mongoose = require("mongoose")
 ///
 /// Schema definition
 ///
+
+var RoomUserSchema = new Schema({  
+});
+
 var RoomSchema = new Schema({
   name: { type: String, required: true },
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
   venueId: Schema.Types.ObjectId,
   venueDefault: { type: Boolean, default: false },
-  userCount: { type: Number, default: 0 }
+  userCount: { type: Number, default: 0 },
+  users: { type: [ RoomUser ] }
 });
 
 var DefaultRoomSchema = new Schema({
@@ -32,7 +37,7 @@ DefaultRoomSchema.index({ venueId: 1 }, { unique: true });
  * and being used for testing purposes now
  */
 RoomSchema.statics.findAll = function(page, pagesize, next) {
-  this.find()
+  this.find({ }, { users: 0 })
     .skip((page - 1) * pagesize)
     .limit(pagesize)
     .sort({ name: 1 })
@@ -44,11 +49,30 @@ RoomSchema.statics.findAll = function(page, pagesize, next) {
  * Finds rooms belonging to a specific venue
  */
 RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
-  this.find({ venueId: new mongoose.Types.ObjectId(venueId) })
+  this.find({ venueId: new mongoose.Types.ObjectId(venueId) }, { users: 0 })
   .skip((page - 1) * pagesize)
   .limit(pagesize)
   .sort({ userCount: -1, name: 1 })
   .exec(next);
+}
+
+/**
+ * addUserToRoom
+ * Adds the user to the room by pushing an entry into the users array
+ * and incrementing the userCount value for the room
+ */
+RoomSchema.statics.addUserToRoom = function(roomId, userId, next) {
+  
+  var roomUser = new RoomUser({ _id: userId });
+
+  this.update(
+    { _id: new mongoose.Types.ObjectId(roomId) }, 
+    {
+      $addToSet: { users: roomUser },
+      $inc: { userCount: 1 }
+    }, 
+    next
+  );
 }
 
 
@@ -110,7 +134,9 @@ RoomSchema.methods.saveDefault = function(next) {
 ///
 /// Create and export the model
 ///
+
 var model = mongoose.model('Room', RoomSchema);
 var DefaultRoom = mongoose.model('DefaultRoom', DefaultRoomSchema);
+var RoomUser = mongoose.model('RoomUser', RoomUserSchema);
 
 module.exports = model;
