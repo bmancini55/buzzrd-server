@@ -78,55 +78,118 @@ if(debug) {
   app.get('/api/venues/foursquare', controllers.Venues.findNearbyFromFoursquare);
 }
 
-// TODO - write custom code for managing this that uses JsonResponse
+// Configure OAuth error handler
 app.use(oauth.errorHandler());
 
-var rooms = [];
+// TODO configure our error handler
+
+
 
 io.sockets.on('connection', function(socket) {
 
-  socket.on('join', function(data) {
-    console.log('Joining room: ' + data.roomId);
+  socket.on('authenticate', function(bearerToken) {
+    authenticate(socket, bearerToken);
+  });
 
-    // validate request with oauth
-    // then...
+  socket.on('join', function(roomId) {    
+    var userId = socket.userId;
 
-    if(socket.room) {
-      console.log('Leaving room: ' + socket.room);
-      socket.leave(socket.room);
-    }
+    if(userId) {  
 
-    // log entry into room
-    models.Room.addUserToRoom(data.roomId, data.userId, function() {
-      socket.room = data.roomId;
-      socket.join(data.roomId);
+      // leave existing room
+      if(socket.roomId) {
+        leaveRoom(socket);
+      }
 
-      // log user history
-    });
+      // join new room
+      joinRoom(socket, roomId);
+    };
 
   });
 
   socket.on('message', function(data) {
+    var userId = socket.userId
+      , roomId = socket.roomId;
 
-    var message = new models.Message({
-      idroom: socket.room,
-      message: data
-    });
+    if(userId && roomId) {
 
-    // save the message and broadcast if we successfully saved the message
-    message.save(function(err) {
-      if(err) {
+      var message = new models.Message({
+        idroom: roomId,
+        message: data
+      });
 
-      } else {
-        io.sockets["in"](socket.room).emit("message", data);
-      }
-    });
+      // save message
+      message.save();
+
+      // broadcast message
+      io.sockets["in"](roomId).emit("message", data);
+
+    }
   });
 
   socket.on('disconnect', function() {
-    
-
-
+    leaveRoom(socket);
   });
+
+
+
+  function authenticate(socket, bearerToken) {
+
+    // authenticate chat
+    models.OAuthAccessToken.findAccessToken(bearerToken, function(err, token) {
+
+      socket.userId = token.userId
+      socket.emit('authenticate', bearerToken);
+
+    });
+  }
+
+
+  function joinRoom(socket, roomId) {
+    var userId = socket.userId;
+
+    // log entry into room
+    models.Room.addUserToRoom(roomId, userId, function() {
+      socket.roomId = roomId;
+      socket.join(roomId);    
+    });
+
+    // log user history
+    new models.UserHistory({ 
+      userId: userId, 
+      action: 'join', 
+      objectType: 'room', 
+      objectId: roomId
+    })
+    .save(function(err, userhistory) {
+      console.log(err);
+    });
+  }
+
+  function leaveRoom(socket) {
+    var roomId = socket.roomId
+      , userId = socket.userId;
+
+    if(roomId && userId) {
+
+      // leave the room
+      socket.leave(roomId);
+      socket.roomId = null;
+
+      // decrement room count
+      models.Room.removeUserFromRoom(roomId, userId, function() {
+        //debug('removed user %s from room %s', userId, roomId);
+      });
+
+      // add to user history
+      new models.UserHistory({ 
+        userId: userId, 
+        action: 'leave', 
+        objectType: 'room', 
+        objectId: roomId
+      })
+      .save();
+    };
+  }
 
 });

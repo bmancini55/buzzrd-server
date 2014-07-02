@@ -1,6 +1,7 @@
 ﻿
 // Module dependencies
 var mongoose = require("mongoose")
+  , debug = require('debug')('room')
   , Schema = mongoose.Schema;
 
 ///
@@ -62,14 +63,30 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
  * and incrementing the userCount value for the room
  */
 RoomSchema.statics.addUserToRoom = function(roomId, userId, next) {
-  
+  debug('adding user %s to room %s', userId, roomId);
   var roomUser = new RoomUser({ _id: userId });
-
   this.update(
     { _id: new mongoose.Types.ObjectId(roomId) }, 
     {
       $addToSet: { users: roomUser },
       $inc: { userCount: 1 }
+    }, 
+    next
+  );
+}
+
+/**
+ * addUserToRoom
+ * Adds the user to the room by pushing an entry into the users array
+ * and incrementing the userCount value for the room
+ */
+RoomSchema.statics.removeUserFromRoom = function(roomId, userId, next) {
+  debug('removing user %s from room %s', userId, roomId);  
+  this.update(
+    { _id: new mongoose.Types.ObjectId(roomId) },
+    {
+      $pull: { users: { _id: new mongoose.Types.ObjectId(userId) } },
+      $inc: { userCount: -1 }
     }, 
     next
   );
