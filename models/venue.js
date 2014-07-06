@@ -427,7 +427,7 @@ VenueSearchSchema.statics.logSearch = function(options, venues) {
 ///
 /// Create and export the model
 ///
-var model = Venue = mongoose.model("Venue", VenueSchema);
+var Venue = mongoose.model("Venue", VenueSchema);
 var VenueSearch = mongoose.model('VenueSearch', VenueSearchSchema);
-module.exports = model;
+module.exports = Venue;
 

@@ -152,8 +152,8 @@ RoomSchema.methods.saveDefault = function(next) {
 /// Create and export the model
 ///
 
-var model = mongoose.model('Room', RoomSchema);
+var Room = mongoose.model('Room', RoomSchema);
 var DefaultRoom = mongoose.model('DefaultRoom', DefaultRoomSchema);
 var RoomUser = mongoose.model('RoomUser', RoomUserSchema);
 
-module.exports = model;
+module.exports = Room;

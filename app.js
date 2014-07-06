@@ -113,13 +113,10 @@ io.sockets.on('connection', function(socket) {
 
     if(userId && roomId) {
 
-      var message = new models.Message({
-        idroom: roomId,
-        message: data
+      // save the message
+      models.Message.saveRoomMessage(roomId, userId, data, function(err, message) {        
+        if(err) console.log('Error saving message: ' + err);
       });
-
-      // save message
-      message.save();
 
       // broadcast message
       io.sockets["in"](roomId).emit("message", data);
