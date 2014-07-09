@@ -22,7 +22,7 @@ exports.findByUsername = function(req, res) {
 
   User.findByUsername(username, function(err, user) {
     if (err) {
-      res.send(new JsonResponse(err));
+      res.send(500, new JsonResponse(err));
     } else {
       if (user) {
         delete user['password'];
@@ -46,7 +46,7 @@ exports.create = function(req, res) {
   User.findByUsername(req.body.username, function(err, user) {
     if (err) {
 
-      res.send(new JsonResponse(err));
+      res.send(500, new JsonResponse(err));
 
     } else {
 

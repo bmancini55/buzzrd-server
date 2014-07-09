@@ -1,33 +1,46 @@
 // Module dependencies
 var JsonResponse  = require('jsonresponse')
-  , fs = require('fs');
+  , fs = require('fs')
+  , multiparty = require('multiparty')
+  , util = require('util');
 
 // Upload an image into the uploads directory
 exports.upload = function(req, res) {
 
-  var ctype = req.get("content-type");
-  var ext = ctype.substr(ctype.indexOf('/')+1);
-  if (ext) {ext = '.' + ext; } else {ext = '';}
+  var form = new multiparty.Form();
 
-  var uuid = require('node-uuid');
-  var uuid1 = uuid.v1();
+  form.parse(req, function(err, fields, files) {
+    if (err) {
+      res.writeHead(400, {'content-type': 'text/plain'});
+      res.end("invalid request: " + err.message);
+      return;
+    }
 
-  var  filename = uuid1 + ext,
-    uploadsDirectory = process.cwd() + '/uploads/',
-    filePath = uploadsDirectory + filename;
+    var file = files.image[0];
 
-  if (!fs.existsSync(uploadsDirectory)) {
-    fs.mkdirSync(uploadsDirectory);
-  }
- 
-  var writable = fs.createWriteStream(filePath);
-  req.pipe(writable);
+    var ctype = file.headers['content-type'];
+    var ext = ctype.substr(ctype.indexOf('/')+1);
+    if (ext) {ext = '.' + ext; } else {ext = '';}
 
-  req.on('end', function (){
-    res.send(201,{'imageURI' : '/uploads/' + filename});
-  });
+    var uuid = require('node-uuid');
+    var uuid1 = uuid.v1();
 
-  writable.on('error', function(err) {
-    res.send(500,err);
+    var  filename = uuid1 + ext,
+      uploadsDirectory = process.cwd() + '/uploads/',
+      filePath = uploadsDirectory + filename;
+
+    if (!fs.existsSync(uploadsDirectory)) {
+      fs.mkdirSync(uploadsDirectory);
+    }
+   
+    fs.rename(file.path, filePath, function(err) {
+        if (err) {
+          res.send(500, new JsonResponse(err));
+        }
+        else{
+          res.send(new JsonResponse(null, {'imageURI' : '/uploads/' + filename}));
+          // res.send(201,{'imageURI' : '/uploads/' + filename});
+        }
+    });
   });
 };

@@ -55,7 +55,7 @@ app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.find
 // User API
 app.post('/api/users', controllers.Users.create);
 app.get ('/api/users', controllers.Users.findAll);
-app.post ('/api/user', controllers.Users.findByUsername);
+app.get ('/api/user', controllers.Users.findByUsername);
 app.post('/api/users/usernameExists', controllers.Users.usernameExists);
 app.post('/api/users/updateProfilePic', controllers.Users.updateProfilePic);
 
