@@ -18,7 +18,7 @@ exports.findByUsername = function(req, res) {
 
   //username: String
 
-  var username = req.body.username;
+  var username = req.param('username');
 
   User.findByUsername(username, function(err, user) {
     if (err) {
