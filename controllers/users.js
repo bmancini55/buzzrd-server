@@ -4,7 +4,9 @@ var JsonResponse  = require('jsonresponse')
   , User          = models.User
   , mongoose = require("mongoose");
 
-// Finds all users
+/**
+ * Finds all users
+ */
 exports.findAll = function(req, res) {
 
   var page = Math.max(req.query.page || 1, 1)
@@ -13,28 +15,20 @@ exports.findAll = function(req, res) {
   User.findAll(page, pagesize, JsonResponse.expressHandler(res));
 };
 
-// Returns the user with the provided username
-exports.findByUsername = function(req, res) {
+/**
+ * Uses the current oauth bearer token to retrieve the current user
+ * The user property is attached to the request object during the 
+ * call to getAccessToken in the OAuthModel we have implemented
+ */
+exports.findCurrent = function (req, res) {
+  var user = req.user;
+  res.send(new JsonResponse(null, user));
+}
 
-  //username: String
 
-  var username = req.param('username');
-
-  User.findByUsername(username, function(err, user) {
-    if (err) {
-      res.send(500, new JsonResponse(err));
-    } else {
-      if (user) {
-        delete user['password'];
-        res.send(new JsonResponse(null, user)); 
-      } else {
-        res.send(new JsonResponse(null, false));
-      }
-    }
-  });
-};
-
-// Creates a new user
+/** 
+ * Creates a new user
+ */
 exports.create = function(req, res) {
 
   //username: String,
@@ -79,7 +73,9 @@ exports.create = function(req, res) {
   });
 };
 
-// Returns a boolean indicating whether or not a user witht the provided username exists
+/** 
+ * Returns a boolean indicating whether or not a user witht the provided username exists
+ */
 exports.usernameExists = function(req, res) {
   
   //username: String
@@ -99,7 +95,9 @@ exports.usernameExists = function(req, res) {
   });
 };
 
-// Updates the URI for the user's profile picture
+/**
+ * Updates the URI for the user's profile picture
+ */
 exports.updateProfilePic = function(req, res) {
   
   var userId = req.body.userId,
