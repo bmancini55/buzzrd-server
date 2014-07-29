@@ -14,7 +14,19 @@ function OAuthModel() { }
 // retrieve the access token from the store
 OAuthModel.prototype.getAccessToken = function(bearerToken, next) {
   debug('retrieving access token %s', bearerToken);
-  OAuthAccessToken.findAccessToken(bearerToken, next);
+  OAuthAccessToken.findAccessToken(bearerToken, function(err, accessToken) {
+    if(err) next(err);
+    else {
+      debug('retrieving associated user %s', accessToken.userId);
+      User.findById(accessToken.userId, function(err, user) {        
+        if(err) next(err);
+        else {
+          accessToken.user = user;
+          next(null, accessToken);
+        }
+      });
+    }
+  });
 }
 
 // gets the client from the client data store

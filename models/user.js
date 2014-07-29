@@ -19,7 +19,6 @@ var UserSchema = new Schema({
   lastName: String,
   sex: String,
   profilePic: String
-  //image: Read GridFs documentation
 });
 
 
@@ -36,8 +35,10 @@ UserSchema.statics.generateSalt = function(next) {
   });
 }
 
-// Hashes a password using PBKDF2
-// Callback gets two arguments (err, derivedKey)
+/** 
+ * Hashes a password using PBKDF2
+ * Callback gets two arguments (err, derivedKey)
+ */
 UserSchema.statics.hashPassword = function(password, salt, next) {
   var ITERATIONS  = 100000
     , KEY_LENGTH  = 128
@@ -48,8 +49,10 @@ UserSchema.statics.hashPassword = function(password, salt, next) {
   });
 }
 
-// Finds all users, likely an admin function
-// and being used for testing purposes now
+/**
+ * Finds all users, likely an admin function
+ * and being used for testing purposes now
+ */
 UserSchema.statics.findAll = function(page, pagesize, next) {
   this.find()
     .skip((page - 1) * pagesize)
@@ -58,17 +61,39 @@ UserSchema.statics.findAll = function(page, pagesize, next) {
     .exec(next);
 }
 
-// Finds the user with the provided username
+/** 
+ * Finds the user with the specified Id
+ */
+UserSchema.statics.findById = function (id, next) {
+  this.findOne({ _id: new mongoose.Types.ObjectId(id) }, next);
+}
+
+/** 
+ * Finds the user with the provided username
+ */
 UserSchema.statics.findByUsername = function(username, next) {
   this.findOne({ username: username }, next);
 }
+
+/**
+ * Updates the profile picture path
+ */
+UserSchema.statics.updateProfilePic = function(userId, profilePic, next) {
+  var select = { _id: new mongoose.Types.ObjectId(userId) },
+     updates = { $set: { profilePic: profilePic } };
+
+  this.findOneAndUpdate(select, updates, next);
+}
+
 
 ///
 /// Instance methods
 ///
 
-// Verifies the supplied password against the user's password
-// with callback arguments (err, valid) where valid is a boolean.
+/**
+ * Verifies the supplied password against the user's password
+ * with callback arguments (err, valid) where valid is a boolean.
+ */
 UserSchema.methods.verifyPassword = function(password, next) {
   var me = this
     , salt = me.salt;
@@ -78,12 +103,17 @@ UserSchema.methods.verifyPassword = function(password, next) {
   });
 }
 
-UserSchema.statics.updateProfilePic = function(userId, profilePic, next) {
-  var select = { _id: new mongoose.Types.ObjectId(userId) },
-     updates = { $set: { profilePic: profilePic } };
-
-  this.findOneAndUpdate(select, updates, next);
+/**
+ * Overrides the toClient method to create a secure display of user info
+ * @override
+ */
+UserSchema.methods.toClient = function() {
+  var client = mongoose.Model.prototype.toClient.call(this);  
+  delete client.password;
+  delete client.salt; 
+  return client;
 }
+
 
 ///
 /// Create and export the model
