@@ -115,10 +115,10 @@ io.sockets.on('connection', function(socket) {
       // save the message
       models.Message.saveRoomMessage(roomId, userId, data, function(err, message) {        
         if(err) console.log('Error saving message: ' + err);
-      });
 
-      // broadcast message
-      io.sockets["in"](roomId).emit("message", data);
+        // broadcast message        
+        io.sockets["in"](roomId).emit("message", message.toClient());
+      });
 
     }
   });
