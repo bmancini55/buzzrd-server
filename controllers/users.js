@@ -52,7 +52,10 @@ exports.create = function(req, res) {
 
       if (user) {
 
-        res.send(new JsonResponse("The username you entered already exists.")); 
+        var error = new Error("The username you entered already exists.");
+
+        res.send(500, new JsonResponse(error)); 
+        // res.send(new JsonResponse("The username you entered already exists.")); 
 
       } else {
         
