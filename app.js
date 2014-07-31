@@ -57,6 +57,7 @@ app.post('/api/users', controllers.Users.create);
 app.post('/api/users/usernameExists', controllers.Users.usernameExists);
 app.post('/api/users/updateProfilePic', controllers.Users.updateProfilePic);
 app.get ('/api/users/current', oauth.authorise(), controllers.Users.findCurrent);
+app.get ('/api/users/:userid/pic', oauth.authorise(), controllers.Users.findProfilePic);
 
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);

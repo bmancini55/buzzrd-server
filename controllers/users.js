@@ -1,8 +1,10 @@
 // Module dependencies
 var JsonResponse  = require('jsonresponse')
+  , path          = require('path')
+  , fs            = require('fs')
+  , Q             = require('Q')
   , models        = require('../models')
-  , User          = models.User
-  , mongoose = require("mongoose");
+  , User          = models.User;
 
 /**
  * Finds all users
@@ -113,3 +115,50 @@ exports.updateProfilePic = function(req, res) {
     }
   });
 };
+
+exports.findProfilePic = function(req, res) {
+
+  var userId = req.param('userid')
+    , rootPath = path.resolve(__dirname + '/../');
+
+  Q.ninvoke(User, "findById", userId)
+  .then(function(user) {    
+    
+    var defaultPath = path.join(rootPath, '/uploads/default.png')
+      , userPath
+      , deferred = Q.defer();
+
+    // verify profile pic exists and respond
+    // with the profile path or the default path
+    if(user && user.profilePic) {      
+      userPath = path.join(rootPath, user.profilePic);    
+
+      fs.exists(userPath, function(exists) {
+        if(exists)
+          deferred.resolve(userPath);
+        else
+          deferred.resolve(defaultPath);
+      })
+      
+      return deferred.promise;      
+    } 
+
+    // return the default path
+    else {
+      return path.join(rootPath, '/uploads/default.png')
+    }
+  })
+  .done(
+
+    // send the specified file
+    function(path) {    
+      res.sendfile(path);
+    }, 
+
+    // otherwise send error code
+    function(err) {
+      res.send(new JsonResponse(err));
+    }
+  );
+
+}
