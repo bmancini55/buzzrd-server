@@ -20,21 +20,42 @@ var MessageTag = new Schema({
   value: { type: Schema.Types.Mixed }
 }, { _id: false });
 
+var MessageUpvote = {
+  _id: Schema.Types.ObjectId,
+  when: { type: Date, default: Date.now }
+}
+
 var MessageSchema = new Schema({
   message: { type: String, required: true },
   user: { type: MessageUser, required: true },
   revealed: { type: Boolean, default: false },
   coord: { type: [ Number ], index: '2dsphere' },
   tags: [ MessageTag ],
+  upvotes: [ MessageUpvote ],
+  upvoteCount: { type: Number, default: 0 },
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now }
 });
+
 
 ///
 /// Statics
 ///
 
-// Find messages for a room
+/** 
+ * Finds a message by its id
+ * @param {String} idroom
+
+ */
+MessageSchema.statics.findById = function(idroom, next) {
+
+  this.findOne({ _id: new mongoose.Types.ObjectId(idroom) }, next);
+
+}
+
+/** 
+ * Find messages for a room
+ */
 MessageSchema.statics.findByRoom = function(idroom, page, pagesize, next) {
   this.find({ 'tags.type': 'room', 'tags.value': new mongoose.Types.ObjectId(idroom) })
     .skip((page - 1) * pagesize)
@@ -86,6 +107,54 @@ MessageSchema.statics.saveRoomMessage = function(idroom, iduser, message, next) 
       });
     }
   });
+}
+
+
+
+///
+/// Instance methods
+///
+
+MessageSchema.methods.upvote = function (iduser, next) {
+
+  var me = this
+    , idmessage = this._id
+
+  // Lets only log up to 100 upvotes... not much point above this  
+  if(this.upvoteCount < 100) {
+
+    // ensure only one vote per user
+    Message.count({
+        "_id": this._id,
+        "upvotes._id": new mongoose.Types.ObjectId(iduser)
+      }, 
+      function (err, count) {
+
+        if(err) next(err);
+        else {
+
+          // only add if we don't have one already
+          if(count > 0) next(null, me);
+          else {      
+            Message.findByIdAndUpdate({
+                _id: idmessage
+              }, { 
+                $inc: { upvoteCount: 1 }, 
+                $push: { upvotes: {
+                    _id: new mongoose.Types.ObjectId(iduser),
+                    when: Date.now 
+                  }
+                }
+              },
+              next);
+          }
+        }
+      });
+
+    
+  } else {
+    next(null, me);
+  }
 }
 
 

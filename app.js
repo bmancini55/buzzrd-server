@@ -48,6 +48,10 @@ app.get ('/api/rooms', oauth.authorise(), controllers.Rooms.findAll);
 app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
 app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
 
+
+// Messages API
+app.get ('/api/messages/:idmessage/upvote', oauth.authorise(), controllers.Messages.upvote);
+
 // Venue API
 app.get ('/api/venues', oauth.authorise(), controllers.Venues.find);
 app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.findByVenue)

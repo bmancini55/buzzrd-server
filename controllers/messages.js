@@ -21,4 +21,21 @@ exports.findByRoom = function(req, res) {
     Message.findByRoom(idroom, page, pagesize, JsonResponse.expressHandler(res));
   }
 
+},
+
+/** 
+ * upvote
+ * Upvotes a message for the currently authenticated use
+ */
+exports.upvote = function (req, res) {
+
+  var idmessage = req.param('idmessage')
+    , iduser = req.user._id.toString()
+
+  Models.Message.findById(idmessage, function (err, message) {
+    if(err) return new res.send(500, new JSonResponse(err));
+    else {
+      message.upvote(iduser, JsonResponse.expressHandler(res));
+    }
+  })
 }
