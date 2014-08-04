@@ -117,43 +117,31 @@ MessageSchema.statics.saveRoomMessage = function(idroom, iduser, message, next) 
 
 MessageSchema.methods.upvote = function (iduser, next) {
 
-  var me = this
-    , idmessage = this._id
+  var original = this;
 
   // Lets only log up to 100 upvotes... not much point above this  
   if(this.upvoteCount < 100) {
 
-    // ensure only one vote per user
-    Message.count({
+    // ensure only one vote per user    
+    Message.findOneAndUpdate({
         "_id": this._id,
-        "upvotes._id": new mongoose.Types.ObjectId(iduser)
-      }, 
-      function (err, count) {
-
-        if(err) next(err);
-        else {
-
-          // only add if we don't have one already
-          if(count > 0) next(null, me);
-          else {      
-            Message.findByIdAndUpdate({
-                _id: idmessage
-              }, { 
-                $inc: { upvoteCount: 1 }, 
-                $push: { upvotes: {
-                    _id: new mongoose.Types.ObjectId(iduser),
-                    when: Date.now 
-                  }
-                }
-              },
-              next);
+        "upvotes._id": { $not: { $eq: new mongoose.Types.ObjectId(iduser) } }
+      }, { 
+        $inc: { upvoteCount: 1 }, 
+        $push: { upvotes: {
+            _id: new mongoose.Types.ObjectId(iduser),
+            when: Date.now 
           }
         }
+      },
+      function (err, message) {
+        if(err) next(err);
+        else if (message) next(null, message);
+        else next(null, original);
       });
-
     
   } else {
-    next(null, me);
+    next(null, this);
   }
 }
 
