@@ -122,7 +122,7 @@ io.sockets.on('connection', function(socket) {
         if(err) console.log('Error saving message: ' + err);
 
         // broadcast message        
-        io.sockets["in"](roomId).emit("message", message.toClient());
+        io.sockets.in(roomId).emit("message", message.toClient());
       });
 
     }
@@ -153,6 +153,9 @@ io.sockets.on('connection', function(socket) {
     models.Room.addUserToRoom(roomId, userId, function() {
       socket.roomId = roomId;
       socket.join(roomId);    
+
+      var clients = io.sockets.clients(roomId);
+      io.sockets.in(roomId).emit('userjoin', clients.length);
     });
 
     // log user history
@@ -176,6 +179,9 @@ io.sockets.on('connection', function(socket) {
       // leave the room
       socket.leave(roomId);
       socket.roomId = null;
+
+      var clients = io.sockets.clients(roomId);
+      io.sockets.in(roomId).emit('userleave', clients.length);
 
       // decrement room count
       models.Room.removeUserFromRoom(roomId, userId, function() {
