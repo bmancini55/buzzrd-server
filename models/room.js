@@ -58,25 +58,29 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
 }
 
 /**
- * addUserToRoom
+ * @method addUsersToRoom
  * Adds the user to the room by pushing an entry into the users array
  * and incrementing the userCount value for the room
  */
-RoomSchema.statics.addUserToRoom = function(roomId, userId, next) {
-  debug('adding user %s to room %s', userId, roomId);
-  var roomUser = new RoomUser({ _id: userId });
+RoomSchema.statics.addUsersToRoom = function(roomId, userIds, next) {
+  debug('adding %d users to room %s', userIds.length, roomId);
+  var roomUsers = userIds.map(function (userId) {
+    return new RoomUser({ _id: userId });
+  });
   this.update(
     { _id: new mongoose.Types.ObjectId(roomId) }, 
     {
-      $addToSet: { users: roomUser },
-      $inc: { userCount: 1 }
+      $set: { 
+        users: roomUsers, 
+        userCount: roomUsers.length 
+      },
     }, 
     next
   );
 }
 
 /**
- * addUserToRoom
+ * @method removeUserFromRoom
  * Adds the user to the room by pushing an entry into the users array
  * and incrementing the userCount value for the room
  */

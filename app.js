@@ -149,13 +149,20 @@ io.sockets.on('connection', function(socket) {
   function joinRoom(socket, roomId) {
     var userId = socket.userId;
 
-    // log entry into room
-    models.Room.addUserToRoom(roomId, userId, function() {
-      socket.roomId = roomId;
+    // add to room
+    socket.roomId = roomId;
       socket.join(roomId);    
 
-      var clients = io.sockets.clients(roomId);
-      io.sockets.in(roomId).emit('userjoin', clients.length);
+    var clients = io.sockets.clients(roomId);
+    io.sockets.in(roomId).emit('userjoin', clients.length);
+
+    // log entry into room
+    var userIds = clients.map(function (client) {
+      return client.userId;
+    })
+    console.log(userIds);
+    models.Room.addUsersToRoom(roomId, userIds, function(err) {
+      console.log(err);
     });
 
     // log user history
