@@ -90,14 +90,25 @@ VenueSchema.statics.findWithRooms = function(lat, lng, meters, next)  {
       venues.map(function(venue) {
         var id = venue._id.toString();              
 
-        return Q.ninvoke(Room, "findByVenue", id, 1, 5)            
-        .then(function(rooms) {
-          venue.rooms = rooms;
-          return venue;
-        });
+        return Q
+        .all([          
+          Q
+          .ninvoke(Room, "findByVenue", id, 1, 5)
+          .then(function(rooms) {
+            venue.rooms = rooms;
+          }),      
 
+          Q
+          .ninvoke(Room, "findVenueDefault", id)
+          .then(function(room) {
+            venue.defaultRoom = room;
+          })
+        ])        
+        .then(function() {
+          return venue;
+        })
       })
-    );  
+    )
   })
   .then(function(venues) {
     debug('found %d venues', venues.length);    
@@ -331,6 +342,9 @@ VenueSchema.methods.toClient = function() {
     client.rooms = this.rooms.map(function(room) {
       return room.toClient();
     });
+  }
+  if(this.defaultRoom) {
+    client.defaultRoom = this.defaultRoom.toClient();
   }
   return client;
 }

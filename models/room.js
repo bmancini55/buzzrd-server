@@ -58,6 +58,19 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
 }
 
 /**
+ * @method findVenueDefault
+ * Finds the default room for a specific venue
+ */
+RoomSchema.statics.findVenueDefault = function(venueId, next) {
+  debug('findingVenueDefault for %s', venueId);
+  this.findOne(
+    { venueId: new mongoose.Types.ObjectId(venueId), venueDefault: true }, 
+    { users: 0 }, 
+    next
+  );
+}
+
+/**
  * @method addUsersToRoom
  * Adds the user to the room by pushing an entry into the users array
  * and incrementing the userCount value for the room
