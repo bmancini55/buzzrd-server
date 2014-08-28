@@ -96,7 +96,7 @@ VenueSchema.statics.findWithRooms = function(lat, lng, meters, next)  {
         return Q
         .all([          
           Q
-          .ninvoke(Room, "findByVenue", id, 1, 5)
+          .ninvoke(Room, "findByVenue", id, 1, 3)
           .then(function(rooms) {
             venue.rooms = rooms;
           }),      
@@ -151,7 +151,7 @@ VenueSchema.statics.findNearbyWithRooms = function(lat, lng, meters, next) {
   .exec(function(err, venues) {
 
     if(err) next(err);
-    else next(null, sort(lng, lng, venues));
+    else next(null, sort(lat, lng, venues));
 
   });
 }
