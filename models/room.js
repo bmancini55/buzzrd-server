@@ -18,7 +18,9 @@ var RoomSchema = new Schema({
   venueId: Schema.Types.ObjectId,
   venueDefault: { type: Boolean, default: false },
   userCount: { type: Number, default: 0 },
-  users: { type: [ RoomUser ] }
+  users: { type: [ RoomUser ] },
+  lastMesasge: { type: Date },
+  messageCount: { type: Number, default: 0 }
 });
 
 var DefaultRoomSchema = new Schema({
@@ -53,7 +55,7 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
   this.find({ venueId: new mongoose.Types.ObjectId(venueId) }, { users: 0 })
   .skip((page - 1) * pagesize)
   .limit(pagesize)
-  .sort({ userCount: -1, name: 1 })
+  .sort({ messageCount: -1, name: 1 })
   .exec(next);
 }
 

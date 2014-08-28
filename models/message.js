@@ -84,6 +84,18 @@ MessageSchema.statics.saveRoomMessage = function(idroom, iduser, message, next) 
           Venue.findOne({ _id: room.venueId }, function(err, venue) {
             if(err) next(err);
             else {
+
+              // update the counts
+              Room.update({ _id: room._id }, { 
+                $set: { lastMessage: Date.now() },
+                $inc: { messageCount: 1 }
+              }).exec();
+              Venue.update({ _id: venue._id }, { 
+                $set: { lastMessage: Date.now() },
+                $inc: { messageCount: 1 }
+              }).exec();     
+
+              // create and update the message
               var instance = new Message({
                 message: message,
                 user: { 
@@ -96,11 +108,10 @@ MessageSchema.statics.saveRoomMessage = function(idroom, iduser, message, next) 
                   { type: 'room', value: room._id }
                 ]
               });
-
               instance.save(function(err, message) {
                 if(err) next(err);
                 else next(null, message);
-              });
+              });                    
             }
           });
         }    

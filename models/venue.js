@@ -5,6 +5,7 @@ var util        = require('util')
   , mongoose    = require('mongoose')
   , Schema      = mongoose.Schema
   , debug       = require('debug')('venue')
+  , debugSort   = require('debug')('venue:sort')
   , config      = require('../common/confighelper').env()
   , foursquare  = require('node-foursquare-venues')(config.foursquare.clientId, config.foursquare.clientSecret)
   , Room        = require('./room');
@@ -39,7 +40,9 @@ var VenueSchema = new Schema({
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
   roomCount: { type: Number, default: 0 },
-  userCount: { type: Number, default: 0 }
+  userCount: { type: Number, default: 0 },
+  lastMessage: { type: Date },
+  messageCount: { type: Number, default: 0 }
 });
 
 var VenueSearchSchema = new Schema({
@@ -132,6 +135,9 @@ VenueSchema.statics.findWithRooms = function(lat, lng, meters, next)  {
 VenueSchema.statics.findNearbyWithRooms = function(lat, lng, meters, next) {
   debug('querying store for venues with rooms');
 
+
+
+
   this.find({ 
     "roomCount": { $gt: 0 },
     "coord": { 
@@ -141,8 +147,13 @@ VenueSchema.statics.findNearbyWithRooms = function(lat, lng, meters, next) {
       }
     }
   })
-  .limit(50)
-  .exec(next);
+  .limit(100)   // 100 is the max returned for $near op
+  .exec(function(err, venues) {
+
+    if(err) next(err);
+    else next(null, sort(lng, lng, venues));
+
+  });
 }
 
 /** 
@@ -436,6 +447,76 @@ VenueSearchSchema.statics.logSearch = function(options, venues) {
     if(err) console.log(err);
   });
 }
+
+
+
+/**
+ * Sort function for venues. 
+ * Sorts on a custom algorithm of proximity,
+ * days since last message, and number of messages.
+ *
+ * @param {Number} lat
+ * @param {Number} lng
+ * @param {[Venue]} venues
+ ( @api private)
+ */
+
+function sort(lat, lng, venues) {
+
+  var distanceHelper = require('../common/distancehelper')
+  , dateHelper = require('../common/datehelper');
+
+  function calculateWeight (proximity, days, messages) {
+    var p = proximity
+      , d = days
+      , m = messages
+      , p2 = Math.pow(proximity, 2)      // number of miles squared
+      , d2 = Math.pow(days, 2)           // number of days squared
+      , m2 = Math.pow(messages, 2)       // number of messages squared
+      , pw = 2                           // promixity weight
+      , dw = 3                           // days weight
+      , mw = 1                           // messages weight
+      , pa = 10                          // proximity asymptotic factor
+      
+      , da = 30                          // days asymptotic factor
+      , ma = 2000                        // messasges asymptoptic factor
+      ;
+
+    return  ( (pw * (1 - (p2 / (p2 + pa)))) + (dw * (1 - (d2 / (d2 + da)))) + (mw * (m / (m + ma))) ) / (pw + dw + mw);
+  }
+
+  function log(results) {
+    results.forEach(function(result) {
+      debugSort("%d: %dmi, %d days, %d messages: %s", 
+        (result.sortWeight * 100).toFixed(2), 
+        result.sortProximity.toFixed(2), 
+        result.sortDays.toFixed(2), 
+        result.sortMessages, 
+        result.name);
+    })
+  }
+
+  function sort(venues) {
+    return venues.sort(function(a, b) {
+      return b.sortWeight - a.sortWeight;
+    });
+  }
+
+  venues.forEach(function(item) {
+    var proximity = distanceHelper.inMiles(lat, lng, item.coord[1], item.coord[0])
+      , days = dateHelper.daysAgo(item.lastMessage ? new Date(item.lastMessage) : new Date(0))
+      , messages = item.messageCount;
+
+    item.sortProximity = proximity;
+    item.sortDays = days;
+    item.sortMessages = messages;
+    item.sortWeight = calculateWeight(proximity, days, messages);
+  });
+
+  var results = sort(venues);
+  log(results);
+  return results;
+}     
 
 
 ///
