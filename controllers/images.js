@@ -1,11 +1,27 @@
 // Module dependencies
-var JsonResponse  = require('jsonresponse')
+var debug = require('debug')('images')
+  , JsonResponse  = require('jsonresponse')
   , fs = require('fs')
   , multiparty = require('multiparty')
-  , util = require('util');
+  , util = require('util')
+  , AWS = require('aws-sdk')
+  , configHelper  = require('../common/confighelper')
+  , config = configHelper.env()
+  , uuid = require('node-uuid')
 
-// Upload an image into the uploads directory
-exports.upload = function(req, res) {
+  , s3Bucket = config.aws.bucket;
+
+// Setup AWS
+AWS.config.update({ 
+  accessKeyId: config.aws.accessKeyId, 
+  secretAccessKey: config.aws.secretAccessKey
+});
+
+
+/**
+ * Upload an image into the uploads directory
+ */
+exports.uploadFS = function(req, res) {
 
   var form = new multiparty.Form();
 
@@ -44,3 +60,64 @@ exports.upload = function(req, res) {
     });
   });
 };
+
+/** 
+ * Uploads to s3
+ */
+exports.upload = function(req, res) {
+  debug('uploading to s3');
+
+  var form = new multiparty.Form()
+    , contentLength;
+
+  form.on('error', function(err) {
+    res.send(500, new JsonResponse(err));
+  });
+
+  form.on('part', function(part) {
+
+    if(part.filename) {
+
+      var ctype = part.headers['content-type']
+        , ext = ctype.substr(ctype.indexOf('/')+1)
+        , uuid1 = uuid.v1()
+        , fileName
+        , fileKey
+        , s3
+
+      if (ext) {ext = '.' + ext; } 
+      else {ext = '';}
+      
+      fileName = uuid1 + ext;
+      fileKey = 'profiles/' + fileName;
+
+      debug('bucket: %s, key: %s', s3Bucket, fileKey);
+      
+      s3 = new AWS.S3();
+      s3.putObject({ 
+        Bucket: s3Bucket, 
+        Key: fileKey,
+        ACL: 'public-read',
+        Body: part,
+        ContentType: ctype,
+        ContentLength: part.byteCount
+      }, function(err, data) {
+
+        debug(err);
+        if(err) res.send(500, new JsonResponse(err));
+        else res.send(new JsonResponse(null, {'imageURI' : fileKey }));
+
+      }); 
+
+    } else {
+
+      part.resume();
+    }
+
+  });
+
+  form.parse(req);
+};
+
+
+

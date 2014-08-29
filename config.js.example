@@ -15,6 +15,10 @@ config = {
     foursquare: {
       clientId: '',
       clientSecret: ''
+    },
+    aws: {
+      accessKeyId: '', 
+      secretAccessKey: ''
     }
   },
 
@@ -31,6 +35,10 @@ config = {
     foursquare: {
       clientId: '',
       clientSecret: ''
+    },
+    aws: {
+      accessKeyId: '', 
+      secretAccessKey: ''
     }
   }
 };

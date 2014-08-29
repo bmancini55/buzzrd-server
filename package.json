@@ -19,6 +19,7 @@
     "q": "~1.0.1",
     "node-uuid": "~1.4.1",
     "jsonresponse": "~0.1.2",
-    "multiparty": "~3.3.0"
+    "multiparty": "~3.3.0",
+    "aws-sdk": "~2.0.15"
   }
 }
