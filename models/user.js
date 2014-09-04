@@ -85,6 +85,32 @@ UserSchema.statics.updateProfilePic = function(userId, profilePic, next) {
   this.findOneAndUpdate(select, updates, next);
 }
 
+/**
+ * Updates the user
+ */
+UserSchema.statics.update = function(userId, user, next) {
+  var select = { _id: new mongoose.Types.ObjectId(userId) },
+    updates;
+
+  if (user.password) {
+    updates = { $set: { 
+               password: user.password,
+               salt: user.salt,
+               firstName: user.firstName,
+               lastName: user.lastName,
+               sex: user.sex
+             } };
+  }
+  else {
+    updates = { $set: { 
+               firstName: user.firstName,
+               lastName: user.lastName,
+               sex: user.sex
+             } };
+  }
+
+  this.findOneAndUpdate(select, updates, next);
+}
 
 ///
 /// Instance methods

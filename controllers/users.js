@@ -12,7 +12,7 @@ var JsonResponse  = require('jsonresponse')
 exports.findAll = function(req, res) {
 
   var page = Math.max(req.query.page || 1, 1)
-    , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000);
+    , pagesize = Math.min(Math.max(req.query.pagesize || 1000, 1), 1000);
 
   User.findAll(page, pagesize, JsonResponse.expressHandler(res));
 };
@@ -72,6 +72,87 @@ exports.create = function(req, res) {
             user.save(JsonResponse.expressHandler(res));
           });
         });
+      }
+    }
+  });
+};
+
+/** 
+ * Updates a user
+ */
+exports.update = function(req, res) {
+
+  //username: String,
+  //password: String,
+  //firstName: String,
+  //lastName: String,
+  //sex: String
+
+  var originalUser;
+
+  User.findByUsername(req.body.username, function(err, user) {
+    originalUser = user;
+
+    if (err) {
+
+      res.send(500, new JsonResponse(err));
+
+    } else {
+
+      if (user) {
+
+        // If  req.body.password is not nil, then 
+        // then get the password salt and 
+
+        if (req.body.password) {
+          var rawPassword = req.body.password;
+
+          User.generateSalt(function(err, salt) {
+            if(err) res.send(500, new JsonResponse(err));
+
+            User.hashPassword(rawPassword, salt, function(err, derivedKey) {
+              var user = new User({
+                username: req.body.username,
+                password: derivedKey,
+                salt: salt,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                sex: req.body.sex
+              });
+            
+              User.update(originalUser.id, user, function(err, user){
+                if(err) {
+                  res.send(500, new JsonResponse(err));
+                } else {
+                  res.send(new JsonResponse(null, user));
+                }
+              });
+
+            });
+          });
+        }
+        else {
+          // save everything except for the password
+          var user = new User({
+                username: req.body.username,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                sex: req.body.sex
+              });
+            
+              User.update(originalUser.id, user, function(err, user){
+                if(err) {
+                  res.send(500, new JsonResponse(err));
+                } else {
+                  res.send(new JsonResponse(null, user));
+                }
+              });
+        }
+
+      } else {
+        var error = new Error("The user you are trying to update does not exist.");
+
+        res.send(500, new JsonResponse(error));
       }
     }
   });
