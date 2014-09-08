@@ -61,63 +61,36 @@ exports.uploadFS = function(req, res) {
   });
 };
 
+
 /** 
  * Uploads to s3
  */
 exports.upload = function(req, res) {
-  debug('uploading to s3');
 
-  var form = new multiparty.Form()
-    , contentLength;
-
-  form.on('error', function(err) {
-    res.send(500, new JsonResponse(err));
-  });
-
-  form.on('part', function(part) {
-
-    if(part.filename) {
-
-      var ctype = part.headers['content-type']
+  var ctype = req.get("content-type")
         , ext = ctype.substr(ctype.indexOf('/')+1)
         , uuid1 = uuid.v1()
         , fileName
         , fileKey
-        , s3
+        , s3;
 
-      if (ext) {ext = '.' + ext; } 
+  if (ext) {ext = '.' + ext; } 
       else {ext = '';}
       
-      fileName = uuid1 + ext;
-      fileKey = 'profiles/' + fileName;
+  fileName = uuid1 + ext;
+  fileKey = 'profiles/' + fileName;
+    
+  s3 = new AWS.S3();
 
-      debug('bucket: %s, key: %s', s3Bucket, fileKey);
-      
-      s3 = new AWS.S3();
-      s3.putObject({ 
-        Bucket: s3Bucket, 
-        Key: fileKey,
-        ACL: 'public-read',
-        Body: part,
-        ContentType: ctype,
-        ContentLength: part.byteCount
-      }, function(err, data) {
-
-        debug(err);
-        if(err) res.send(500, new JsonResponse(err));
-        else res.send(new JsonResponse(null, {'imageURI' : fileKey }));
-
-      }); 
-
-    } else {
-
-      part.resume();
-    }
-
+  s3.putObject({ 
+      Bucket: s3Bucket, 
+      Key: fileKey,
+      ACL: 'public-read',
+      Body: req,
+      ContentType: ctype,
+      ContentLength: parseInt(req.headers["content-length"])
+    }, function(err, data) {
+      if(err) res.send(500, new JsonResponse(err));
+      else res.send(new JsonResponse(null, {'imageURI' : fileKey }));
   });
-
-  form.parse(req);
 };
-
-
-
