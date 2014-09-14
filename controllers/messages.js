@@ -13,7 +13,7 @@ exports.findByRoom = function(req, res) {
 
   var idroom = req.param('idroom')
     , page = Math.max(req.query.page || 1, 1)
-    , pagesize = Math.min(Math.max(req.query.pagesize || 50, 1), 1000);
+    , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000);
 
   if(!idroom) {
     res.send(new JsonResponse('Room must be supplied'));
