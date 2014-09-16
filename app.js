@@ -55,6 +55,9 @@ app.get ('/api/messages/:idmessage/upvote', oauth.authorise(), controllers.Messa
 app.get ('/api/venues', oauth.authorise(), controllers.Venues.find);
 app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.findByVenue)
 
+// Room API
+app.get ('/api/rooms/nearby', oauth.authorise(), controllers.Rooms.findNearby);
+
 // User API
 app.post('/api/users', controllers.Users.create);
 app.post('/api/users/usernameExists', controllers.Users.usernameExists);

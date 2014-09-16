@@ -8,6 +8,27 @@ var Q             = require('Q')
   , Venue         = models.Venue
   , Message       = models.Message;
 
+
+/**
+ * Finds rooms based on proximity and search criteria 
+ */ 
+exports.findNearby = function(req, res) {
+
+  var page = Math.max(req.query.page || 1, 1)
+    , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
+    , lng = req.query.lng
+    , lat = req.query.lat
+    , radius = req.query.radius || 10000
+    , search = req.query.search;
+  
+  Room.findNearby({ 
+    lat: lat,
+    lng: lng,
+    meters: radius,
+    search: search
+  }, JsonResponse.expressHandler(res));
+}
+
 /**
  * findByVenue
  * Finds a paged list of rooms by specific venue
@@ -32,6 +53,8 @@ exports.findAll = function(req, res) {
 
   Room.findAll(page, pagesize, JsonResponse.expressHandler(res));
 }
+
+
 
 /** 
  * create

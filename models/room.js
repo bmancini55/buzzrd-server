@@ -1,7 +1,9 @@
 ﻿
 // Module dependencies
 var mongoose = require("mongoose")
+  , Q = require('Q')
   , debug = require('debug')('room')
+  , debugSort   = require('debug')('room:sort')
   , Schema = mongoose.Schema;
 
 ///
@@ -20,7 +22,8 @@ var RoomSchema = new Schema({
   userCount: { type: Number, default: 0 },
   users: { type: [ RoomUser ] },
   lastMesasge: { type: Date },
-  messageCount: { type: Number, default: 0 }
+  messageCount: { type: Number, default: 0 },
+  coord: { type: [ Number ], index: '2dsphere' }
 });
 
 var DefaultRoomSchema = new Schema({
@@ -33,6 +36,42 @@ DefaultRoomSchema.index({ venueId: 1 }, { unique: true });
 ///
 /// Static methods
 ///
+
+
+/**
+ * Finds rooms based on proximity and search criteria
+ * @param options 
+ * @config lat
+ * @config lng
+ * @config meters
+ * @config search
+ */
+RoomSchema.statics.findNearby = function(options, next) {
+  debug('find %j', options);
+
+  var lng = options.lng
+    , lat = options.lat
+    , meters = options.meters;
+
+  this.find({  
+    "coord": { 
+      "$near" : { 
+        "$geometry" : { type: "Point", coordinates: [ lng, lat ] }, 
+        "$maxDistance" : meters 
+      }
+    }
+  })
+  .limit(100)   // 100 is the max returned for $near op
+  .exec(function(err, rooms) {
+    debug('found %d rooms', rooms.length);
+
+    if(err) next(err);
+    else next(null, sort(lat, lng, rooms));
+
+  });
+
+}
+
 
 /**
  * findAll
@@ -164,6 +203,75 @@ RoomSchema.methods.saveDefault = function(next) {
 
   });
 }
+
+
+/**
+ * Sort function for rooms. 
+ * Sorts on a custom algorithm of proximity,
+ * days since last message, and number of messages.
+ *
+ * @param {Number} lat
+ * @param {Number} lng
+ * @param {[Venue]} rooms
+ ( @api private)
+ */
+
+function sort(lat, lng, rooms) {
+
+  var distanceHelper = require('../common/distancehelper')
+    , dateHelper = require('../common/datehelper');
+
+  function calculateWeight (proximity, days, messages) {
+    var p = proximity
+      , d = days
+      , m = messages
+      , p2 = Math.pow(proximity, 2)      // number of miles squared
+      , d2 = Math.pow(days, 2)           // number of days squared
+      , m2 = Math.pow(messages, 2)       // number of messages squared
+      , pw = 2                           // promixity weight
+      , dw = 3                           // days weight
+      , mw = 1                           // messages weight
+      , pa = 10                          // proximity asymptotic factor
+      
+      , da = 30                          // days asymptotic factor
+      , ma = 2000                        // messasges asymptoptic factor
+      ;
+
+    return  ( (pw * (1 - (p2 / (p2 + pa)))) + (dw * (1 - (d2 / (d2 + da)))) + (mw * (m / (m + ma))) ) / (pw + dw + mw);
+  }
+
+  function log(items) {
+    items.forEach(function(result) {
+      debugSort("%d: %dmi, %d days, %d messages: %s", 
+        (result.sortWeight * 100).toFixed(2), 
+        result.sortProximity.toFixed(2), 
+        result.sortDays.toFixed(2), 
+        result.sortMessages, 
+        result.name);
+    })
+  }
+
+  function sort(items) {
+    return items.sort(function(a, b) {
+      return b.sortWeight - a.sortWeight;
+    });
+  }
+
+  rooms.forEach(function(item) {
+    var proximity = distanceHelper.inMiles(lat, lng, item.coord[1], item.coord[0])
+      , days = dateHelper.daysAgo(item.lastMessage ? new Date(item.lastMessage) : new Date(0))
+      , messages = item.messageCount;
+
+    item.sortProximity = proximity;
+    item.sortDays = days;
+    item.sortMessages = messages;
+    item.sortWeight = calculateWeight(proximity, days, messages);
+  });
+
+  var results = sort(rooms);
+  log(results);
+  return results;
+}     
 
 
 
