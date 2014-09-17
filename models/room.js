@@ -5,7 +5,8 @@ var mongoose = require("mongoose")
   , debug = require('debug')('room')
   , debugSort   = require('debug')('room:sort')  
   , Schema = mongoose.Schema
-  , User = require('./user');
+  , User = require('./user')
+  , Venue = require('./venue');
 
 ///
 /// Schema definition
@@ -64,15 +65,24 @@ RoomSchema.statics.findNearby = function(options, next) {
   })
   .limit(100)   // 100 is the max returned for $near op
   .exec(function(err, rooms) {
-    debug('found %d rooms', rooms.length);
-
-    if(err) next(err);
-    else next(null, sort(lat, lng, rooms));
+    if(err) next(err);        
+    else {
+      sort(lat, lng, rooms);
+      attachVenues(rooms, next);
+    }
 
   });
 
 }
 
+/**
+ * Finds the rooms belonging to the specified user.
+ * This method will find the array of users in the User collection
+ * record matching the userId parameter and will then look up
+ * all rooms matching those records.
+ * 
+ * @param {String} userId 
+ */ 
 RoomSchema.statics.findByUser = function(userId, next) {
   debug('findByUser %s', userId);
 
@@ -80,7 +90,12 @@ RoomSchema.statics.findByUser = function(userId, next) {
     if(err) next(err);
     else {
 
-      Room.find({ _id: { $in: user.rooms }}, next);
+      Room.find({ _id: { $in: user.rooms }}, function(err, rooms) {
+        if(err) next(err);
+        else {
+          attachVenues(rooms, next);
+        }
+      });
 
     }
   });
@@ -166,6 +181,11 @@ RoomSchema.statics.removeUserFromRoom = function(roomId, userId, next) {
 
 
 
+
+
+
+
+
 ///
 /// Instance methods
 ///
@@ -219,6 +239,69 @@ RoomSchema.methods.saveDefault = function(next) {
 }
 
 
+/** 
+ * toClient
+ * @override
+ * To client method that will also include rooms if they are available
+ */
+RoomSchema.methods.toClient = function() {
+  var client = mongoose.Model.prototype.toClient.call(this);
+  if(this.venue) {
+    client.venue = this.venue.toClient();
+  }
+  return client;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/** 
+ * Attaches venues to the room objects. The corresponding
+ * venue for each room will be attached to the `venue` 
+ * property.
+ *
+ * @param {[Room]} rooms
+ * @param {Callback} next
+ * @api private
+ */
+function attachVenues(rooms, next) {
+
+  var venueIds = rooms.map(function(room) {
+    return room.venueId;
+  });
+
+  Venue.findVenues(venueIds, function(err, venues) {
+
+    if(err) next(err);
+    else {
+
+      // construct a quick lookup for the venues based on ID
+      var venueLookup = {};
+      venues.forEach(function(venue) {
+        venueLookup[venue._id.toString()] = venue;
+      });
+
+      // attach the venue to each room
+      rooms.forEach(function(room) {
+        room.venue = venueLookup[room.venueId.toString()] || null;
+      });
+
+      next(null, rooms);
+    }
+
+  });
+
+}
+
+
 /**
  * Sort function for rooms. 
  * Sorts on a custom algorithm of proximity,
@@ -227,7 +310,7 @@ RoomSchema.methods.saveDefault = function(next) {
  * @param {Number} lat
  * @param {Number} lng
  * @param {[Venue]} rooms
- ( @api private)
+ * @api private
  */
 
 function sort(lat, lng, rooms) {

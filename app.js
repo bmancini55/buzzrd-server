@@ -46,7 +46,7 @@ app.post('/oauth/grant', oauth.grant());
 // Room API
 app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
 app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
-
+app.get ('/api/rooms/nearby', oauth.authorise(), controllers.Rooms.findNearby);
 
 // Messages API
 app.get ('/api/messages/:idmessage/upvote', oauth.authorise(), controllers.Messages.upvote);
@@ -54,9 +54,6 @@ app.get ('/api/messages/:idmessage/upvote', oauth.authorise(), controllers.Messa
 // Venue API
 app.get ('/api/venues', oauth.authorise(), controllers.Venues.find);
 app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.findByVenue)
-
-// Room API
-app.get ('/api/rooms/nearby', oauth.authorise(), controllers.Rooms.findNearby);
 
 // User API
 app.post('/api/users', controllers.Users.create);

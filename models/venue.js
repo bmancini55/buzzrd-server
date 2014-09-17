@@ -74,6 +74,25 @@ VenueSchema.statics.findById = function(id, next) {
   }, next);
 }
 
+
+/**
+ * Finds the venues with the supplied Ids
+ * 
+ * @param [String] ids
+ */
+VenueSchema.statics.findVenues = function(ids, next) {
+  debug('findVenues %s', ids.length);
+
+  ids = ids.map(function(id) { 
+    return new mongoose.Types.ObjectId(id);
+  });
+
+  Venue.find({ 
+    _id: { $in: ids }
+  }, next);
+}
+
+
 /** 
  * findWithRooms
  * Finds venues with rooms near the location
