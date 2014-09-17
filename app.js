@@ -66,6 +66,11 @@ app.get ('/api/users/current', oauth.authorise(), controllers.Users.findCurrent)
 app.get ('/api/users/:userid/pic', oauth.authorise(), controllers.Users.findProfilePic);
 app.post('/api/users/update/', controllers.Users.update);
 
+// Me API
+app.get ('/api/me', oauth.authorise(), controllers.Users.findCurrent);
+app.get ('/api/me/rooms', oauth.authorise(), controllers.Rooms.findCurrentUser);
+
+
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);
 

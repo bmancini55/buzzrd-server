@@ -2,7 +2,7 @@
 // Module dependencies
 var mongoose = require('mongoose')
   , crypto = require('crypto')
-  , debug       = require('debug')('users')
+  , debug       = require('debug')('user')
   , Schema = mongoose.Schema
   , ObjectId = Schema.ObjectId;
 
@@ -18,9 +18,9 @@ var UserSchema = new Schema({
   firstName: String,
   lastName: String,
   sex: String,
-  profilePic: String
+  profilePic: String,
+  rooms: Array
 });
-
 
 
 ///
@@ -88,7 +88,7 @@ UserSchema.statics.updateProfilePic = function(userId, profilePic, next) {
 /**
  * Updates the user
  */
-UserSchema.statics.update = function(userId, user, next) {
+UserSchema.statics.updateUser = function(userId, user, next) {
   var select = { _id: new mongoose.Types.ObjectId(userId) },
     updates;
 
@@ -116,6 +116,23 @@ UserSchema.statics.update = function(userId, user, next) {
 /// Instance methods
 ///
 
+/** 
+ * Adds a room to the user 
+ * @param {String} roomId
+ */
+UserSchema.methods.addRoom = function(roomId, next) {
+  debug('addRoom %s for user %s and raw', roomId, this._id.toString());
+
+  User.update(
+    { _id: this._id },
+    { 
+      updated: new Date(),
+      $addToSet: { rooms: new mongoose.Types.ObjectId(roomId) } 
+    },
+    next);
+
+}
+
 /**
  * Verifies the supplied password against the user's password
  * with callback arguments (err, valid) where valid is a boolean.
@@ -137,6 +154,7 @@ UserSchema.methods.toClient = function() {
   var client = mongoose.Model.prototype.toClient.call(this);  
   delete client.password;
   delete client.salt; 
+  delete client.rooms;
   return client;
 }
 
@@ -144,5 +162,5 @@ UserSchema.methods.toClient = function() {
 ///
 /// Create and export the model
 ///
-var userModel = mongoose.model('User', UserSchema);
-module.exports = userModel;
+var User = mongoose.model('User', UserSchema);
+module.exports = User;

@@ -37,12 +37,27 @@ function create(app) {
 
       if(userId && roomId) {
 
-        // save the message
-        models.Message.saveRoomMessage(roomId, userId, data, function(err, message) {        
-          if(err) console.log('Error saving message: ' + err);
+        // find the user
+        models.User.findById(userId, function(err, user) {
 
-          // broadcast message        
-          io.sockets.in(roomId).emit("message", message.toClient());
+          if(err) console.log('Error getting users: ' + err);
+          else {
+
+            // log the user messaging the room
+            user.addRoom(roomId, function(err) {
+              if(err) console.log('Error adding room to user: ' + err);
+            });
+
+            // save the message
+            models.Message.saveRoomMessage(roomId, user, data, function(err, message) {        
+              if(err) console.log('Error saving message: ' + err);
+
+              // broadcast message        
+              io.sockets.in(roomId).emit("message", message.toClient());
+
+            });
+
+          }
         });
 
       }

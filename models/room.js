@@ -3,8 +3,9 @@
 var mongoose = require("mongoose")
   , Q = require('Q')
   , debug = require('debug')('room')
-  , debugSort   = require('debug')('room:sort')
-  , Schema = mongoose.Schema;
+  , debugSort   = require('debug')('room:sort')  
+  , Schema = mongoose.Schema
+  , User = require('./user');
 
 ///
 /// Schema definition
@@ -47,7 +48,7 @@ DefaultRoomSchema.index({ venueId: 1 }, { unique: true });
  * @config search
  */
 RoomSchema.statics.findNearby = function(options, next) {
-  debug('find %j', options);
+  debug('findNearby %j', options);
 
   var lng = options.lng
     , lat = options.lat
@@ -70,6 +71,19 @@ RoomSchema.statics.findNearby = function(options, next) {
 
   });
 
+}
+
+RoomSchema.statics.findByUser = function(userId, next) {
+  debug('findByUser %s', userId);
+
+  User.findById(userId, function(err, user) {
+    if(err) next(err);
+    else {
+
+      Room.find({ _id: { $in: user.rooms }}, next);
+
+    }
+  });
 }
 
 

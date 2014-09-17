@@ -29,6 +29,21 @@ exports.findNearby = function(req, res) {
   }, JsonResponse.expressHandler(res));
 }
 
+
+/**
+ * Finds rooms for the current user
+ */
+exports.findCurrentUser = function(req, res) {
+
+  var page = Math.max(req.query.page || 1, 1)
+    , pagesize = Math.min(Math.max(req.query.pagesize || 100, 1), 1000)
+    , user = req.user
+    , userId = user._id.toString();
+
+  Room.findByUser(userId, JsonResponse.expressHandler(res));
+
+}
+
 /**
  * findByVenue
  * Finds a paged list of rooms by specific venue

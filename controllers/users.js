@@ -120,7 +120,7 @@ exports.update = function(req, res) {
                 sex: req.body.sex
               });
             
-              User.update(originalUser.id, user, function(err, user){
+              User.updateUser(originalUser.id, user, function(err, user){
                 if(err) {
                   res.send(500, new JsonResponse(err));
                 } else {
@@ -140,7 +140,7 @@ exports.update = function(req, res) {
                 sex: req.body.sex
               });
             
-              User.update(originalUser.id, user, function(err, user){
+              User.updateUser(originalUser.id, user, function(err, user){
                 if(err) {
                   res.send(500, new JsonResponse(err));
                 } else {
