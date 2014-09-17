@@ -20,6 +20,7 @@ var RoomSchema = new Schema({
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
   venueId: Schema.Types.ObjectId,
+  venueName: { type: String },
   venueDefault: { type: Boolean, default: false },
   userCount: { type: Number, default: 0 },
   users: { type: [ RoomUser ] },
@@ -53,21 +54,33 @@ RoomSchema.statics.findNearby = function(options, next) {
 
   var lng = options.lng
     , lat = options.lat
-    , meters = options.meters;
+    , meters = options.meters
+    , search = options.search
+    , query;
 
-  this.find({  
+  query = {  
     "coord": { 
       "$near" : { 
         "$geometry" : { type: "Point", coordinates: [ lng, lat ] }, 
         "$maxDistance" : meters 
       }
     }
-  })
+  };
+
+  if(search) {
+    query["$or"] = [      
+      { "name": new RegExp(search, "i") },
+      { "venueName": new RegExp(search, "i") }
+    ];
+  }
+
+  this.find(query)
   .limit(100)   // 100 is the max returned for $near op
   .exec(function(err, rooms) {
     if(err) next(err);        
     else {
       sort(lat, lng, rooms);
+      rooms = rooms.slice(0, 50);
       attachVenues(rooms, next);
     }
 
