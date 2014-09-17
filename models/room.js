@@ -23,7 +23,7 @@ var RoomSchema = new Schema({
   venueDefault: { type: Boolean, default: false },
   userCount: { type: Number, default: 0 },
   users: { type: [ RoomUser ] },
-  lastMesasge: { type: Date },
+  lastMessage: { type: Date },
   messageCount: { type: Number, default: 0 },
   coord: { type: [ Number ], index: '2dsphere' }
 });
