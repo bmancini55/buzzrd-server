@@ -11,3 +11,8 @@ Please follow these coding standards
 * Use spaces instead of tabs
 * Use 2 spaces instead of 4 spaces
 * Run JSHint on your code (grunt task coming soon)
+
+## Testing
+Testing is done with mocha
+
+`mocha --recurisve`

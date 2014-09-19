@@ -4,7 +4,12 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , Venue = require('./venue')
   , Room = require('./room')
-  , User = require('./user');    
+  , User = require('./user')
+  , Sanitizer = require('./sanitizer')
+
+// Locals
+  , sanitizer = new Sanitizer();
+
 
 ///
 /// Schema definition
@@ -75,44 +80,49 @@ MessageSchema.statics.findByRoom = function(idroom, page, pagesize, next) {
  * Persists a message for a specific room
  */
 MessageSchema.statics.saveRoomMessage = function(idroom, user, message, next) {  
-  Room.findOne({ _id: new mongoose.Types.ObjectId(idroom) }, function(err, room) {
-    if(err) next(err);
-    else {
-      Venue.findOne({ _id: room.venueId }, function(err, venue) {
-        if(err) next(err);
-        else {
 
-          // update the counts
-          Room.update({ _id: room._id }, { 
-            $set: { lastMessage: Date.now() },
-            $inc: { messageCount: 1 }
-          }).exec();
-          Venue.update({ _id: venue._id }, { 
-            $set: { lastMessage: Date.now() },
-            $inc: { messageCount: 1 }
-          }).exec();     
+  sanitizer.cleanMessage(message, function(err, message) {
 
-          // create and update the message
-          var instance = new Message({
-            message: message,
-            user: { 
-              _id: user._id,
-              username: user.username
-            },
-            coord: venue.coord,
-            tags: [
-              { type: 'venue', value: venue._id },
-              { type: 'room', value: room._id }
-            ]
-          });
-          instance.save(function(err, message) {
-            if(err) next(err);
-            else next(null, message);
-          });                    
-        }
-      });
-    }    
-  });    
+    Room.findOne({ _id: new mongoose.Types.ObjectId(idroom) }, function(err, room) {
+      if(err) next(err);
+      else {
+        Venue.findOne({ _id: room.venueId }, function(err, venue) {
+          if(err) next(err);
+          else {
+
+            // update the counts
+            Room.update({ _id: room._id }, { 
+              $set: { lastMessage: Date.now() },
+              $inc: { messageCount: 1 }
+            }).exec();
+            Venue.update({ _id: venue._id }, { 
+              $set: { lastMessage: Date.now() },
+              $inc: { messageCount: 1 }
+            }).exec();     
+
+            // create and update the message
+            var instance = new Message({
+              message: message,
+              user: { 
+                _id: user._id,
+                username: user.username
+              },
+              coord: venue.coord,
+              tags: [
+                { type: 'venue', value: venue._id },
+                { type: 'room', value: room._id }
+              ]
+            });
+            instance.save(function(err, message) {
+              if(err) next(err);
+              else next(null, message);
+            });                    
+          }
+        });
+      }    
+    });  
+
+  });  
 }
 
 
@@ -150,6 +160,11 @@ MessageSchema.methods.upvote = function (iduser, next) {
     next(null, this);
   }
 }
+
+
+///
+/// Helper methods
+///
 
 
 ///

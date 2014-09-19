@@ -21,5 +21,9 @@
     "jsonresponse": "~0.1.2",
     "multiparty": "~3.3.0",
     "aws-sdk": "~2.0.15"
+  },
+  "devDependencies": {
+    "mocha": "~1.21.4",
+    "chai": "~1.9.1"
   }
 }
