@@ -84,44 +84,49 @@ MessageSchema.statics.saveRoomMessage = function(idroom, user, message, next) {
   sanitizer.cleanMessage(message, function(err, message) {
 
     Room.findOne({ _id: new mongoose.Types.ObjectId(idroom) }, function(err, room) {
-      if(err) next(err);
-      else {
-        Venue.findOne({ _id: room.venueId }, function(err, venue) {
-          if(err) next(err);
-          else {
+      if(!err) {
 
-            // update the counts
-            Room.update({ _id: room._id }, { 
-              $set: { lastMessage: Date.now() },
-              $inc: { messageCount: 1 }
-            }).exec();
-            Venue.update({ _id: venue._id }, { 
-              $set: { lastMessage: Date.now() },
-              $inc: { messageCount: 1 }
-            }).exec();     
+        // update the counts
+        Room.update({ _id: room._id }, { 
+          $set: { lastMessage: Date.now() },
+          $inc: { messageCount: 1 }
+        }).exec();
 
-            // create and update the message
-            var instance = new Message({
-              message: message,
-              user: { 
-                _id: user._id,
-                username: user.username
-              },
-              coord: venue.coord,
-              tags: [
-                { type: 'venue', value: venue._id },
-                { type: 'room', value: room._id }
-              ]
-            });
-            instance.save(function(err, message) {
-              if(err) next(err);
-              else next(null, message);
-            });                    
-          }
+        if(room.venueId) {
+          Venue.findOne({ _id: room.venueId }, function(err, venue) {
+            if(!err) {
+
+              Venue.update({ _id: venue._id }, { 
+                $set: { lastMessage: Date.now() },
+                $inc: { messageCount: 1 }
+              }).exec();
+
+            }
+          });
+        }
+        
+        // update the tags for the message
+        var tags = [{ type: 'room', value: room._id }];
+        if(room.venueId) {
+          tags.push({ type: 'venue', value: room.venueId });
+        }        
+
+        // create the message
+        var instance = new Message({
+          message: message,
+          user: { 
+            _id: user._id,
+            username: user.username
+          },
+          coord: room.coord,
+          tags: tags
         });
-      }    
-    });  
-
+        instance.save(function(err, message) {
+          if(err) return next(err);
+          else return next(null, message);
+        });                              
+      }
+    });
   });  
 }
 
