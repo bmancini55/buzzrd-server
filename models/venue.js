@@ -93,54 +93,6 @@ VenueSchema.statics.findVenues = function(ids, next) {
 }
 
 
-/** 
- * findWithRooms
- * Finds venues with rooms near the location
- * @param lat latitude of the coordinate
- * @param lng longtitude of the coordinate
- * @param meters limits result to the meter radius of coordinates
- * @param next node callback of for (err, [Venue])
- */
-VenueSchema.statics.findWithRooms = function(lat, lng, meters, next)  {
-  debug('findWithRooms lat %d, lng %d, %dm', lat, lng, meters);
-
-  Q.ninvoke(Venue, "findNearbyWithRooms", lat, lng, meters)
-  .then(function(venues) {  
-    return Q.all(
-      // map each venue into a promise
-      // that loads the rooms for that venue
-      venues.map(function(venue) {
-        var id = venue._id.toString();              
-
-        return Q
-        .all([          
-          Q
-          .ninvoke(Room, "findByVenue", id, 1, 3)
-          .then(function(rooms) {
-            venue.rooms = rooms;
-          }),      
-
-          Q
-          .ninvoke(Room, "findVenueDefault", id)
-          .then(function(room) {
-            venue.defaultRoom = room;
-          })
-        ])        
-        .then(function() {
-          return venue;
-        })
-      })
-    )
-  })
-  .then(function(venues) {
-    debug('found %d venues', venues.length);    
-    next(null, venues);
-  })
-  .fail(function(err) {
-    next(err);
-  });
-
-}
 
 /** 
  * findNearbyWithRooms
@@ -318,48 +270,6 @@ VenueSchema.statics.upsertVenues = function(venues, next) {
 /// Instance methods
 ///
 
-/**
- * addRoom
- * adds a room by saving the room and incrementing the room count
- * @param {Room} room to add
- */
-VenueSchema.methods.addRoom = function(room, next) {
-  var venue = this;
-
-  // save the room
-  if(room.venueDefault) {
-
-    room.saveDefault(function(err, room) {
-      if(err) next(err);
-      else {
-
-        // increment the room count
-        venue.update({ $inc: { roomCount: 1 } }, function(err) {
-          if(err) next(err);
-          else next(null, room);
-        });
-
-      }    
-    });
-
-
-  } else {
-
-    room.save(function(err, room) {
-      if(err) next(err);
-      else {
-
-        // increment the room count
-        venue.update({ $inc: { roomCount: 1 } }, function(err) {
-          if(err) next(err);
-          else next(null, room);
-        });
-
-      }    
-    });
-
-  }
-}
 
 /** 
  * toClient
@@ -390,6 +300,12 @@ VenueSchema.methods.toClient = function() {
 Math.roundp = function(number, precision) {
   return parseFloat(parseFloat(number).toFixed(precision));
 }
+
+
+
+
+
+
 
 ///
 /// VenueSearch
@@ -469,73 +385,6 @@ VenueSearchSchema.statics.logSearch = function(options, venues) {
 
 
 
-/**
- * Sort function for venues. 
- * Sorts on a custom algorithm of proximity,
- * days since last message, and number of messages.
- *
- * @param {Number} lat
- * @param {Number} lng
- * @param {[Venue]} venues
- ( @api private)
- */
-
-function sort(lat, lng, venues) {
-
-  var distanceHelper = require('../common/distancehelper')
-  , dateHelper = require('../common/datehelper');
-
-  function calculateWeight (proximity, days, messages) {
-    var p = proximity
-      , d = days
-      , m = messages
-      , p2 = Math.pow(proximity, 2)      // number of miles squared
-      , d2 = Math.pow(days, 2)           // number of days squared
-      , m2 = Math.pow(messages, 2)       // number of messages squared
-      , pw = 2                           // promixity weight
-      , dw = 3                           // days weight
-      , mw = 1                           // messages weight
-      , pa = 10                          // proximity asymptotic factor
-      
-      , da = 30                          // days asymptotic factor
-      , ma = 2000                        // messasges asymptoptic factor
-      ;
-
-    return  ( (pw * (1 - (p2 / (p2 + pa)))) + (dw * (1 - (d2 / (d2 + da)))) + (mw * (m / (m + ma))) ) / (pw + dw + mw);
-  }
-
-  function log(results) {
-    results.forEach(function(result) {
-      debugSort("%d: %dmi, %d days, %d messages: %s", 
-        (result.sortWeight * 100).toFixed(2), 
-        result.sortProximity.toFixed(2), 
-        result.sortDays.toFixed(2), 
-        result.sortMessages, 
-        result.name);
-    })
-  }
-
-  function sort(venues) {
-    return venues.sort(function(a, b) {
-      return b.sortWeight - a.sortWeight;
-    });
-  }
-
-  venues.forEach(function(item) {
-    var proximity = distanceHelper.inMiles(lat, lng, item.coord[1], item.coord[0])
-      , days = dateHelper.daysAgo(item.lastMessage ? new Date(item.lastMessage) : new Date(0))
-      , messages = item.messageCount;
-
-    item.sortProximity = proximity;
-    item.sortDays = days;
-    item.sortMessages = messages;
-    item.sortWeight = calculateWeight(proximity, days, messages);
-  });
-
-  var results = sort(venues);
-  log(results);
-  return results;
-}     
 
 
 ///

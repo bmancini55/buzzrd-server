@@ -77,45 +77,11 @@ exports.findAll = function(req, res) {
  */ 
 exports.create = function(req, res) {  
   var name = req.body.name
-    , venueId = req.body.venueId;
+    , venueId = req.body.venueId
+    , lat = req.body.lat
+    , lng = req.body.lng;
 
-  Venue.findById(venueId, function(err, venue) {
-
-    if(err) res.send(new Jsonrespon(err));
-    else {
-
-      var isDefault = (venue.roomCount === 0);
-
-      // create the default room
-      if(isDefault) {
-        room = new Room({
-          name: venue.name,
-          venueId: venue._id,
-          venueDefault: true
-        });
-      } 
-
-      // create a new room
-      else {
-        room = new Room({
-          name: name || util.format('%s %s', venue.name, (venue.roomCount + 1)),
-          venueId: venue._id,
-          venueDefault: false
-        });
-      }
-
-      // add the room to the venue
-      venue.addRoom(room, function(err, newRoom) {
-        if(err) res.send(new JsonResponse(err));
-        else {
-          return res.send(new JsonResponse(null, {
-            venue: venue,
-            room: newRoom
-          }));
-        }
-      })
-    }
-  });  
+  Room.createRoom(name, req.userId, lat, lng, venueId, JsonResponse.expressHandler(res));
 };
 
 

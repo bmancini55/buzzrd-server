@@ -19,21 +19,14 @@ var RoomSchema = new Schema({
   name: { type: String, required: true },
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
+  createdBy:  Schema.Types.ObjectId,
   venueId: Schema.Types.ObjectId,
-  venueName: { type: String },
-  venueDefault: { type: Boolean, default: false },
-  userCount: { type: Number, default: 0 },
-  users: { type: [ RoomUser ] },
-  lastMessage: { type: Date },
+  userCount: { type: Number, default: 0 },  
+  users: { type: [ RoomUser ], default: [] },
+  lastMessage: { type: Date, default: Date.now },
   messageCount: { type: Number, default: 0 },
   coord: { type: [ Number ], index: '2dsphere' }
 });
-
-var DefaultRoomSchema = new Schema({
-  roomId: Schema.Types.ObjectId,
-  venueId: Schema.Types.ObjectId
-});
-DefaultRoomSchema.index({ venueId: 1 }, { unique: true });
 
 
 ///
@@ -141,19 +134,6 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
 }
 
 /**
- * @method findVenueDefault
- * Finds the default room for a specific venue
- */
-RoomSchema.statics.findVenueDefault = function(venueId, next) {
-  debug('findingVenueDefault for %s', venueId);
-  this.findOne(
-    { venueId: new mongoose.Types.ObjectId(venueId), venueDefault: true }, 
-    { users: 0 }, 
-    next
-  );
-}
-
-/**
  * @method addUsersToRoom
  * Adds the user to the room by pushing an entry into the users array
  * and incrementing the userCount value for the room
@@ -194,6 +174,63 @@ RoomSchema.statics.removeUserFromRoom = function(roomId, userId, next) {
 
 
 
+/**
+ * Creates a room. For rooms attached to venues it will load the appropriate
+ * joined meta data and use the venue's information where appropriate.
+ * 
+ * @param {String} name
+ * @param {String} userId
+ * @param {Float} lat,
+ * @param {Float} lng,
+ * @param {String} venueId - optional
+ * @callback
+ */
+RoomSchema.statics.createRoom = function(name, userId, lat, lng, venueId, next) {
+  debug('creating room %s, lat: %d, lng: %d, venueId: %s', name, lat, lng, venueId);
+
+  if(venueId) {
+
+    Venue.findById(venueId, function(err, venue) {
+      if(err) return next(err);
+      else {        
+
+        // save the room
+        new Room({
+          name: name,
+          createdBy: userId,
+          venueId: venue._id,
+          coord: venue.coord
+        }).save(function(err, room) {
+
+          if (err) return next(err);
+          else {
+
+            // attach venue to room
+            room.venue = venue;
+
+            // update the venue stats
+            venue.update({ $inc: { roomCount: 1} }, function(err) {
+
+              if(err) return next(err);
+              else return next(null, room);
+
+            });
+          }
+
+        });
+      }
+    });    
+
+  } else {
+
+    // save the room
+    new Room({
+      name: name,
+      createdBy: userId,
+      coord: [ lng, lat ]
+    }).save(next);
+  }
+}
 
 
 
@@ -203,53 +240,7 @@ RoomSchema.statics.removeUserFromRoom = function(roomId, userId, next) {
 /// Instance methods
 ///
 
-/**
- * save overrides the default functionality to add an
- * additional index for ensuring unique default room values are store
- * @override
- */
-RoomSchema.methods.saveDefault = function(next) {
 
-  var me = this;
-
-  // initially downgrade default status
-  this.venueDefault = false;
-
-  // persist to ensure id is generated
-  this.save(function(err, room) {
-
-    if(err) next(err);
-    else {
-
-      // create and persist unique constraint
-      var unique = new DefaultRoom({ 
-        roomId: room._id,
-        venueId: room.venueId
-      });
-      unique.save(function(err, uniuque) {
-
-        if(err) {
-          
-          // ignore duplicate key error
-          if(err.code === 11000) {
-            next(null, room);
-          } else {
-            next(err);
-          }
-        }
-        else {
-
-          // upgrade room value to default status
-          room.venueDefault = true;
-          room.save(next);
-        }
-
-      });
-
-    }
-
-  });
-}
 
 
 /** 
@@ -390,7 +381,6 @@ function sort(lat, lng, rooms) {
 ///
 
 var Room = mongoose.model('Room', RoomSchema);
-var DefaultRoom = mongoose.model('DefaultRoom', DefaultRoomSchema);
 var RoomUser = mongoose.model('RoomUser', RoomUserSchema);
 
 module.exports = Room;
