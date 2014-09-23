@@ -295,7 +295,9 @@ function attachVenues(rooms, next) {
 
       // attach the venue to each room
       rooms.forEach(function(room) {
-        room.venue = venueLookup[room.venueId.toString()] || null;
+        if(room.venueId) {
+          room.venue = venueLookup[room.venueId.toString()] || null;
+        }
       });
 
       next(null, rooms);
