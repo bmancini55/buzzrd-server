@@ -1,12 +1,32 @@
 ﻿
 // Module dependencies
-var mongoose = require("mongoose")
-  , Q = require('Q')
-  , debug = require('debug')('room')
+var mongoose    = require("mongoose")
+  , Q           = require('Q')
+  , Geocoder    = require('node-geocoder')
+  , debug       = require('debug')('room')
   , debugSort   = require('debug')('room:sort')  
-  , Schema = mongoose.Schema
-  , User = require('./user')
-  , Venue = require('./venue');
+  , config      = require('../common/confighelper').env()
+  , Schema      = mongoose.Schema
+  , User        = require('./user')
+  , Venue       = require('./venue')
+  , Location    = require('./location')
+
+// Locals
+  , geocoder;
+
+geocoderConfig = {
+  
+};
+
+geocoder = Geocoder.getGeocoder(
+  'google',
+  'https',
+  {
+    apiKey: config.geocoder.googleApiKey,
+    formatter: null
+  }
+);
+
 
 ///
 /// Schema definition
@@ -19,12 +39,14 @@ var RoomSchema = new Schema({
   name: { type: String, required: true },
   created: { type: Date, default: Date.now },
   updated: { type: Date, default: Date.now },
-  createdBy:  Schema.Types.ObjectId,
-  venueId: Schema.Types.ObjectId,
-  userCount: { type: Number, default: 0 },  
+  createdBy:  Schema.Types.ObjectId,  
   users: { type: [ RoomUser ], default: [] },
-  lastMessage: { type: Date },
+  userCount: { type: Number, default: 0 },  
   messageCount: { type: Number, default: 0 },
+  lastMessage: { type: Date },  
+  venueId: Schema.Types.ObjectId,
+  venueName: { type: String },
+  location: { type: Location },
   coord: { type: [ Number ], index: '2dsphere' }
 });
 
@@ -70,11 +92,11 @@ RoomSchema.statics.findNearby = function(options, next) {
   this.find(query)
   .limit(100)   // 100 is the max returned for $near op
   .exec(function(err, rooms) {
-    if(err) next(err);        
+    if(err) return next(err);        
     else {
       sort(lat, lng, rooms);
       rooms = rooms.slice(0, 50);
-      attachVenues(rooms, next);
+      return next(null, rooms);
     }
 
   });
@@ -93,16 +115,9 @@ RoomSchema.statics.findByUser = function(userId, next) {
   debug('findByUser %s', userId);
 
   User.findById(userId, function(err, user) {
-    if(err) next(err);
+    if(err) return next(err);
     else {
-
-      Room.find({ _id: { $in: user.rooms }}, function(err, rooms) {
-        if(err) next(err);
-        else {
-          attachVenues(rooms, next);
-        }
-      });
-
+      return Room.find({ _id: { $in: user.rooms }}, next);
     }
   });
 }
@@ -194,43 +209,68 @@ RoomSchema.statics.createRoom = function(name, userId, lat, lng, venueId, next) 
       if(err) return next(err);
       else {        
 
+        // increment the room count
+        Venue.update(
+          { _id: venue._id },
+          { $inc: { roomCount: 1} },
+          function() {});
+
         // save the room
         new Room({
           name: name,
           createdBy: userId,
           lastMessage: Date.now(),
           coord: venue.coord,
-          venueId: venue._id
-        }).save(function(err, room) {
+          venueId: venue._id,
+          venueName: venue.name,
+          location: venue.location
+        }).save(next);
 
-          if (err) return next(err);
-          else {
-
-            // attach venue to room
-            room.venue = venue;
-
-            // update the venue stats
-            venue.update({ $inc: { roomCount: 1} }, function(err) {
-
-              if(err) return next(err);
-              else return next(null, room);
-
-            });
-          }
-
-        });
       }
     });    
 
   } else {
 
-    // save the room
-    new Room({
-      name: name,
-      createdBy: userId,
-      coord: [ lng, lat ],
-      lastMessage: Date.now()
-    }).save(next);
+    geocoder.reverse(lat, lng, function(err, geocode) {
+
+      console.log(geocode || err);
+
+      var location;
+      if(err || !geocode) {
+        location = {
+          lat: lat,
+          lng: lng,
+          address: '',
+          city: '',
+          state: '',
+          country: '',
+          cc: '',
+        };
+      } else {
+        geocode = Array.isArray(geocode) ? geocode[0] : geocode;
+        location = {
+          lat: lat,
+          lng: lng,
+          address: geocode.streetNumber + ' ' + geocode.streetName,
+          city: geocode.city,
+          state: geocode.stateCode,
+          country: geocode.country,
+          cc: geocode.countryCode
+        };
+      }
+
+      // save the room
+      new Room({
+        name: name,
+        createdBy: userId,
+        coord: [ lng, lat ],
+        lastMessage: Date.now(),
+        location: location
+      }).save(next);
+
+    });
+
+    
   }
 }
 
@@ -252,9 +292,6 @@ RoomSchema.statics.createRoom = function(name, userId, lat, lng, venueId, next) 
  */
 RoomSchema.methods.toClient = function() {
   var client = mongoose.Model.prototype.toClient.call(this);
-  if(this.venue) {
-    client.venue = this.venue.toClient();
-  }
   return client;
 }
 

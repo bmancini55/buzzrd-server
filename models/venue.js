@@ -8,20 +8,12 @@ var util        = require('util')
   , debugSort   = require('debug')('venue:sort')
   , config      = require('../common/confighelper').env()
   , foursquare  = require('node-foursquare-venues')(config.foursquare.clientId, config.foursquare.clientSecret)
-  , Room        = require('./room');
+  , Room        = require('./room')
+  , Location    = require('./location');
 
 ///
 /// Schema definition
 ///
-var Location = {
-  address: String,
-  lat: Number,
-  lng: Number,
-  cc: String,
-  city: String,
-  state: String,
-  country: String  
-};
 
 var VenueCategory = {
   name: String,
