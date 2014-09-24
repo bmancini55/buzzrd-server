@@ -23,7 +23,7 @@ var RoomSchema = new Schema({
   venueId: Schema.Types.ObjectId,
   userCount: { type: Number, default: 0 },  
   users: { type: [ RoomUser ], default: [] },
-  lastMessage: { type: Date, default: Date.now },
+  lastMessage: { type: Date },
   messageCount: { type: Number, default: 0 },
   coord: { type: [ Number ], index: '2dsphere' }
 });
@@ -198,8 +198,9 @@ RoomSchema.statics.createRoom = function(name, userId, lat, lng, venueId, next) 
         new Room({
           name: name,
           createdBy: userId,
-          venueId: venue._id,
-          coord: venue.coord
+          lastMessage: Date.now(),
+          coord: venue.coord,
+          venueId: venue._id
         }).save(function(err, room) {
 
           if (err) return next(err);
@@ -227,7 +228,8 @@ RoomSchema.statics.createRoom = function(name, userId, lat, lng, venueId, next) 
     new Room({
       name: name,
       createdBy: userId,
-      coord: [ lng, lat ]
+      coord: [ lng, lat ],
+      lastMessage: Date.now()
     }).save(next);
   }
 }
@@ -332,12 +334,12 @@ function sort(lat, lng, rooms) {
       , d2 = Math.pow(days, 2)           // number of days squared
       , m2 = Math.pow(messages, 2)       // number of messages squared
       , pw = 2                           // promixity weight
-      , dw = 3                           // days weight
+      , dw = 1                           // days weight
       , mw = 1                           // messages weight
-      , pa = 10                          // proximity asymptotic factor
+      , pa = 1                           // proximity asymptotic factor
       
-      , da = 30                          // days asymptotic factor
-      , ma = 2000                        // messasges asymptoptic factor
+      , da = 7                           // days asymptotic factor
+      , ma = 200                         // messasges asymptoptic factor
       ;
 
     return  ( (pw * (1 - (p2 / (p2 + pa)))) + (dw * (1 - (d2 / (d2 + da)))) + (mw * (m / (m + ma))) ) / (pw + dw + mw);
