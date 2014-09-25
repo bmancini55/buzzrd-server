@@ -233,8 +233,6 @@ RoomSchema.statics.createRoom = function(name, userId, lat, lng, venueId, next) 
 
     geocoder.reverse(lat, lng, function(err, geocode) {
 
-      console.log(geocode || err);
-
       var location;
       if(err || !geocode) {
         location = {

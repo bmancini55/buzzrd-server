@@ -61,17 +61,26 @@ MessageSchema.statics.findById = function(idroom, next) {
 /** 
  * Find messages for a room
  */
-MessageSchema.statics.findByRoom = function(idroom, page, pagesize, next) {
-  this.find({ 'tags.type': 'room', 'tags.value': new mongoose.Types.ObjectId(idroom) })
+MessageSchema.statics.findByRoom = function(idroom, page, pagesize, after, next) {
+  
+  var query = { 
+    'tags.type': 'room', 
+    'tags.value': new mongoose.Types.ObjectId(idroom)    
+  };
+
+  if(after) {
+    query['_id'] = { $gt: new mongoose.Types.ObjectId(after) };
+  }
+
+  this.find(query)
     .skip((page - 1) * pagesize)
     .limit(pagesize)
-    .sort({ created: -1 })
+    .sort({ _id: -1 })
     .exec(function(err, rooms) {
-      if(err) {
-        next(err);
-      } else {
+      if(err) return next(err);
+      else {
         rooms = rooms.reverse();
-        next(null, rooms);
+        return next(null, rooms);
       }
     });
 }
