@@ -1,6 +1,7 @@
 ﻿
 // Module dependencies
-var mongoose = require('mongoose')
+var debug = require('debug')('message')
+  , mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , Venue = require('./venue')
   , Room = require('./room')
@@ -69,9 +70,10 @@ MessageSchema.statics.findByRoom = function(idroom, page, pagesize, after, next)
   };
 
   if(after) {
-    query['_id'] = { $gt: new mongoose.Types.ObjectId(after) };
+    query['_id'] = { $lt: new mongoose.Types.ObjectId(after) };
   }
 
+  debug('findByRoom: %j', query);
   this.find(query)
     .skip((page - 1) * pagesize)
     .limit(pagesize)
