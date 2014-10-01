@@ -43,6 +43,10 @@ config = {
     aws: {
       accessKeyId: '', 
       secretAccessKey: ''
+      bucket: ''
+    },  
+    geocoder: {
+      googleApiKey: ''
     }
   }
 };
