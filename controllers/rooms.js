@@ -1,6 +1,6 @@
 ﻿
 // Module dependencies
-var Q             = require('Q')
+var Q             = require('q')
   , util          = require('util')
   , JsonResponse  = require('jsonresponse')
   , models        = require('../models')

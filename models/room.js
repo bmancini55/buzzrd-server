@@ -1,7 +1,7 @@
 ﻿
 // Module dependencies
 var mongoose    = require("mongoose")
-  , Q           = require('Q')
+  , Q           = require('q')
   , Geocoder    = require('node-geocoder')
   , debug       = require('debug')('room')
   , debugSort   = require('debug')('room:sort')  

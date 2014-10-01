@@ -2,7 +2,7 @@
 var JsonResponse  = require('jsonresponse')
   , path          = require('path')
   , fs            = require('fs')
-  , Q             = require('Q')
+  , Q             = require('q')
   , models        = require('../models')
   , User          = models.User;
 
