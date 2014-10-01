@@ -19,7 +19,7 @@
     "node-geocoder": "^2.9.0",
     "node-oauth2-server": "^2.1.0",
     "node-uuid": "~1.4.1",
-    "q": "~1.0.1",
+    "q": "^1.0.1",
     "serve-static": "~1.1.0",
     "socket.io": "~0.9.17"
   },
