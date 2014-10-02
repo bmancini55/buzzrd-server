@@ -5,7 +5,8 @@ var Rooms             = require('./rooms')
   , OAuthClients      = require('./oauthclients')
   , OAuthAccessTokens = require('./oauthaccesstokens')
   , Venues            = require('./venues')
-  , Images            = require('./images');			  
+  , Images            = require('./images')
+  , Disclaimers       = require('./disclaimers');			  
 
 module.exports = {
   Rooms: Rooms,
@@ -14,5 +15,6 @@ module.exports = {
   OAuthClients: OAuthClients,
   OAuthAccessTokens: OAuthAccessTokens,
   Venues: Venues,
-  Images: Images
+  Images: Images,
+  Disclaimers: Disclaimers
 }
