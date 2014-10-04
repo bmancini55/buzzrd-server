@@ -15,14 +15,15 @@ function OAuthModel() { }
 OAuthModel.prototype.getAccessToken = function(bearerToken, next) {
   debug('retrieving access token %s', bearerToken);
   OAuthAccessToken.findAccessToken(bearerToken, function(err, accessToken) {
-    if(err) next(err);
+    if(err) return next(err);
+    else if(!accessToken) return next(null, null);
     else {
       debug('retrieving associated user %s', accessToken.userId);
       User.findById(accessToken.userId, function(err, user) {        
         if(err) next(err);
         else {
           accessToken.user = user;
-          next(null, accessToken);
+          return next(null, accessToken);
         }
       });
     }
