@@ -274,10 +274,7 @@ VenueSchema.methods.toClient = function() {
     client.rooms = this.rooms.map(function(room) {
       return room.toClient();
     });
-  }
-  if(this.defaultRoom) {
-    client.defaultRoom = this.defaultRoom.toClient();
-  }
+  }  
   return client;
 }
 

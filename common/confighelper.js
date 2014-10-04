@@ -51,5 +51,6 @@ function full() {
 // Export the module
 module.exports = {
   env: env,
-  full: full
+  full: full,
+  NODE_ENV: process.env.NODE_ENV  
 };

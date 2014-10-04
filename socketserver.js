@@ -9,6 +9,7 @@ function create(app) {
   var server = require('http').createServer(app)
     , io = require('socket.io').listen(server)
 
+  io.set('log level', 1); // reduce logging
   io.sockets.on('connection', function(socket) {
 
     socket.on('authenticate', function(bearerToken) {
@@ -93,22 +94,11 @@ function create(app) {
       // log entry into room
       var userIds = clients.map(function (client) {
         return client.userId;
-      })
-      console.log(userIds);
+      });  
       models.Room.addUsersToRoom(roomId, userIds, function(err) {
-        console.log(err);
+        if(err) console.log(err);
       });
 
-      // log user history
-      new models.UserHistory({ 
-        userId: userId, 
-        action: 'join', 
-        objectType: 'room', 
-        objectId: roomId
-      })
-      .save(function(err, userhistory) {
-        console.log(err);
-      });
     }
 
     function leaveRoom(socket) {
@@ -125,18 +115,9 @@ function create(app) {
         io.sockets.in(roomId).emit('userleave', clients.length);
 
         // decrement room count
-        models.Room.removeUserFromRoom(roomId, userId, function() {
-          //debug('removed user %s from room %s', userId, roomId);
+        models.Room.removeUserFromRoom(roomId, userId, function(err) {
+          if(err) console.log(err);
         });
-
-        // add to user history
-        new models.UserHistory({ 
-          userId: userId, 
-          action: 'leave', 
-          objectType: 'room', 
-          objectId: roomId
-        })
-        .save();
       };
     }
 
