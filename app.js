@@ -36,8 +36,7 @@ app.get('/', function(req, res) {
 app.oauth = oauth = OAuthServer({
     model: new OAuthModel(),
     grants: ['password'],
-    accessTokenLifetime: null,
-    debug: debug
+    accessTokenLifetime: null
   });
 
 // OAuth API
