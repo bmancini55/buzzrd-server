@@ -9,7 +9,8 @@ var fs    = require('fs')
 // Local variables
   , configDir = path.dirname(require.main.filename)
   , configPath = path.join(configDir, 'config.js')
-  , config;
+  , config
+  , NODE_ENV = process.env.NODE_ENV || 'development';
 
 
 /**
@@ -24,14 +25,13 @@ function initialize() {
  * of the configuration file
  */
 function env() {
-  var envType = process.env.NODE_ENV || 'development'
-    , config = full();
+  var config = full();
 
-  if(!config[envType]) {
-    throw new Error('Config does not contain environment configuration for ' + envType);
+  if(!config[NODE_ENV]) {
+    throw new Error('Config does not contain environment configuration for ' + NODE_ENV);
   }
 
-  return config[envType];
+  return config[NODE_ENV];
 }
 
 /** 
@@ -52,5 +52,5 @@ function full() {
 module.exports = {
   env: env,
   full: full,
-  NODE_ENV: process.env.NODE_ENV  
+  NODE_ENV: NODE_ENV
 };

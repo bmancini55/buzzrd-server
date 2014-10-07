@@ -17,7 +17,7 @@ var express       = require('express')
   , config = configHelper.env()
   , app = express()
   , server = socketServer(app)
-  , debug = process.env.NODE_ENV || 'development'
+  , debug = configHelper.NODE_ENV === 'development'
   , oauth;
 
 // Start listening on the configured port
