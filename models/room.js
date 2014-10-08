@@ -6,6 +6,7 @@ var mongoose    = require("mongoose")
   , debug       = require('debug')('room')
   , debugSort   = require('debug')('room:sort')  
   , config      = require('../common/confighelper').env()
+  , dateHelper  = require('../common/datehelper')
   , Schema      = mongoose.Schema
   , User        = require('./user')
   , Venue       = require('./venue')
@@ -79,6 +80,9 @@ RoomSchema.statics.findNearby = function(options, next) {
         "$geometry" : { type: "Point", coordinates: [ lng, lat ] }, 
         "$maxDistance" : meters 
       }
+    },
+    "lastMessage": {
+       "$gt": dateHelper.addDays(new Date(), -14)
     }
   };
 
