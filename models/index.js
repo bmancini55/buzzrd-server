@@ -7,11 +7,14 @@
 
   , Venue             = require('./venue')
 
+  , Friend            = require('./friend')
+  
 module.exports = {
   Room: Room,
   Message: Message,
   User: User,
   OAuthAccessToken: OAuthAccessToken,
   OAuthClient: OAuthClient,
-  Venue: Venue
+  Venue: Venue,
+  Friend: Friend
 }

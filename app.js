@@ -72,6 +72,10 @@ app.get ('/api/me/rooms', oauth.authorise(), controllers.Rooms.findCurrentUser);
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);
 
+// Friend API
+app.post('/api/friends', oauth.authorise(), controllers.Friends.create);
+app.get ('/api/me/friends', oauth.authorise(), controllers.Friends.findCurrentUsers);
+
 // DEBUG ONLY MOUNTS
 if(debug) {
 
@@ -89,6 +93,9 @@ if(debug) {
 
   // Rooms API
   app.get ('/api/rooms', oauth.authorise(), controllers.Rooms.findAll);
+
+  // Friends API
+  app.get ('/api/friends', controllers.Friends.findAll);
 }
 
 // Configure OAuth error handler
