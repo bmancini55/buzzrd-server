@@ -62,6 +62,24 @@ UserSchema.statics.findAll = function(page, pagesize, next) {
 }
 
 /** 
+ * find
+ * Finds users for the provided search string
+ * @params options
+ *   @param search the text to search for
+ * @param next node callback of form (err, [User])
+ */
+UserSchema.statics.findByNameOrUsername = function(options, next) {
+
+var search = new RegExp(options.search, "i");
+
+this.find({ $or:[ {'username': search}, {'firstName': search}, {'lastName': search} ]})
+    .skip((options.page - 1) * options.pageSize)
+    .limit(options.pageSize)
+    .sort({ username: 1 })
+    .exec(next);
+}
+
+/** 
  * Finds the user with the specified Id
  */
 UserSchema.statics.findById = function (id, next) {

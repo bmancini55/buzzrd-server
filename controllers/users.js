@@ -18,6 +18,23 @@ exports.findAll = function(req, res) {
 };
 
 /**
+ * find
+ * Finds users for the provided search string
+ */
+exports.find = function(req, res) {
+
+  var page = Math.max(req.query.page || 1, 1)
+    , pageSize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
+    , search = req.query.search;
+
+    User.findByNameOrUsername({
+      search: search,
+      page: page,
+      pageSize: pageSize
+    }, JsonResponse.expressHandler(res));
+}
+
+/**
  * Uses the current oauth bearer token to retrieve the current user
  * The user property is attached to the request object during the 
  * call to getAccessToken in the OAuthModel we have implemented
