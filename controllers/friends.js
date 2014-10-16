@@ -38,3 +38,21 @@ exports.findAll = function(req, res) {
 
   Friend.findAll(page, pagesize, JsonResponse.expressHandler(res));
 };
+
+/**
+ * findPotentialFriends
+ * Finds users for the provided search string that aren't friends with the current user
+ */
+exports.findPotentialFriends = function(req, res) {
+
+  var page = Math.max(req.query.page || 1, 1)
+    , pageSize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
+    , search = req.query.search;
+
+    Friend.findPotentialFriends({
+      search: search,
+      page: page,
+      pageSize: pageSize,
+      userId: req.user.id
+    }, JsonResponse.expressHandler(res));
+}

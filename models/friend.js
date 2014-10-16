@@ -37,9 +37,13 @@ FriendSchema.statics.findByUser = function(userId, next) {
 
     if(err) return next(err);
     else {
-      return User.find({ _id: { $in: friend.friends }}, next);
+      if (friend) {
+        return User.find({ _id: { $in: friend.friends }}, next);
+      }
+      else {
+        return next(null, {});
+      }
     }
-
    });
 }
 
@@ -53,32 +57,65 @@ FriendSchema.statics.findByUser = function(userId, next) {
  */
 FriendSchema.statics.createFriend = function(userId, friendId, next) {
 
-  this.findOne({ userId: userId }, function(err, friend) {
-    if (friend) {
-      Friend.update(
-        { userId: userId },
-        { 
-          $addToSet: { friends: new mongoose.Types.ObjectId(friendId) } 
-        },
-        next);
-    } else {
-      Friend.create(
-        { 
-          userId: userId,
-          $addToSet: { friends: new mongoose.Types.ObjectId(friendId) } 
-        },
-        function (err, friend) {
-          Friend.update(
-            { userId: userId },
-            { 
-              $addToSet: { friends: new mongoose.Types.ObjectId(friendId) } 
-            },
-            next);
-        });
-    }
-  });
+  this.findOneAndUpdate(
+    { 
+      userId: userId 
+    },
+    { 
+      $addToSet: { friends: new mongoose.Types.ObjectId(friendId) } 
+    },
+    { 
+      upsert: true 
+    },
+    next
+  );  
+}
 
-  
+
+/** 
+ * find
+ * Finds users for the provided search string that aren't already friends with the current user
+ * @params options
+ *   @param search the text to search for
+ * @param next node callback of form (err, [User])
+ */
+FriendSchema.statics.findPotentialFriends = function(options, next) {
+
+var search = new RegExp(options.search, "i"),
+    userId = options.userId;
+
+  Friend.findOne({ userId: userId}, {}).exec(function(err, friend) {
+
+    if(err) return next(err);
+    else {
+      if (friend) {
+          User.find({
+            $and: [
+              { _id: { $nin: friend.friends } },
+              {
+                $or:[ {'username': search}, {'firstName': search}, {'lastName': search} ]
+              }
+            ]
+          }) .skip((options.page - 1) * options.pageSize)
+             .limit(options.pageSize)
+             .sort({ username: 1 })
+             .exec(next);
+      }
+      else {
+        User.find({
+            $and: [
+              { _id: { $ne: userId } },
+              {
+                $or:[ {'username': search}, {'firstName': search}, {'lastName': search} ]
+              }
+            ]
+          }) .skip((options.page - 1) * options.pageSize)
+             .limit(options.pageSize)
+             .sort({ username: 1 })
+             .exec(next);
+      }
+    }
+   });
 }
 
 

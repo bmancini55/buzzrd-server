@@ -61,7 +61,6 @@ app.post('/api/users/updateProfilePic', controllers.Users.updateProfilePic);
 app.get ('/api/users/current', oauth.authorise(), controllers.Users.findCurrent);
 app.get ('/api/users/:userid/pic', oauth.authorise(), controllers.Users.findProfilePic);
 app.post('/api/users/update/', controllers.Users.update);
-app.get ('/api/users', oauth.authorise(), controllers.Users.find);
 
 // Disclaimer API
 app.get('/api/disclaimers/termsofservice', controllers.Disclaimers.termsofservice);
@@ -76,6 +75,7 @@ app.post('/api/images/upload', controllers.Images.upload);
 // Friend API
 app.post('/api/friends', oauth.authorise(), controllers.Friends.create);
 app.get ('/api/me/friends', oauth.authorise(), controllers.Friends.findCurrentUsers);
+app.get ('/api/me/findPotentialFriends', oauth.authorise(), controllers.Friends.findPotentialFriends);
 
 // DEBUG ONLY MOUNTS
 if(debug) {
