@@ -72,6 +72,27 @@ FriendSchema.statics.createFriend = function(userId, friendId, next) {
 }
 
 
+/**
+ * Removes a friend.
+ * 
+ * @param {String} userId
+ * @param {String} friendId
+ * @callback
+ */
+FriendSchema.statics.removeFriend = function(userId, friendId, next) {
+
+  this.findOneAndUpdate(
+    { 
+      userId: userId 
+    },
+    { 
+      $pull: { friends: new mongoose.Types.ObjectId(friendId) } 
+    },
+    next
+  );  
+}
+
+
 /** 
  * find
  * Finds users for the provided search string that aren't already friends with the current user

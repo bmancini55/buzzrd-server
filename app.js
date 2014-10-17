@@ -76,6 +76,7 @@ app.post('/api/images/upload', controllers.Images.upload);
 app.post('/api/friends', oauth.authorise(), controllers.Friends.create);
 app.get ('/api/me/friends', oauth.authorise(), controllers.Friends.findCurrentUsers);
 app.get ('/api/me/findPotentialFriends', oauth.authorise(), controllers.Friends.findPotentialFriends);
+app.post('/api/me/removeFriend', oauth.authorise(), controllers.Friends.removeFriend);
 
 // DEBUG ONLY MOUNTS
 if(debug) {

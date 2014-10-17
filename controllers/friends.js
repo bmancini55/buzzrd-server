@@ -56,3 +56,14 @@ exports.findPotentialFriends = function(req, res) {
       userId: req.user.id
     }, JsonResponse.expressHandler(res));
 }
+
+/**
+ * removeFriend
+ * Remove the provided friend from the current user's friend list
+ */
+exports.removeFriend = function(req, res) {
+  var user = req.user
+    , friendId = req.body.friendId;
+
+  Friend.removeFriend(user._id, friendId, JsonResponse.expressHandler(res));
+}
