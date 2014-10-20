@@ -68,6 +68,7 @@ app.get('/api/disclaimers/privacypolicy', controllers.Disclaimers.privacypolicy)
 
 app.get ('/api/me', oauth.authorise(), controllers.Users.findCurrent);
 app.get ('/api/me/rooms', oauth.authorise(), controllers.Rooms.findCurrentUser);
+app.put ('/api/me/device', oauth.authorise(), controllers.Users.updateDevice);
 
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);

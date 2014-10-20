@@ -19,7 +19,8 @@ var UserSchema = new Schema({
   lastName: String,
   sex: String,
   profilePic: String,
-  rooms: Array
+  rooms: Array,
+  deviceId: String
 });
 
 

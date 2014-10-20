@@ -243,3 +243,24 @@ exports.findProfilePic = function(req, res) {
   );
 
 }
+
+
+
+exports.updateDevice = function(req, res) { 
+  var user = req.user
+    , deviceId = req.param('deviceId');
+
+  // validate deviceId
+  if(!deviceId) {
+    res.send(new JsonResponse(new Error('deviceId is required')));
+  }
+
+  // updates the user's device ID
+  else {
+    user.deviceId = deviceId;
+    user.save(function(err, user) {
+      res.send(new JsonResponse(null, user));
+      return;
+    });
+  }
+}
