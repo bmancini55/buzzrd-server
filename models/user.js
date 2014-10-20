@@ -156,6 +156,7 @@ UserSchema.methods.toClient = function() {
   delete client.password;
   delete client.salt; 
   delete client.rooms;
+  delete client.deviceId;
   return client;
 }
 
