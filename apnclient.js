@@ -12,14 +12,14 @@ var apn           = require('apn')
 
 conn = new apn.Connection(config.apn);
 
-exports.notifyRoom = function(roomId, message) {
+exports.notifyRoom = function(roomId, message, excludeUsers) {
   debug('notifyRoom %s', roomId);
 
   // update notification counts
-  UserRoom.updateBadgeCounts(roomId)
+  UserRoom.updateBadgeCounts(roomId, excludeUsers)
   .then(function(count) {
     debug('updated %d notifications', count);
-    return UserRoom.getNotifiable(roomId);
+    return UserRoom.getNotifiable(roomId, excludeUsers);
   })
   .then(function(notifications) {
     debug('found %d notifications', notifications.length);

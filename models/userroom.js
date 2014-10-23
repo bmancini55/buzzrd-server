@@ -13,16 +13,24 @@ var UserRoomSchema = new Schema({
   userId: mongoose.Schema.ObjectId,
   roomId: mongoose.Schema.ObjectId,
   deviceId: String,
-  notify: Boolean,
-  inRoom: Boolean,
-  lastEnter: Date,
-  lastLeave: Date,
-  badgeCount: Number
+  notify: Boolean,  
+  badgeCount: Number,
+  created: Date,
+  updated: Date  
 });
 
 
+/** 
+ * Adds the UserRoom record by performing an upsert
+ * If the UserRoom record already exists it will update the information
+ *
+ * @param {String} userId
+ * @param {String} roomId
+ * @param {String} deviceId - the current deviceId of the user
+ */
+
 UserRoomSchema.statics.addRoom = function(userId, roomId, deviceId, next) {
-  debug('addRoom');  
+  debug('addRoom for user %s', userId); 
   var $query, $update, $options;
 
   $query = { 
@@ -31,14 +39,15 @@ UserRoomSchema.statics.addRoom = function(userId, roomId, deviceId, next) {
   };
   
   $update = {
-    userId: new mongoose.Types.ObjectId(userId), 
-    roomId: new mongoose.Types.ObjectId(roomId),
-    deviceId: deviceId,
-    notify: true,
-    inRoom: true,
-    lastEnter: Date.now(),
-    lastLeave: null,
-    badgeCount: 0
+    updated: new Date(),
+    $setOnInsert: {       
+      userId: new mongoose.Types.ObjectId(userId), 
+      roomId: new mongoose.Types.ObjectId(roomId),
+      deviceId: deviceId,
+      notify: true,
+      badgeCount: 0,
+      created: new Date()
+    }
   };
   
   $options = {
@@ -56,15 +65,18 @@ UserRoomSchema.statics.addRoom = function(userId, roomId, deviceId, next) {
  * @param {String} deviceId
  * @param {Function} next
  */
+
 UserRoomSchema.statics.updateDevice = function(userId, deviceId, next) {
+  debug('updateDevice for user %s', userId);
   var $query, $update, $options;
 
   $query = { 
-    userId: new mongoose.Types.ObjectId(userId)
+    userId: new mongoose.Types.ObjectId(userId)    
   };
 
   $update = {
-    deviceId: deviceId
+    deviceId: deviceId,
+    updated: new Date()
   };
 
   $options = {
@@ -75,27 +87,53 @@ UserRoomSchema.statics.updateDevice = function(userId, deviceId, next) {
 }
 
 
-UserRoomSchema.statics.joinRoom = function(userId, roomId, next) {
+/**
+ * Updates the userroom record by resetting the badgecount
+ * and updating the timestamp to incidate the last join for the user
+ *
+ * @param {String} userId
+ * @param {String} roomId
+ * @param {Function} next 
+ */
 
+UserRoomSchema.statics.logJoin = function(userId, roomId, next) {
+  debug('joinRoom for user %s', userId); 
+  var $query, $update, $options;
+
+  $query = { 
+    userId: new mongoose.Types.ObjectId(userId), 
+    roomId: new mongoose.Types.ObjectId(roomId) 
+  };
+  
+  $update = {
+    badgeCount: 0,
+    updated: new Date(),
+  };
+  
+  UserRoom.update($query, $update, next);
 }
 
 
-UserRoomSchema.statics.leaveRoom = function(userId, roomId, next) {
+/**
+ * Update the badge counts for a specific room but exclude the users that
+ * are currently in the room as supplied by the excludeUsers property
+ *
+ * @param {String} roomId - The room to update badges for
+ * @param {Array} excludeUsers - Array of UsersIds to exclude
+ * @param {Callback} next
+ */
 
-}
-
-
-UserRoomSchema.statics.updateBadgeCounts = function(roomId, next) {
+UserRoomSchema.statics.updateBadgeCounts = function(roomId, excludeUsers, next) {
   var deferred = new Q.defer()
     , $query
     , $update
     , $options;
 
   $query = { 
+    userId: { $nin: excludeUsers },
     roomId: new mongoose.Types.ObjectId(roomId), 
-    notify: true,
-    inRoom: false
-  }  ;
+    notify: true
+  };
 
   $update = { $inc: { badgeCount: 1 } };  
   $options = { multi: true };
@@ -115,7 +153,18 @@ UserRoomSchema.statics.updateBadgeCounts = function(roomId, next) {
   return deferred.promise;
 }
 
-UserRoomSchema.statics.getNotifiable = function(roomId, next) {
+
+/**
+ * Retrieves the notifications for a room by finding
+ * users that want notifications for the room and that aren't currently
+ * in the room
+ *
+ * @param {String} roomId - the room to find the notifications for
+ * @param {Array} excludeUsers - Array of UserIds that should be excluded
+ * @param {Callback} next
+ */
+
+UserRoomSchema.statics.getNotifiable = function(roomId, excludeUsers, next) {
   debug('getNotifiable for room %s', roomId);
 
   var deferred = new Q.defer()
@@ -125,9 +174,9 @@ UserRoomSchema.statics.getNotifiable = function(roomId, next) {
   
   // Setup query for finding user that want notification for the room
   $userQuery = { 
+    userId: { $nin: excludeUsers },
     roomId: new mongoose.Types.ObjectId(roomId), 
-    notify: true,
-    inRoom: false
+    notify: true
   };
 
   $userProj = { 
@@ -147,6 +196,7 @@ UserRoomSchema.statics.getNotifiable = function(roomId, next) {
 
     // perform aggregation to get notification counts
     else {
+      debug('found %d notifications', results.length);
       
       // create array of userId's
       var userIds = results.map(function(result) { return result.userId; });

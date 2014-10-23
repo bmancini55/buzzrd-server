@@ -53,12 +53,12 @@ function create(app) {
               io.sockets.in(roomId).emit("message", message.toClient());
 
               // broadcase notifications
-              apnclient.notifyRoom(roomId, message.message);
+              var excludeUsers = getUserInRoom(roomId);
+              apnclient.notifyRoom(roomId, message.message, excludeUsers);
 
             });
 
             // add the room to the user's list
-            console.log(user);
             models.UserRoom.addRoom(userId, roomId, user.deviceId, function(err) {
               if(err) console.log('Error adding room for user: ' + err);
             });
@@ -93,16 +93,19 @@ function create(app) {
       socket.roomId = roomId;
         socket.join(roomId);    
 
-      var clients = io.sockets.clients(roomId);
-      io.sockets.in(roomId).emit('userjoin', clients.length);
+      // get users in room
+      var userIds = getUserInRoom(roomId);
+      io.sockets.in(roomId).emit('userjoin', userIds.length);
 
-      // log entry into room
-      var userIds = clients.map(function (client) {
-        return client.userId;
-      });  
+      // update room user count
       models.Room.addUsersToRoom(roomId, userIds, function(err) {
-        if(err) console.log(err);
+        if(err) console.log('Error updating rooms user count %j', err);
       });
+
+      // update userroom records
+      models.UserRoom.logJoin(userId, roomId, function(err) {
+        if(err) console.log('Error logging join in userroom %j', err);
+      })
 
     }
 
@@ -116,14 +119,21 @@ function create(app) {
         socket.leave(roomId);
         socket.roomId = null;
 
-        var clients = io.sockets.clients(roomId);
-        io.sockets.in(roomId).emit('userleave', clients.length);
+        var userIds = getUserInRoom(roomId);
+        io.sockets.in(roomId).emit('userleave', userIds.length);
 
         // decrement room count
         models.Room.removeUserFromRoom(roomId, userId, function(err) {
           if(err) console.log(err);
         });
       };
+    }
+
+    function getUserInRoom(roomId) {
+      var clients = io.sockets.clients(roomId);
+      return clients.map(function (client) {
+        return client.userId;
+      });
     }
 
   });

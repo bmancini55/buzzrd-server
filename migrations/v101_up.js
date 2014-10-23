@@ -19,10 +19,9 @@ db.users.find({ }).forEach(function(user) {
       roomId: room,
       deviceId: user.deviceId,
       notify: true,
-      inRoom: false,
-      lastEnter: null,
-      lastLeave: null,
-      badgeCount: 0
+      badgeCount: 0,
+      created: new Date(),
+      updated: new Date(),
     });
   });    
 });
