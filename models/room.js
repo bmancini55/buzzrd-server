@@ -9,6 +9,7 @@ var mongoose    = require("mongoose")
   , dateHelper  = require('../common/datehelper')
   , Schema      = mongoose.Schema
   , User        = require('./user')
+  , UserRoom    = require('./userroom')
   , Venue       = require('./venue')
   , Location    = require('./location')
 
@@ -108,20 +109,22 @@ RoomSchema.statics.findNearby = function(options, next) {
 }
 
 /**
- * Finds the rooms belonging to the specified user.
- * This method will find the array of users in the User collection
- * record matching the userId parameter and will then look up
- * all rooms matching those records.
+ * Finds the rooms belonging to the specified user by querying the UserRoom
+ * collection and then using the results to load the rooms. This could
+ * also be used to include user badge counts...
  * 
  * @param {String} userId 
  */ 
 RoomSchema.statics.findByUser = function(userId, next) {
   debug('findByUser %s', userId);
 
-  User.findById(userId, function(err, user) {
+  UserRoom.findByUser(userId, function(err, userrooms) {
     if(err) return next(err);
-    else {
-      return Room.find({ _id: { $in: user.rooms }}, next);
+    else {      
+      var roomObjectIds = userrooms.map(function(userroom) {
+        return userroom.roomId
+      });
+      return Room.find({ _id: { $in: roomObjectIds }}, next);
     }
   });
 }

@@ -20,6 +20,24 @@ var UserRoomSchema = new Schema({
 });
 
 
+/**
+ * Finds the UserRoom records by UserId
+ *
+ * @param {String} userId
+ */
+
+UserRoomSchema.statics.findByUser = function(userId, next) {
+  debug('findByUserId for user %s', userId);
+  var $query;
+
+  $query = { 
+    userId: new mongoose.Types.ObjectId(userId)
+  };
+
+  UserRoom.find($query, next);
+}
+
+
 /** 
  * Adds the UserRoom record by performing an upsert
  * If the UserRoom record already exists it will update the information
