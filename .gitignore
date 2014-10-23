@@ -1,6 +1,7 @@
 
 node_modules
 uploads
+certs
 config.js
 
 /* Visual Studio */

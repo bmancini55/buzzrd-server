@@ -23,7 +23,11 @@ config = {
     },  
     geocoder: {
       googleApiKey: ''
-    }
+    },
+    apn: {
+      cert: 'cert.pem',
+      key: 'key.pem'
+    }    
   },
 
   // Production specific configuration values
@@ -47,7 +51,11 @@ config = {
     },  
     geocoder: {
       googleApiKey: ''
-    }
+    },
+    apn: {
+      cert: 'cert.pem',
+      key: 'key.pem'
+    }    
   }
 };
 

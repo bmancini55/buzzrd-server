@@ -1,13 +1,12 @@
 ﻿var Room              = require('./room')
   , Message           = require('./message')
   , User              = require('./user')
-
+  , UserRoom          = require('./userroom')
   , OAuthAccessToken  = require('./oauthaccesstoken')
   , OAuthClient       = require('./oauthclient')
-
   , Venue             = require('./venue')
+  , Friend            = require('./friend');
 
-  , Friend            = require('./friend')
   
 module.exports = {
   Room: Room,
@@ -16,5 +15,6 @@ module.exports = {
   OAuthAccessToken: OAuthAccessToken,
   OAuthClient: OAuthClient,
   Venue: Venue,
-  Friend: Friend
+  Friend: Friend,
+  UserRoom: UserRoom
 }

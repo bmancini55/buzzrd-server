@@ -4,7 +4,8 @@ var JsonResponse  = require('jsonresponse')
   , fs            = require('fs')
   , Q             = require('q')
   , models        = require('../models')
-  , User          = models.User;
+  , User          = models.User
+  , UserRoom      = models.UserRoom;
 
 /**
  * Finds all users
@@ -262,6 +263,9 @@ exports.updateDevice = function(req, res) {
       var savedDeviceId = user.deviceId;
       res.send(new JsonResponse(null, savedDeviceId));
       return;
+    });
+    UserRoom.updateDevice(user._id.toString(), deviceId, function(err) {
+      if(err) console.log('Error updating deviceId %j', err);
     });
   }
 }

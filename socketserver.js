@@ -1,6 +1,7 @@
-var debug = require('debug')('socketserver')
-  , OAuthModel    = require('./common/oauthmodel')
-  , models        = require('./models');
+var debug       = require('debug')('socketserver')
+  , OAuthModel  = require('./common/oauthmodel')
+  , models      = require('./models')
+  , apnclient   = require('./apnclient');
 
 function create(app) {
 
@@ -44,11 +45,6 @@ function create(app) {
           if(err) console.log('Error getting users: ' + err);
           else {
 
-            // log the user messaging the room
-            user.addRoom(roomId, function(err) {
-              if(err) console.log('Error adding room to user: ' + err);
-            });
-
             // save the message
             models.Message.saveRoomMessage(roomId, user, data, function(err, message) {        
               if(err) console.log('Error saving message: ' + err);
@@ -56,6 +52,15 @@ function create(app) {
               // broadcast message        
               io.sockets.in(roomId).emit("message", message.toClient());
 
+              // broadcase notifications
+              apnclient.notifyRoom(roomId, message.message);
+
+            });
+
+            // add the room to the user's list
+            console.log(user);
+            models.UserRoom.addRoom(userId, roomId, user.deviceId, function(err) {
+              if(err) console.log('Error adding room for user: ' + err);
             });
 
           }

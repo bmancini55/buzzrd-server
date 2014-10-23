@@ -3,7 +3,7 @@
 var mongoose = require('mongoose')
   , crypto = require('crypto')
   , debug       = require('debug')('user')
-  , Schema = mongoose.Schema
+  , Schema = mongoose.Schema  
   , ObjectId = Schema.ObjectId;
 
 ///
@@ -116,23 +116,6 @@ UserSchema.statics.updateUser = function(userId, user, next) {
 ///
 /// Instance methods
 ///
-
-/** 
- * Adds a room to the user 
- * @param {String} roomId
- */
-UserSchema.methods.addRoom = function(roomId, next) {
-  debug('addRoom %s for user %s and raw', roomId, this._id.toString());
-
-  User.update(
-    { _id: this._id },
-    { 
-      updated: new Date(),
-      $addToSet: { rooms: new mongoose.Types.ObjectId(roomId) } 
-    },
-    next);
-
-}
 
 /**
  * Verifies the supplied password against the user's password
