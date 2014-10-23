@@ -25,3 +25,10 @@ db.users.find({ }).forEach(function(user) {
     });
   });    
 });
+
+
+// CAUTION - irreversable change
+// remove rooms property from user createCollection
+// db.users.update({
+//   $unset: { rooms: 1 }
+// })

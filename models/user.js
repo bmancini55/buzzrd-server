@@ -19,7 +19,6 @@ var UserSchema = new Schema({
   lastName: String,
   sex: String,
   profilePic: String,
-  rooms: Array,
   deviceId: String
 });
 
@@ -138,7 +137,6 @@ UserSchema.methods.toClient = function() {
   var client = mongoose.Model.prototype.toClient.call(this);  
   delete client.password;
   delete client.salt; 
-  delete client.rooms;
   delete client.deviceId;
   return client;
 }
