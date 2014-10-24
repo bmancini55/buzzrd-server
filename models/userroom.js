@@ -76,6 +76,26 @@ UserRoomSchema.statics.addRoom = function(userId, roomId, deviceId, next) {
 }
 
 
+/** 
+ * Remove the UserRoom record for the provided userId and roomId
+ *
+ * @param {String} userId
+ * @param {String} roomId
+ */
+
+UserRoomSchema.statics.removeRoom = function(userId, roomId, next) {
+  debug('removeRoom for user %s', userId); 
+  var $query;
+
+  $query = { 
+    userId: new mongoose.Types.ObjectId(userId), 
+    roomId: new mongoose.Types.ObjectId(roomId) 
+  };
+  
+  UserRoom.remove($query, next);        
+}
+
+
 /**
  * Updates the device information for all rooms for a specific user
  *

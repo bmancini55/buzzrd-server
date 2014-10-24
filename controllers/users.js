@@ -269,3 +269,29 @@ exports.updateDevice = function(req, res) {
     });
   }
 }
+
+exports.findByUsername = function(req, res) {
+  
+  //username: String
+  var username = req.query.username;
+
+  User.findByUsername(username, function(err, user) {
+    if (err) {
+      res.send(new JsonResponse(err));
+    } else {
+      debugger;
+      res.send(new JsonResponse(null, user)); 
+    }
+  });
+};
+
+/**
+ * removeRoom
+ * Remove the provided room from the current user's room list
+ */
+exports.removeRoom = function(req, res) {
+  var user = req.user
+    , roomId = req.body.roomId;
+
+  UserRoom.removeRoom(user._id, roomId, JsonResponse.expressHandler(res));
+}

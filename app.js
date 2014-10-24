@@ -66,9 +66,11 @@ app.post('/api/users/update/', controllers.Users.update);
 app.get('/api/disclaimers/termsofservice', controllers.Disclaimers.termsofservice);
 app.get('/api/disclaimers/privacypolicy', controllers.Disclaimers.privacypolicy);
 
+// User Rooms
 app.get ('/api/me', oauth.authorise(), controllers.Users.findCurrent);
 app.get ('/api/me/rooms', oauth.authorise(), controllers.Rooms.findCurrentUser);
 app.put ('/api/me/device', oauth.authorise(), controllers.Users.updateDevice);
+app.post('/api/me/removeRoom', oauth.authorise(), controllers.Users.removeRoom);
 
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);
@@ -78,6 +80,10 @@ app.post('/api/friends', oauth.authorise(), controllers.Friends.create);
 app.get ('/api/me/friends', oauth.authorise(), controllers.Friends.findCurrentUsers);
 app.get ('/api/me/findPotentialFriends', oauth.authorise(), controllers.Friends.findPotentialFriends);
 app.post('/api/me/removeFriend', oauth.authorise(), controllers.Friends.removeFriend);
+
+
+  app.get ('/api/users/findByUsername', controllers.Users.findByUsername);
+  app.get ('/api/me/rooms2', controllers.Rooms.findByUserId);
 
 // DEBUG ONLY MOUNTS
 if(debug) {

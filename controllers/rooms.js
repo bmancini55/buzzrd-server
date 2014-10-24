@@ -85,3 +85,15 @@ exports.create = function(req, res) {
 };
 
 
+/**
+ * Finds rooms for the current user
+ */
+exports.findByUserId = function(req, res) {
+
+  var page = Math.max(req.query.page || 1, 1)
+    , pagesize = Math.min(Math.max(req.query.pagesize || 100, 1), 1000)
+    , userId = req.query.userId;
+
+  Room.findByUser(userId, JsonResponse.expressHandler(res));
+
+}
