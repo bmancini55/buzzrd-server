@@ -105,7 +105,7 @@ function create(app) {
       // update userroom records and emit notification to decrement
       // the badge count for the room
       models.UserRoom.logJoin(userId, roomId, function(err, badgeCount) {
-        socket.emit('resetnotification', badgeCount);
+        socket.emit('clearbadgecount', badgeCount);
         if(err) console.log('Error logging join in userroom %j', err);
       });
 
