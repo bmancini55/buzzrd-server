@@ -136,19 +136,26 @@ UserRoomSchema.statics.updateDevice = function(userId, deviceId, next) {
 
 UserRoomSchema.statics.logJoin = function(userId, roomId, next) {
   debug('joinRoom for user %s', userId); 
-  var $query, $update, $options;
 
-  $query = { 
+  var $query = { 
     userId: new mongoose.Types.ObjectId(userId), 
     roomId: new mongoose.Types.ObjectId(roomId) 
   };
   
-  $update = {
-    badgeCount: 0,
-    updated: new Date(),
-  };
-  
-  UserRoom.update($query, $update, next);
+  UserRoom.findOne($query, function(err, userroom) {
+    if(err) return next(err);
+    else {
+      var priorCount = userroom ? userroom.badgeCount : 0;
+
+      if(priorCount > 0) {
+        userroom.badgeCount = 0;
+        userroom.updated = new Date();
+        userroom.save();
+      }
+
+      return next(null, priorCount);
+    }
+  });
 }
 
 

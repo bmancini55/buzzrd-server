@@ -91,7 +91,7 @@ function create(app) {
 
       // add to room
       socket.roomId = roomId;
-        socket.join(roomId);    
+      socket.join(roomId);    
 
       // get users in room
       var userIds = getUserInRoom(roomId);
@@ -102,10 +102,12 @@ function create(app) {
         if(err) console.log('Error updating rooms user count %j', err);
       });
 
-      // update userroom records
-      models.UserRoom.logJoin(userId, roomId, function(err) {
+      // update userroom records and emit notification to decrement
+      // the badge count for the room
+      models.UserRoom.logJoin(userId, roomId, function(err, badgeCount) {
+        socket.emit('resetnotification', badgeCount);
         if(err) console.log('Error logging join in userroom %j', err);
-      })
+      });
 
     }
 
@@ -119,6 +121,7 @@ function create(app) {
         socket.leave(roomId);
         socket.roomId = null;
 
+        // notify room of user leaving
         var userIds = getUserInRoom(roomId);
         io.sockets.in(roomId).emit('userleave', userIds.length);
 
