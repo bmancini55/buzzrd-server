@@ -22,7 +22,8 @@
     "node-uuid": "~1.4.1",
     "q": "^1.0.1",
     "serve-static": "~1.1.0",
-    "socket.io": "~0.9.17"
+    "socket.io": "~0.9.17",
+    "underscore": "^1.7.0"
   },
   "devDependencies": {
     "chai": "~1.9.1",

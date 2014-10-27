@@ -2,6 +2,7 @@
 // Module dependencies
 var mongoose    = require("mongoose")
   , Q           = require('q')
+  , _           = require('underscore')
   , Geocoder    = require('node-geocoder')
   , debug       = require('debug')('room')
   , debugSort   = require('debug')('room:sort')  
@@ -128,18 +129,67 @@ RoomSchema.statics.findNearby = function(options, next) {
  */ 
 RoomSchema.statics.findByUser = function(userId, next) {
   debug('findByUser %s', userId);
+  var deferred = Q.defer();
 
+  // First find userroom references
   UserRoom.findByUser(userId, function(err, userrooms) {
-    if(err) return next(err);
+    if(err) {
+      deferred.reject(err);
+      if(next) return next(err);
+    }
     else {      
-      var roomObjectIds = userrooms.map(function(userroom) {
-        return userroom.roomId
+      var roomObjectIds = _.pluck(userrooms, 'roomId');
+      
+      // Find the actual rooms
+      Room.find({ _id: { $in: roomObjectIds }}, function(err, rooms) {
+        if(err) {
+          deferred.reject(err);
+          if(next) return next(err);
+        }
+        else {
+
+          // attach the userroom info
+          Room.attachUserRooms(rooms, userrooms);
+
+          // resolve the promise
+          deferred.resolve(rooms);
+          if(next) return next(null, rooms);
+        }
       });
-      return Room.find({ _id: { $in: roomObjectIds }}, next);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
+/**
+ * Attaches userroom metadata to a list of rooms
+ * 
+ * @param {Array} rooms 
+ * @param {Array} userrooms
+ */
+RoomSchema.statics.attachUserRooms = function(rooms, userrooms) {
+  debug('Attaching %d userrooms', userrooms.length);
+
+  // create lookup based on roomId
+  var lookup = _.indexBy(userrooms, 'roomId');
+
+  // process each room in the list
+  rooms.forEach(function(room) {
+
+    // check if the userroom metadata exists
+    var userroom = lookup[room._id];
+    if(userroom && userroom.notify) {
+      debug('room %s has notificaitons', room._id.toString());
+      room.watchedRoom = true;
+      room.newMessages = userroom.badgeCount > 0;
+    } else {
+      room.watchedRoom = false;
+      room.newMessages = false;
     }
   });
 }
-
 
 /**
  * findAll

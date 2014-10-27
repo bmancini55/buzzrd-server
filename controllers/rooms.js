@@ -43,22 +43,10 @@ exports.findNearby = function(req, res) {
     return UserRoom.findByUserAndRooms(userId, roomIds)
     .then(function(userrooms) {
 
-      var lookup = {};
-      userrooms.forEach(function(userroom) {
-        lookup[userroom.roomId.toString()] = userroom;
-      });
+      // process the userrooms
+      Room.attachUserRooms(rooms, userrooms);
 
-      rooms.forEach(function(room) {
-        var userroom = lookup[room._id.toString()];
-        if(userroom && userroom.notify) {
-          room.watchedRoom = true;
-          room.newMessages = userroom.badgeCount > 0;
-        } else {
-          room.watchedRoom = false;
-          room.newMessages = false;
-        }
-      });
-
+      // send the result
       res.send(new JsonResponse(null, rooms));
 
     });
