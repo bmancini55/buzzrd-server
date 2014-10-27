@@ -69,7 +69,8 @@ var RoomSchema = new Schema({
 RoomSchema.statics.findNearby = function(options, next) {
   debug('findNearby %j', options);
 
-  var lng = options.lng
+  var deferred = Q.defer()
+    , lng = options.lng
     , lat = options.lat
     , meters = options.meters
     , search = options.search
@@ -94,18 +95,28 @@ RoomSchema.statics.findNearby = function(options, next) {
     ];
   }
 
-  this.find(query)
+  Room.find(query)
   .limit(100)   // 100 is the max returned for $near op
   .exec(function(err, rooms) {
-    if(err) return next(err);        
+    if(err) {
+      deferred.reject(err);
+      if(next) return next(err);        
+    } 
     else {
+
+      // do sort
       sort(lat, lng, rooms);
+
+      // limit to top 50 after sort
       rooms = rooms.slice(0, 50);
-      return next(null, rooms);
+
+      deferred.resolve(rooms);
+      if (next) return next(null, rooms);
     }
 
   });
 
+  return deferred.promise;
 }
 
 /**
@@ -297,16 +308,10 @@ RoomSchema.statics.createRoom = function(name, userId, lat, lng, venueId, next) 
  */
 RoomSchema.methods.toClient = function() {
   var client = mongoose.Model.prototype.toClient.call(this);
+  client.watchedRoom = this.watchedRoom;
+  client.newMessages = this.newMessages;
   return client;
 }
-
-
-
-
-
-
-
-
 
 
 

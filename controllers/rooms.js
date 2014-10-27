@@ -5,6 +5,7 @@ var Q             = require('q')
   , JsonResponse  = require('jsonresponse')
   , models        = require('../models')
   , Room          = models.Room
+  , UserRoom      = models.UserRoom
   , Venue         = models.Venue
   , Message       = models.Message;
 
@@ -26,7 +27,45 @@ exports.findNearby = function(req, res) {
     lng: lng,
     meters: radius,
     search: search
-  }, JsonResponse.expressHandler(res));
+  })
+  .then(function(rooms) {
+
+    var userId
+      , roomIds;
+
+    userId = req.user._id.toString();
+    roomIds = rooms.map(function(room) {
+      return room._id.toString();
+    });
+
+    // find rooms for the user and attach metadata to the 
+    // actual rooms 
+    return UserRoom.findByUserAndRooms(userId, roomIds)
+    .then(function(userrooms) {
+
+      var lookup = {};
+      userrooms.forEach(function(userroom) {
+        lookup[userroom.roomId.toString()] = userroom;
+      });
+
+      rooms.forEach(function(room) {
+        var userroom = lookup[room._id.toString()];
+        if(userroom && userroom.notify) {
+          room.watchedRoom = true;
+          room.newMessages = userroom.badgeCount > 0;
+        } else {
+          room.watchedRoom = false;
+          room.newMessages = false;
+        }
+      });
+
+      res.send(new JsonResponse(null, rooms));
+
+    });
+  })
+  .catch(function (err) {
+    res.send(new JsonResponse(err));
+  });
 }
 
 

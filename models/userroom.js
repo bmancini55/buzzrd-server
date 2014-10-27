@@ -37,6 +37,45 @@ UserRoomSchema.statics.findByUser = function(userId, next) {
   UserRoom.find($query, next);
 }
 
+/**
+ * Finds the UserRoom records associated with the 
+ * user and the supplied list of rooms
+ *
+ * @param {String} userId the identifier for the user
+ * @param {Array} roomsIds the array of RoomId strings
+ * @callback next
+ * @return {Promise}
+ */
+UserRoomSchema.statics.findByUserAndRooms = function(userId, roomIds, next) {
+  debug('findByUserAndRooms %s', userId);
+
+  var deferred = Q.defer()
+    , roomObjectIds
+    , $query;
+
+  roomObjectIds = roomIds.map(function(roomId) {
+    return new mongoose.Types.ObjectId(roomId);
+  });
+
+  $query = {
+    userId: new mongoose.Types.ObjectId(userId),
+    roomId: { $in: roomObjectIds }
+  };
+
+  UserRoom.find($query, function(err, userrooms) {
+    if(err) {
+      deferred.reject(err);
+      if(next) return next(err);
+    }
+    else {
+      deferred.resolve(userrooms);
+      if(next) return next(null, userrooms);
+    }
+  });
+
+  return deferred.promise;
+}
+
 
 /** 
  * Adds the UserRoom record by performing an upsert
