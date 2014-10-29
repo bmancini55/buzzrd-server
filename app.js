@@ -71,9 +71,11 @@ app.get('/api/disclaimers/privacypolicy', controllers.Disclaimers.privacypolicy)
 
 //////////////////////////////////////////////////////////////////
 //
-// All mounts below will have authorization applied
+// SECURE MOUNTS - All mounts below require authorization
 //
 //////////////////////////////////////////////////////////////////
+
+// Authorize all requests for the /api mount
 app.all('/api/*', oauth.authorise());
 
 // Room API
@@ -109,7 +111,12 @@ app.get ('/api/me/friends', controllers.Friends.findCurrentUsers);
 app.get ('/api/me/findPotentialFriends', controllers.Friends.findPotentialFriends);
 app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
 
-// DEBUG ONLY MOUNTS
+
+//////////////////////////////////////////////////////////////////
+//
+// DEBUG MOUNTS
+//
+//////////////////////////////////////////////////////////////////
 if(debug) {
 
   // OAuth API
@@ -130,6 +137,7 @@ if(debug) {
   // Friends API
   app.get ('/api/friends', controllers.Friends.findAll);
 }
+
 
 // Configure OAuth error handler
 app.use(oauth.errorHandler());
