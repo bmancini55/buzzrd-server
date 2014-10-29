@@ -40,6 +40,22 @@ app.oauth = oauth = OAuthServer({
   });
 
 
+//////////////////////////////////////////////////////////////////
+//
+// Version 1.0.0 MOUNTS 
+// REMOVE AFTER FUTURE RELEASE
+//
+//////////////////////////////////////////////////////////////////
+app.post('/api/users/updateProfilePic', controllers.Users.updateProfilePic);
+app.get ('/api/users/current', oauth.authorise(), controllers.Users.findCurrent);
+app.post('/api/users/update/', controllers.Users.update);
+
+
+//////////////////////////////////////////////////////////////////
+//
+// UNSECURED MOUNTS
+//
+//////////////////////////////////////////////////////////////////
 
 // OAuth API
 app.post('/oauth/grant', oauth.grant());
@@ -51,6 +67,7 @@ app.post('/api/users/usernameExists', controllers.Users.usernameExists);
 // Disclaimer API
 app.get('/api/disclaimers/termsofservice', controllers.Disclaimers.termsofservice);
 app.get('/api/disclaimers/privacypolicy', controllers.Disclaimers.privacypolicy);
+
 
 //////////////////////////////////////////////////////////////////
 //
@@ -91,7 +108,6 @@ app.post('/api/friends', controllers.Friends.create);
 app.get ('/api/me/friends', controllers.Friends.findCurrentUsers);
 app.get ('/api/me/findPotentialFriends', controllers.Friends.findPotentialFriends);
 app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
-
 
 // DEBUG ONLY MOUNTS
 if(debug) {
