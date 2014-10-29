@@ -37,6 +37,42 @@ UserRoomSchema.statics.findByUser = function(userId, next) {
   UserRoom.find($query, next);
 }
 
+
+
+/**
+ * Retrieves the unread notifications for a user
+ *
+ * @param {String} userId - the userId to find notifications for
+ * @param {Callback} next
+ * @return {Promise}
+ */
+
+UserRoomSchema.statics.findUnreadForUser = function(userId, next) {
+  debug('findUnreadbyUser for %s', userId);
+
+  var deferred = Q.defer()
+    , $query;
+
+  $query = {
+    userId: new mongoose.Types.ObjectId(userId),
+    badgeCount: { $gt: 0 }
+  };
+
+  UserRoom.find($query, function(err, userrooms) {
+    if(err) {
+      deferred.reject(err);
+      if(next) return next(err);
+    } else {
+      deferred.resolve(userrooms);
+      if(next) return next(userrooms);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
+
 /**
  * Finds the UserRoom records associated with the 
  * user and the supplied list of rooms
@@ -313,6 +349,7 @@ UserRoomSchema.statics.getNotifiable = function(roomId, excludeUsers, next) {
   // always return the promise
   return deferred.promise;
 }
+
 
 
 

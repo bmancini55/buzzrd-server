@@ -71,6 +71,18 @@ exports.findCurrentUser = function(req, res) {
 
 }
 
+
+/**
+ * Finds unread rooms for the currently authenticated user
+ */
+exports.findCurrentUnread = function(req, res) {
+  
+  var userId = req.userId;
+
+  Room.findCurrentUnread(userId, JsonResponse.expressHandler(res));  
+}
+
+
 /**
  * findByVenue
  * Finds a paged list of rooms by specific venue

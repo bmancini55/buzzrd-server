@@ -78,6 +78,14 @@ app.get('/api/disclaimers/privacypolicy', controllers.Disclaimers.privacypolicy)
 // Authorize all requests for the /api mount
 app.all('/api/*', oauth.authorise());
 
+// userId preprocessor
+app.all('/api/*', function(req, res, next) {
+  if(req.user) {
+    req.userId = req.user._id.toString();
+  }
+  next();
+});
+
 // Room API
 app.post('/api/rooms', controllers.Rooms.create);
 app.get ('/api/rooms/:idroom/messages', controllers.Messages.findByRoom);
@@ -99,6 +107,7 @@ app.get ('/api/me', controllers.Users.findCurrent);
 app.put ('/api/me', controllers.Users.update);
 app.put ('/api/me/pic', controllers.Users.updateProfilePic);
 app.get ('/api/me/rooms', controllers.Rooms.findCurrentUser);
+app.get ('/api/me/unread', controllers.Rooms.findCurrentUnread);
 app.put ('/api/me/device', controllers.Users.updateDevice);
 app.post('/api/me/removeRoom', controllers.Users.removeRoom);
 

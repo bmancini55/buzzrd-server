@@ -138,10 +138,13 @@ RoomSchema.statics.findByUser = function(userId, next) {
       if(next) return next(err);
     }
     else {      
-      var roomObjectIds = _.pluck(userrooms, 'roomId');
+
+      var roomObjectIds = _.pluck(userrooms, 'roomId')
+        , $query = { _id: { $in: roomObjectIds }};
       
       // Find the actual rooms
-      Room.find({ _id: { $in: roomObjectIds }}, function(err, rooms) {
+      Room.find($query, function(err, rooms) {
+
         if(err) {
           deferred.reject(err);
           if(next) return next(err);
@@ -157,6 +160,48 @@ RoomSchema.statics.findByUser = function(userId, next) {
         }
       });
     }
+  });
+
+  return deferred.promise;
+}
+
+
+/**
+ * Finds the unread rooms for the currently authenticated user
+ * 
+ * @param {String} userId
+ * @callback next
+ * @return {Promise}
+ */
+RoomSchema.statics.findCurrentUnread = function(userId, next) {
+  debug('findCurrentUnread for %s', userId);
+  var deferred = Q.defer();
+
+  // get the userrooms records
+  UserRoom.findUnreadForUser(userId)
+  .then(function(userrooms) {
+
+    var roomObjectIds = _.pluck(userrooms, 'roomId')
+      , $query = { _id: { $in: roomObjectIds }};
+
+    // Find the rooms 
+    Room.find($query, function(err, rooms) {
+      if(err) {
+        deferred.reject(err);
+        if(next) return next(err);
+      } 
+      else {
+
+        // attach userrooms to rooms
+        Room.attachUserRooms(rooms, userrooms);
+
+        // resolve the promise
+        deferred.resolve(rooms);
+        if(next) return next(null, rooms);
+
+      }
+    });
+
   });
 
   return deferred.promise;
@@ -212,7 +257,7 @@ RoomSchema.statics.findByVenue = function(venueId, page, pagesize, next) {
   this.find({ venueId: new mongoose.Types.ObjectId(venueId) }, { users: 0 })
   .skip((page - 1) * pagesize)
   .limit(pagesize)
-  .sort({ messageCount: -1, name: 1 })
+  .sort({  messageCount: -1, name: 1 })
   .exec(next);
 }
 
