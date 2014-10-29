@@ -33,6 +33,7 @@ exports.notifyRoom = function(roomId, message, excludeUsers) {
         note.expiry = Math.floor(Date.now() / 1000) + 3600; // expire 1 hour from now
         note.badge = notification.badgeCount;
         note.setAlertText(message);
+        note.payload = { 'room': roomId };
         note.trim();
 
         // send notifications    
@@ -43,6 +44,6 @@ exports.notifyRoom = function(roomId, message, excludeUsers) {
 
   })
   .catch(function(err) {
-    console.log(err);
+    console.log('Error notifying room: %j' + err);
   })  
 }
