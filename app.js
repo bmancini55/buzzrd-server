@@ -121,8 +121,6 @@ app.get ('/api/me/friends', controllers.Friends.findCurrentUsers);
 app.get ('/api/me/findPotentialFriends', controllers.Friends.findPotentialFriends);
 app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
 
-  
-  app.get ('/api/users/findByUsername', controllers.Users.findByUsername);
 //
 // DEBUG MOUNTS
 //
