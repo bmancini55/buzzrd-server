@@ -37,35 +37,8 @@ function create(app) {
       var userId = socket.userId
         , roomId = socket.roomId;
 
-      if(userId && roomId) {
-
-        // find the user
-        models.User.findById(userId, function(err, user) {
-
-          if(err) console.log('Error getting users: ' + err);
-          else {
-
-            // save the message
-            models.Message.saveRoomMessage(roomId, user, data, function(err, message) {        
-              if(err) console.log('Error saving message: ' + err);
-
-              // broadcast message        
-              io.sockets.in(roomId).emit("message", message.toClient());
-
-              // broadcase notifications
-              var excludeUsers = getUserInRoom(roomId);
-              apnclient.notifyRoom(roomId, message.message, excludeUsers);
-
-            });
-
-            // add the room to the user's list
-            models.UserRoom.addRoom(userId, roomId, user.deviceId, function(err) {
-              if(err) console.log('Error adding room for user: ' + err);
-            });
-
-          }
-        });
-
+      if(userId && roomId && data) {
+        sendMessage(userId, roomId, data);
       }
     });
 
@@ -86,6 +59,7 @@ function create(app) {
       });
     }
 
+
     function joinRoom(socket, roomId) {
       var userId = socket.userId;
 
@@ -101,15 +75,8 @@ function create(app) {
       models.Room.addUsersToRoom(roomId, userIds, function(err) {
         if(err) console.log('Error updating rooms user count %j', err);
       });
-
-      // update userroom records and emit notification to decrement
-      // the badge count for the room
-      models.UserRoom.logJoin(userId, roomId, function(err, badgeCount) {
-        socket.emit('clearbadgecount', badgeCount);
-        if(err) console.log('Error logging join in userroom %j', err);
-      });
-
     }
+
 
     function leaveRoom(socket) {
       var roomId = socket.roomId
@@ -131,6 +98,39 @@ function create(app) {
         });
       };
     }
+
+
+    function sendMessage(userId, roomId, data) {
+
+      // find the user
+      models.User.findById(userId, function(err, user) {
+
+        if(err) console.log('Error getting users: ' + err);
+        else {
+
+          // save the message
+          models.Message.saveRoomMessage(roomId, user, data, function(err, message) {        
+            if(err) console.log('Error saving message: ' + err);
+
+            // broadcast message        
+            io.sockets.in(roomId).emit("message", message.toClient());
+
+            // broadcase notifications
+            var excludeUsers = getUserInRoom(roomId);
+            apnclient.notifyRoom(roomId, message.message, excludeUsers);
+
+          });
+
+          // add the room to the user's list
+          models.UserRoom.addRoom(userId, roomId, user.deviceId, function(err) {
+            if(err) console.log('Error adding room for user: ' + err);
+          });
+
+        }
+      });
+
+    }
+
 
     function getUserInRoom(roomId) {
       var clients = io.sockets.clients(roomId);

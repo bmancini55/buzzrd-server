@@ -111,6 +111,7 @@ app.get ('/api/me/rooms', controllers.Rooms.findCurrentUser);
 app.get ('/api/me/unread', controllers.Rooms.findCurrentUnread);
 app.put ('/api/me/device', controllers.Users.updateDevice);
 app.post('/api/me/removeRoom', controllers.Users.removeRoom);
+app.put ('/api/me/rooms/reset', controllers.Rooms.resetBadgeCount);
 
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);

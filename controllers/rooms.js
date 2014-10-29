@@ -192,3 +192,14 @@ exports.inviteFriends = function(req, res) {
       });
     });
 };
+
+
+/**
+ * Update userroom record and return the updated badgeCount value
+ */
+exports.resetBadgeCount = function(req, res) {
+  var userId = req.userId
+    , roomId = req.param('roomId');
+
+  UserRoom.logJoin(userId, roomId, JsonResponse.expressHandler(res));
+}
