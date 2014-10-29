@@ -9,9 +9,29 @@ var apn           = require('apn')
   , config        = configHelper.env()
   , Room          = Models.Room
   , UserRoom      = Models.UserRoom
-  , conn;
+  , service;
 
-conn = new apn.Connection(config.apn);
+service = new apn.Connection(config.apn);
+
+service.on('connected', function() {
+  console.log('Connected to APNS');
+});
+
+service.on('disconnected', function() {
+  console.log('Disconnected from APNS');
+});
+
+service.on('transmissionError', function(errCode, notification, device) {
+  console.error("Notification caused error: " + errCode + " for device ", device, notification);    
+});
+
+service.on('timeout', function () {
+  console.log("APNS connection timeout");
+});
+
+service.on('socketError', console.error);
+
+
 
 exports.notifyRoom = function(roomId, message, excludeUsers) {
   debug('notifyRoom %s', roomId);
@@ -53,7 +73,7 @@ exports.notifyRoom = function(roomId, message, excludeUsers) {
             note.trim();
 
             // send notifications    
-            conn.pushNotification(note, notification.deviceId);
+            service.pushNotification(note, notification.deviceId);
           }
         });
 
