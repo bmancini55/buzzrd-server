@@ -40,6 +40,7 @@ app.oauth = oauth = OAuthServer({
   });
 
 
+<<<<<<< HEAD
 //////////////////////////////////////////////////////////////////
 //
 // Version 1.0.0 MOUNTS 
@@ -49,6 +50,13 @@ app.oauth = oauth = OAuthServer({
 app.post('/api/users/updateProfilePic', controllers.Users.updateProfilePic);
 app.get ('/api/users/current', oauth.authorise(), controllers.Users.findCurrent);
 app.post('/api/users/update/', controllers.Users.update);
+=======
+// Room API
+app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
+app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
+app.get ('/api/rooms/nearby', oauth.authorise(), controllers.Rooms.findNearby);
+app.post ('/api/rooms/inviteFriends', oauth.authorise(), controllers.Rooms.inviteFriends);
+>>>>>>> Invite friends and store them as notifications
 
 
 //////////////////////////////////////////////////////////////////
@@ -60,7 +68,6 @@ app.post('/api/users/update/', controllers.Users.update);
 // OAuth API
 app.post('/oauth/grant', oauth.grant());
 
-app.post ('/api/rooms/inviteFriends', oauth.authorise(), controllers.Rooms.inviteFriends);
 // User API
 app.post('/api/users', controllers.Users.create);
 app.post('/api/users/usernameExists', controllers.Users.usernameExists);
@@ -91,7 +98,6 @@ app.all('/api/*', function(req, res, next) {
 app.post('/api/rooms', controllers.Rooms.create);
 app.get ('/api/rooms/:idroom/messages', controllers.Messages.findByRoom);
 app.get ('/api/rooms/nearby', controllers.Rooms.findNearby);
-app.post ('/api/rooms/inviteFriends', oauth.authorise(), controllers.Rooms.inviteFriends);
 
 // Messages API
 app.get ('/api/messages/:idmessage/upvote', controllers.Messages.upvote);
@@ -101,6 +107,7 @@ app.get ('/api/venues', controllers.Venues.find);
 app.get ('/api/venues/:venueid/rooms', controllers.Rooms.findByVenue)
 
 // User API
+app.get ('/api/users/findByUsername', controllers.Users.findByUsername);
 app.get ('/api/users/:userid/pic', controllers.Users.findProfilePic);
 
 // Current User API
@@ -116,17 +123,27 @@ app.post('/api/me/removeRoom', controllers.Users.removeRoom);
 app.post('/api/images/upload', controllers.Images.upload);
 
 // Friend API
+<<<<<<< HEAD
 app.post('/api/friends', controllers.Friends.create);
 app.get ('/api/me/friends', controllers.Friends.findCurrentUsers);
 app.get ('/api/me/findPotentialFriends', controllers.Friends.findPotentialFriends);
 app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
 
-  
-  app.get ('/api/users/findByUsername', controllers.Users.findByUsername);
+
+//////////////////////////////////////////////////////////////////
 //
 // DEBUG MOUNTS
 //
 //////////////////////////////////////////////////////////////////
+=======
+app.post('/api/friends', oauth.authorise(), controllers.Friends.create);
+app.get ('/api/me/friends', oauth.authorise(), controllers.Friends.findCurrentUsers);
+app.get ('/api/me/findPotentialFriends', oauth.authorise(), controllers.Friends.findPotentialFriends);
+app.post('/api/me/removeFriend', oauth.authorise(), controllers.Friends.removeFriend);
+
+  
+// DEBUG ONLY MOUNTS
+>>>>>>> Invite friends and store them as notifications
 if(debug) {
 
   // OAuth API

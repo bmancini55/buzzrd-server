@@ -7,7 +7,8 @@ var Q             = require('q')
   , Room          = models.Room
   , UserRoom      = models.UserRoom
   , Venue         = models.Venue
-  , Message       = models.Message;
+  , Message       = models.Message
+  , Notification  = models.Notification;
 
 
 /**
@@ -136,3 +137,58 @@ exports.findByUserId = function(req, res) {
   Room.findByUser(userId, JsonResponse.expressHandler(res));
 
 }
+
+/** 
+ * inviteFriends
+ * Invite friends to a room
+ */ 
+exports.inviteFriends = function(req, res) {
+  var user = req.user
+    , notificationTypeId = 1 // Invitation
+    , roomId = req.body.roomId
+    , users = JSON.parse(req.body.users)
+    , message = 'Chat Invitation'
+    , payload
+    , description;
+
+    Room.findById(roomId, function(err, room) {
+      if ((user.firstName) && (user.lastName)) {
+        description = user.firstName + ' ' + user.lastName + ' invited you to chat in ' + room.name;
+        } else {
+        description = user.username + ' invited you to chat in ' + room.name;
+      }
+
+      payload = {
+        senderId: user._id
+        , roomId: room._id
+        , description: description
+      };
+
+      var notifications = [];
+
+      for (var i = 0; i < users.length; i++) {
+        var notification = new Notification({
+          typeId: notificationTypeId
+          , recipientId: users[i].iduser
+          , message: message
+          , payload: payload
+        });
+        
+        notifications.push(notification);
+      }
+
+      var promises = notifications.map(function(notification) {
+ 
+        return Notification.createNotification(notification);  
+
+      });
+
+      Q.all(promises)
+      .then(function() {
+        res.send(new JsonResponse(null, 'success'));
+      })
+      .fail(function(err) {
+        res.send(new JsonResponse(err));
+      });
+    });
+};

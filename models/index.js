@@ -5,7 +5,9 @@
   , OAuthAccessToken  = require('./oauthaccesstoken')
   , OAuthClient       = require('./oauthclient')
   , Venue             = require('./venue')
-  , Friend            = require('./friend');
+  , Friend            = require('./friend')
+  , Notification      = require('./notification')
+  , NotificationTypes = require('./notification');
 
   
 module.exports = {
@@ -16,5 +18,7 @@ module.exports = {
   OAuthClient: OAuthClient,
   Venue: Venue,
   Friend: Friend,
-  UserRoom: UserRoom
+  UserRoom: UserRoom,
+  Notification: Notification,
+  NotificationTypes: NotificationTypes
 }
