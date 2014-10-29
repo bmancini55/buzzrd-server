@@ -352,7 +352,6 @@ UserRoomSchema.statics.getNotifiable = function(roomId, excludeUsers, next) {
 
 
 
-
 ///
 /// Create and export the model
 ///
