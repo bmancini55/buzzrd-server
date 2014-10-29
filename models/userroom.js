@@ -209,7 +209,7 @@ UserRoomSchema.statics.updateDevice = function(userId, deviceId, next) {
  * @param {Function} next 
  */
 
-UserRoomSchema.statics.logJoin = function(userId, roomId, next) {
+UserRoomSchema.statics.resetBadgeCount = function(userId, roomId, next) {
   debug('joinRoom for user %s', userId); 
 
   var $query = { 

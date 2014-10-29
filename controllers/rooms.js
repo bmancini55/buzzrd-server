@@ -201,5 +201,5 @@ exports.resetBadgeCount = function(req, res) {
   var userId = req.userId
     , roomId = req.param('roomId');
 
-  UserRoom.logJoin(userId, roomId, JsonResponse.expressHandler(res));
+  UserRoom.resetBadgeCount(userId, roomId, JsonResponse.expressHandler(res));
 }
