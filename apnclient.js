@@ -8,8 +8,16 @@ var apn           = require('apn')
   , configHelper  = require('./common/confighelper')
   , config        = configHelper.env()
   , Room          = Models.Room
+  , User          = Models.User
   , UserRoom      = Models.UserRoom
-  , service;
+  , service
+  , feedback;
+
+////////////////////////////////////////////////////////////
+// 
+// SERVICE HANDLERS
+//
+////////////////////////////////////////////////////////////
 
 service = new apn.Connection(config.apn);
 
@@ -32,6 +40,58 @@ service.on('timeout', function () {
 service.on('socketError', console.error);
 
 
+////////////////////////////////////////////////////////////
+// 
+// FEEDBACK HANDLERS
+//
+////////////////////////////////////////////////////////////
+
+feedback = new apn.Feedback({
+  cert: config.apn.cert,
+  key: config.apn.key,
+  batchFeedback: true,
+  interval: 300
+});
+
+feedback.on('feedback', function(items) {
+  items.forEach(function(item) {
+    console.log('Feedback for item: ', item.device.toString());
+
+    // TODO clear out this device
+    User.find({ deviceId: item.device.toString() }, function(err, user) {
+
+      if(user) {
+        var deviceId = null;
+
+        // updates the user's device ID
+        User.updateDevice(userId, deviceId, function(err, user) {
+          if(err) console.log('Error updating deviceId')
+          
+          return;
+        });
+
+        // update device ID for all UserRooms
+        UserRoom.updateDevice(user._id.toString(), deviceId, function(err) {
+          if(err) console.log('Error updating deviceId %j', err);
+        });
+      }
+
+    });
+
+  });
+});
+feedback.on('error', console.error);
+feedback.on('feedbackError', console.error);
+
+console.log('Starting APNS Feedback');
+feedback.start();
+
+
+////////////////////////////////////////////////////////////
+// 
+// EXPORTED METHODS
+//
+////////////////////////////////////////////////////////////
 
 exports.notifyRoom = function(roomId, message, excludeUsers) {
   debug('notifyRoom %s', roomId);

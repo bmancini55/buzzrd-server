@@ -351,6 +351,32 @@ UserRoomSchema.statics.getNotifiable = function(roomId, excludeUsers, next) {
 }
 
 
+/** 
+ * Toggles the notification value for the UserRoom
+ * 
+ * @param {String} userId
+ * @param {String} roomId
+ * @param {Boolean} notify
+ * @callback next
+ */
+UserRoomSchema.statics.toggleNotification = function(userId, roomId, notify, next) {
+  debug('toggleNotification for user %s, room %s', userId, roomId);  
+  var $query
+    , $update;
+
+  $query = {
+    userId: new mongoose.Types.ObjectId(userId),
+    roomId: new mongoose.Types.ObjectId(roomId)
+  };
+
+  $update = {
+    $set: { notify: notify }
+  };
+
+  UserRoom.update($query, $update, next);
+}
+
+
 
 ///
 /// Create and export the model

@@ -1,10 +1,11 @@
 
 // Module dependencies
-var mongoose = require('mongoose')
-  , crypto = require('crypto')
-  , debug       = require('debug')('user')
-  , Schema = mongoose.Schema  
-  , ObjectId = Schema.ObjectId;
+var mongoose  = require('mongoose')
+  , Q         = require('q')
+  , crypto    = require('crypto')
+  , debug     = require('debug')('user')
+  , Schema    = mongoose.Schema  
+  , ObjectId  = Schema.ObjectId;
 
 ///
 /// Schema definition
@@ -84,6 +85,43 @@ UserSchema.statics.updateProfilePic = function(userId, profilePic, next) {
 
   this.findOneAndUpdate(select, updates, next);
 }
+
+/**
+ * Updates the device for a user
+ * 
+ * @param {String} userId
+ * @param {String} device
+ * @callback next
+ * @return Promise
+ */
+UserSchema.statics.updateDevice = function(userId, device, next) {
+  debug('updateDevice');
+  var deferred = Q.defer()
+    , $query
+    , $update;
+
+  $query = {
+    _id: new mongoose.Types.ObjectId(userId)
+  };
+
+  $update: {
+    $set: { device: device }
+  };
+
+  User.findOneAndUpdate($query, $update, function(err, user) {
+    if(err) {
+      deferred.reject(err);
+      if(next) return next(err);
+    } 
+    else {
+      deferred.resolve(user);
+      if(next) return next(null, user);
+    }
+  });
+
+  return deferred.promise;
+}
+
 
 /**
  * Updates the user

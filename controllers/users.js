@@ -246,9 +246,8 @@ exports.findProfilePic = function(req, res) {
 }
 
 
-
 exports.updateDevice = function(req, res) { 
-  var user = req.user
+  var userId = req.userId
     , deviceId = req.param('deviceId');
 
   // validate deviceId
@@ -256,19 +255,22 @@ exports.updateDevice = function(req, res) {
     res.send(new JsonResponse(new Error('deviceId is required')));
   }
 
-  // updates the user's device ID
   else {
-    user.deviceId = deviceId;
-    user.save(function(err, user) {
+    
+    // updates the user's device ID
+    User.updateDevice(userId, deviceId, function(err, user) {
       var savedDeviceId = user.deviceId;
       res.send(new JsonResponse(null, savedDeviceId));
       return;
     });
-    UserRoom.updateDevice(user._id.toString(), deviceId, function(err) {
+
+    // update device ID for all UserRooms
+    UserRoom.updateDevice(userId, deviceId, function(err) {
       if(err) console.log('Error updating deviceId %j', err);
     });
   }
 }
+
 
 exports.findByUsername = function(req, res) {
   

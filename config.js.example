@@ -33,7 +33,7 @@ config = {
   // Production specific configuration values
   // that will be applied when node is launched with
   // 
-  produdction: {
+  production: {
     express: {
       port: 8080
     },
