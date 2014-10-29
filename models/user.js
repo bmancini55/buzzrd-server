@@ -90,12 +90,12 @@ UserSchema.statics.updateProfilePic = function(userId, profilePic, next) {
  * Updates the device for a user
  * 
  * @param {String} userId
- * @param {String} device
- * @callback next
- * @return Promise
+ * @param {String} deviceId
+ * @callback next with error and deviceId
+ * @return Promise resolves to deviceId
  */
-UserSchema.statics.updateDevice = function(userId, device, next) {
-  debug('updateDevice');
+UserSchema.statics.updateDevice = function(userId, deviceId, next) {
+  debug('updateDevice for user %s', userId);
   var deferred = Q.defer()
     , $query
     , $update;
@@ -104,18 +104,21 @@ UserSchema.statics.updateDevice = function(userId, device, next) {
     _id: new mongoose.Types.ObjectId(userId)
   };
 
-  $update: {
-    $set: { device: device }
+  $update = {
+    $set: { 
+      deviceId: deviceId,
+      updated: new Date()
+    }
   };
 
-  User.findOneAndUpdate($query, $update, function(err, user) {
+  User.update($query, $update, function(err) {
     if(err) {
       deferred.reject(err);
       if(next) return next(err);
     } 
     else {
-      deferred.resolve(user);
-      if(next) return next(null, user);
+      deferred.resolve(deviceId);
+      if(next) return next(null, deviceId);
     }
   });
 

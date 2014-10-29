@@ -258,9 +258,8 @@ exports.updateDevice = function(req, res) {
   else {
     
     // updates the user's device ID
-    User.updateDevice(userId, deviceId, function(err, user) {
-      var savedDeviceId = user.deviceId;
-      res.send(new JsonResponse(null, savedDeviceId));
+    User.updateDevice(userId, deviceId, function(err, deviceId) {
+      res.send(new JsonResponse(null, deviceId));
       return;
     });
 

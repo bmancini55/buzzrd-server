@@ -58,20 +58,19 @@ feedback.on('feedback', function(items) {
     console.log('Feedback for item: ', item.device.toString());
 
     // TODO clear out this device
-    User.find({ deviceId: item.device.toString() }, function(err, user) {
+    User.findOne({ deviceId: item.device.toString() }, function(err, user) {
 
       if(user) {
-        var deviceId = null;
+        var deviceId = null
+          , userId = user._id.toString();
 
         // updates the user's device ID
-        User.updateDevice(userId, deviceId, function(err, user) {
-          if(err) console.log('Error updating deviceId')
-          
-          return;
+        User.updateDevice(userId, deviceId, function(err) {
+          if(err) console.log('Error updating deviceId');
         });
 
         // update device ID for all UserRooms
-        UserRoom.updateDevice(user._id.toString(), deviceId, function(err) {
+        UserRoom.updateDevice(userId, deviceId, function(err) {
           if(err) console.log('Error updating deviceId %j', err);
         });
       }

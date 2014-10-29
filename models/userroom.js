@@ -188,8 +188,10 @@ UserRoomSchema.statics.updateDevice = function(userId, deviceId, next) {
   };
 
   $update = {
-    deviceId: deviceId,
-    updated: new Date()
+    $set: {
+      deviceId: deviceId,
+      updated: new Date()
+    }
   };
 
   $options = {
