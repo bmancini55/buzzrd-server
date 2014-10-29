@@ -186,8 +186,8 @@ exports.usernameExists = function(req, res) {
  */
 exports.updateProfilePic = function(req, res) {
   
-  var userId = req.body.userId,
-    profilePic = req.body.profilePic;
+  var userId = req.user._id.toString()
+    , profilePic = req.body.profilePic;
   
   User.updateProfilePic(userId, profilePic, function(err, user){
     if(err) {

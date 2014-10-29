@@ -39,51 +39,59 @@ app.oauth = oauth = OAuthServer({
     accessTokenLifetime: null
   });
 
+
+
 // OAuth API
 app.post('/oauth/grant', oauth.grant());
-
-// Room API
-app.post('/api/rooms', oauth.authorise(), controllers.Rooms.create);
-app.get ('/api/rooms/:idroom/messages', oauth.authorise(), controllers.Messages.findByRoom);
-app.get ('/api/rooms/nearby', oauth.authorise(), controllers.Rooms.findNearby);
-
-// Messages API
-app.get ('/api/messages/:idmessage/upvote', oauth.authorise(), controllers.Messages.upvote);
-
-// Venue API
-app.get ('/api/venues', oauth.authorise(), controllers.Venues.find);
-app.get ('/api/venues/:venueid/rooms', oauth.authorise(), controllers.Rooms.findByVenue)
 
 // User API
 app.post('/api/users', controllers.Users.create);
 app.post('/api/users/usernameExists', controllers.Users.usernameExists);
-app.post('/api/users/updateProfilePic', controllers.Users.updateProfilePic);
-app.get ('/api/users/current', oauth.authorise(), controllers.Users.findCurrent);
-app.get ('/api/users/:userid/pic', oauth.authorise(), controllers.Users.findProfilePic);
-app.post('/api/users/update/', controllers.Users.update);
 
 // Disclaimer API
 app.get('/api/disclaimers/termsofservice', controllers.Disclaimers.termsofservice);
 app.get('/api/disclaimers/privacypolicy', controllers.Disclaimers.privacypolicy);
 
-// User Rooms
-app.get ('/api/me', oauth.authorise(), controllers.Users.findCurrent);
-app.get ('/api/me/rooms', oauth.authorise(), controllers.Rooms.findCurrentUser);
-app.put ('/api/me/device', oauth.authorise(), controllers.Users.updateDevice);
-app.post('/api/me/removeRoom', oauth.authorise(), controllers.Users.removeRoom);
+//////////////////////////////////////////////////////////////////
+//
+// All mounts below will have authorization applied
+//
+//////////////////////////////////////////////////////////////////
+app.all('/api/*', oauth.authorise());
+
+// Room API
+app.post('/api/rooms', controllers.Rooms.create);
+app.get ('/api/rooms/:idroom/messages', controllers.Messages.findByRoom);
+app.get ('/api/rooms/nearby', controllers.Rooms.findNearby);
+
+// Messages API
+app.get ('/api/messages/:idmessage/upvote', controllers.Messages.upvote);
+
+// Venue API
+app.get ('/api/venues', controllers.Venues.find);
+app.get ('/api/venues/:venueid/rooms', controllers.Rooms.findByVenue)
+
+// User API
+app.get ('/api/users/findByUsername', controllers.Users.findByUsername);
+app.get ('/api/users/:userid/pic', controllers.Users.findProfilePic);
+
+// Current User API
+app.get ('/api/me', controllers.Users.findCurrent);
+app.put ('/api/me', controllers.Users.update);
+app.put ('/api/me/pic', controllers.Users.updateProfilePic);
+app.get ('/api/me/rooms', controllers.Rooms.findCurrentUser);
+app.put ('/api/me/device', controllers.Users.updateDevice);
+app.post('/api/me/removeRoom', controllers.Users.removeRoom);
 
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);
 
 // Friend API
-app.post('/api/friends', oauth.authorise(), controllers.Friends.create);
-app.get ('/api/me/friends', oauth.authorise(), controllers.Friends.findCurrentUsers);
-app.get ('/api/me/findPotentialFriends', oauth.authorise(), controllers.Friends.findPotentialFriends);
-app.post('/api/me/removeFriend', oauth.authorise(), controllers.Friends.removeFriend);
+app.post('/api/friends', controllers.Friends.create);
+app.get ('/api/me/friends', controllers.Friends.findCurrentUsers);
+app.get ('/api/me/findPotentialFriends', controllers.Friends.findPotentialFriends);
+app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
 
-
-  app.get ('/api/users/findByUsername', controllers.Users.findByUsername);
-  app.get ('/api/me/rooms2', controllers.Rooms.findByUserId);
 
 // DEBUG ONLY MOUNTS
 if(debug) {
@@ -101,7 +109,7 @@ if(debug) {
   app.get('/api/venues/foursquare', controllers.Venues.findNearbyFromFoursquare);
 
   // Rooms API
-  app.get ('/api/rooms', oauth.authorise(), controllers.Rooms.findAll);
+  app.get ('/api/rooms', controllers.Rooms.findAll);
 
   // Friends API
   app.get ('/api/friends', controllers.Friends.findAll);
