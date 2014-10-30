@@ -60,6 +60,36 @@ var RoomSchema = new Schema({
 
 
 /**
+ * Finds a room by its identifier
+ * 
+ * @param {String} roomId
+ * @callback next
+ * @return {Promise}
+ */
+RoomSchema.statics.findById = function(roomId, next) {
+  debug('findById %s', roomId);
+
+  var deferred = Q.defer()
+    , $query;
+
+  $query = {
+    _id: new mongoose.Types.ObjectId(roomId)
+  };
+
+  Room.findOne($query, function(err, room) {
+    if(err) {
+      deferred.reject(err);
+      if(next) return next(err);
+    }
+    else {
+      deferred.resolve(null, room);
+      if(next) return next(null, room);
+    }
+  });
+}
+
+
+/**
  * Finds rooms based on proximity and search criteria
  * @param options 
  * @config lat

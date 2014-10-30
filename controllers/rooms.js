@@ -12,6 +12,15 @@ var Q             = require('q')
 
 
 /**
+ * Finds a room by its ID
+ */
+exports.findById = function(req, res) {
+  var idroom = req.param('idroom');
+  Room.findById(idroom, JsonResponse.expressHandler(res));
+}
+
+
+/**
  * Finds rooms based on proximity and search criteria 
  */ 
 exports.findNearby = function(req, res) {
