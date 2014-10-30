@@ -27,3 +27,15 @@ exports.removeNotification = function(req, res) {
 
   Notification.removeNotification(notificationId, JsonResponse.expressHandler(res));
 }
+
+/**
+ * updateNotificationRead
+ * Marks a notification as either being read or not read
+ */
+exports.updateNotificationRead = function(req, res) {
+  var user = req.user
+    , notificationId = req.body.notificationId
+    , read = req.body.read;
+
+  Notification.updateNotificationRead(notificationId, read, JsonResponse.expressHandler(res));
+}

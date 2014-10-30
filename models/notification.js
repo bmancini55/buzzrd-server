@@ -85,6 +85,24 @@ NotificationSchema.statics.removeNotification = function(notificationId, next) {
   Notification.remove($query, next);        
 }
 
+/**
+ * Marks a notification as either being read or not read
+ * 
+ * @param {String} notificationId
+ *
+ */
+NotificationSchema.statics.updateNotificationRead = function(notificationId, read, next) {
+  debug('updateNotificationRead %s', notificationId); 
+
+  var select = { _id: new mongoose.Types.ObjectId(notificationId) },
+    updates = { $set: { 
+               read: read,
+             } };
+  
+  this.findOneAndUpdate(select, updates, next);    
+}
+
+
 ///
 /// Create and export the model
 ///

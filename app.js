@@ -126,6 +126,7 @@ app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
 // Notification API
 app.get ('/api/me/notifications', controllers.Notifications.findCurrentUser);
 app.post('/api/me/removeNotification', controllers.Notifications.removeNotification);
+app.put('/api/me/notifications/updateNotificationRead', controllers.Notifications.updateNotificationRead);
 
 //
 // DEBUG MOUNTS
