@@ -89,10 +89,10 @@ app.all('/api/*', function(req, res, next) {
 
 // Room API
 app.post('/api/rooms', controllers.Rooms.create);
-app.get ('/api/rooms/:idroom', controllers.Rooms.findById);
-app.get ('/api/rooms/:idroom/messages', controllers.Messages.findByRoom);
-app.get ('/api/rooms/nearby', controllers.Rooms.findNearby);
 app.post ('/api/rooms/inviteFriends', oauth.authorise(), controllers.Rooms.inviteFriends);
+app.get ('/api/rooms/nearby', controllers.Rooms.findNearby);
+app.get ('/api/rooms/:idroom/messages', controllers.Messages.findByRoom);
+app.get ('/api/rooms/:idroom', controllers.Rooms.findById);
 
 // Messages API
 app.get ('/api/messages/:idmessage/upvote', controllers.Messages.upvote);
