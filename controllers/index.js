@@ -7,7 +7,8 @@ var Rooms             = require('./rooms')
   , Venues            = require('./venues')
   , Images            = require('./images')
   , Disclaimers       = require('./disclaimers')
-  , Friends           = require('./friends');
+  , Friends           = require('./friends')
+  , Notifications     = require('./notifications');
 
 module.exports = {
   Rooms: Rooms,
@@ -18,5 +19,6 @@ module.exports = {
   Venues: Venues,
   Images: Images,
   Disclaimers: Disclaimers,
-  Friends: Friends
+  Friends: Friends,
+  Notifications: Notifications
 }

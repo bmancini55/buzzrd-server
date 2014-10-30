@@ -123,6 +123,10 @@ app.get ('/api/me/friends', controllers.Friends.findCurrentUsers);
 app.get ('/api/me/findPotentialFriends', controllers.Friends.findPotentialFriends);
 app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
 
+// Notification API
+app.get ('/api/me/notifications', controllers.Notifications.findCurrentUser);
+app.post('/api/me/removeNotification', controllers.Notifications.removeNotification);
+
 //
 // DEBUG MOUNTS
 //

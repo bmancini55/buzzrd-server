@@ -1,6 +1,7 @@
 // Module dependencies
 var mongoose    = require("mongoose")
   , Q           = require('Q')
+  , debug       = require('debug')('room')
   , Schema      = mongoose.Schema;
 
 ///
@@ -53,6 +54,35 @@ NotificationSchema.statics.createNotification = function(notification, next) {
 
   // always return the promise
   return deferred.promise; 
+}
+
+/**
+ * Gets a notifications for the provided user
+ * 
+ * @param {String} userId
+ *
+ */
+NotificationSchema.statics.findByUser = function(userId, next) {
+  debug('findByUser %s', userId);
+
+  return Notification.find({ recipientId: userId}, next);
+}
+
+/**
+ * Removes the provided notification
+ * 
+ * @param {String} notificationId
+ *
+ */
+NotificationSchema.statics.removeNotification = function(notificationId, next) {
+  debug('removeNotification %s', notificationId); 
+  var $query;
+
+  $query = { 
+    _id: new mongoose.Types.ObjectId(notificationId)
+  };
+  
+  Notification.remove($query, next);        
 }
 
 ///
