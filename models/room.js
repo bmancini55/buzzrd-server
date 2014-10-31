@@ -255,11 +255,13 @@ RoomSchema.statics.attachUserRooms = function(rooms, userrooms) {
 
     // check if the userroom metadata exists
     var userroom = lookup[room._id];
-    if(userroom && userroom.notify) {
+    if(userroom) {
       debug('room %s has notificaitons', room._id.toString());
+      room.notify      = userroom.notify;
       room.watchedRoom = true;
       room.newMessages = userroom.badgeCount > 0;
     } else {
+      room.notify      = false;
       room.watchedRoom = false;
       room.newMessages = false;
     }
@@ -435,6 +437,7 @@ RoomSchema.methods.toClient = function() {
   var client = mongoose.Model.prototype.toClient.call(this);
   client.watchedRoom = this.watchedRoom;
   client.newMessages = this.newMessages;
+  client.notify      = this.notify;
   return client;
 }
 

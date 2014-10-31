@@ -109,10 +109,11 @@ app.get ('/api/me', controllers.Users.findCurrent);
 app.put ('/api/me', controllers.Users.update);
 app.put ('/api/me/pic', controllers.Users.updateProfilePic);
 app.get ('/api/me/rooms', controllers.Rooms.findCurrentUser);
+app.put ('/api/me/rooms/reset', controllers.Rooms.resetBadgeCount);
+app.put ('/api/me/rooms/:roomId', controllers.Rooms.updateUserRoom);
 app.get ('/api/me/unread', controllers.Rooms.findCurrentUnread);
 app.put ('/api/me/device', controllers.Users.updateDevice);
 app.post('/api/me/removeRoom', controllers.Users.removeRoom);
-app.put ('/api/me/rooms/reset', controllers.Rooms.resetBadgeCount);
 
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);

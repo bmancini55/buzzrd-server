@@ -210,3 +210,24 @@ exports.resetBadgeCount = function(req, res) {
 
   UserRoom.resetBadgeCount(userId, roomId, JsonResponse.expressHandler(res));
 }
+
+
+/**
+ * Update user room record for the user
+ */
+exports.updateUserRoom = function(req, res) {
+  
+  var userId = req.userId
+    , roomId = req.param('roomId')
+    , notify = req.param('notify');
+
+  // toggle the notification
+  if(notify != null) {    
+    UserRoom.toggleNotification(userId, roomId, notify, JsonResponse.expressHandler(res));
+  } 
+
+  // Nothing else to update
+  else {
+    res.send(new JsonResponse('No values to update'));
+  }
+}
