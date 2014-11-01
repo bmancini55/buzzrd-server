@@ -3,7 +3,8 @@
 var mongoose    = require('mongoose')
   , Q           = require('Q')
   , Schema      = mongoose.Schema
-  , debug       = require('debug')('userroom');
+  , debug       = require('debug')('userroom')
+  , User        = require('./user');
 
 ///
 /// Schema definition
@@ -375,7 +376,27 @@ UserRoomSchema.statics.toggleNotification = function(userId, roomId, notify, nex
     $set: { notify: notify }
   };
 
-  UserRoom.update($query, $update, next);
+  User.findById(userId, function(err, user) {
+    if(err) return next(err);
+    else {
+  
+      // attempt to update an existing record
+      UserRoom.update($query, $update, function(err, rows) {    
+        if(err) return next(err);    
+
+        // if there is no update, we need to insert
+        else if (notify && rows == 0) {                              
+          UserRoom.addRoom(userId, roomId, user.deviceId, next);
+        }
+
+        // otherwise, we're good to go
+        else next(null, user);
+
+      });
+
+    }
+
+  });
 }
 
 
