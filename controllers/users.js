@@ -250,24 +250,20 @@ exports.updateDevice = function(req, res) {
   var userId = req.userId
     , deviceId = req.param('deviceId');
 
-  // validate deviceId
-  if(!deviceId) {
-    res.send(new JsonResponse(new Error('deviceId is required')));
-  }
+  // validate deviceId  
+  deviceId = (deviceId === '' ? null : deviceId);
+  
+  // updates the user's device ID
+  User.updateDevice(userId, deviceId, function(err, deviceId) {
+    if(err) console.log('Error updating usre deviceId %j', err);
+  });
 
-  else {
-    
-    // updates the user's device ID
-    User.updateDevice(userId, deviceId, function(err, deviceId) {
-      res.send(new JsonResponse(null, deviceId));
-      return;
-    });
+  // update device ID for all UserRooms
+  UserRoom.updateDevice(userId, deviceId, function(err) {
+    if(err) console.log('Error updating deviceId %j', err);
+  });
 
-    // update device ID for all UserRooms
-    UserRoom.updateDevice(userId, deviceId, function(err) {
-      if(err) console.log('Error updating deviceId %j', err);
-    });
-  }
+  res.send(new JsonResponse(null, deviceId));
 }
 
 
