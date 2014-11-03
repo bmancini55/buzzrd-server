@@ -1,6 +1,6 @@
 // Module dependencies
 var mongoose    = require("mongoose")
-  , Q           = require('Q')
+  , Q           = require('q')
   , debug       = require('debug')('room')
   , Schema      = mongoose.Schema;
 

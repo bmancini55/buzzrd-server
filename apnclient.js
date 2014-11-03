@@ -1,7 +1,7 @@
 
 // Module Dependencies
 var apn           = require('apn')
-  , Q             = require('Q')
+  , Q             = require('q')
   , debug         = require('debug')('apnclient')
   , JsonResponse  = require('jsonresponse')
   , Models        = require('./models')

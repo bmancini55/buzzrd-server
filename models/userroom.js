@@ -1,7 +1,7 @@
 
 // Module dependencies
 var mongoose    = require('mongoose')
-  , Q           = require('Q')
+  , Q           = require('q')
   , Schema      = mongoose.Schema
   , debug       = require('debug')('userroom')
   , User        = require('./user');
