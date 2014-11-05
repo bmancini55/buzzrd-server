@@ -170,10 +170,13 @@ RoomSchema.statics.findByUser = function(userId, next) {
     else {      
 
       var roomObjectIds = _.pluck(userrooms, 'roomId')
-        , $query = { _id: { $in: roomObjectIds }};
+        , $query = { _id: { $in: roomObjectIds }}
+        , $sort = { lastMessage: -1 };
       
       // Find the actual rooms
-      Room.find($query, function(err, rooms) {
+      Room.find($query)
+      .sort($sort)
+      .exec(function(err, rooms) {
 
         if(err) {
           deferred.reject(err);
