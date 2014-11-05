@@ -29,7 +29,7 @@ exports.findNearby = function(req, res) {
     , pagesize = Math.min(Math.max(req.query.pagesize || 25, 1), 1000)
     , lng = req.query.lng
     , lat = req.query.lat
-    , radius = req.query.radius || 10000
+    , radius = req.query.radius || 1610
     , search = req.query.search;
   
   Room.findNearby({ 
