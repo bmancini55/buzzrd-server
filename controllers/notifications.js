@@ -14,7 +14,7 @@ exports.findCurrentUser = function(req, res) {
 	, pagesize = Math.min(Math.max(req.query.pagesize || 100, 1), 1000)
 	, user = req.user;
 	
-  	Notification.findByUser(user._id, JsonResponse.expressHandler(res));
+  Notification.findByUser(user._id).sort({ date: 'desc' }).exec(JsonResponse.expressHandler(res));
 };
 
 /**

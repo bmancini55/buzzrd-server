@@ -157,18 +157,25 @@ exports.inviteFriends = function(req, res) {
     , roomId = req.body.roomId
     , users = JSON.parse(req.body.users)
     , payload
-    , description;
+    , description
+    , senderName;
 
     Room.findById(roomId, function(err, room) {
+      message = 'invited you to chat in the room';
+
+      debugger;
+
       if ((user.firstName) && (user.lastName)) {
-        message = user.firstName + ' ' + user.lastName + ' invited you to chat in ' + room.name;
-        } else {
-        message = user.username + ' invited you to chat in ' + room.name;
+        senderName = user.firstName + ' ' + user.lastName;
+      } else {
+        senderName = user.username;
       }
 
       payload = {
         senderId: user._id
         , roomId: room._id
+        , senderName: senderName
+        , roomName: room.name
       };
 
       var notifications = [];
