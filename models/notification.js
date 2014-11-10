@@ -234,6 +234,7 @@ NotificationSchema.statics.createRoomNotifications = function(roomId, users, nex
 
   $query = { 
     recipientId: { $in: requestedIds },
+    typeId: 2,
     'payload.roomId': new mongoose.Types.ObjectId(roomId)
   };
 

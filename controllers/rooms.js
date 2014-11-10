@@ -185,6 +185,9 @@ exports.inviteFriends = function(req, res) {
           , recipientId: users[i].iduser
           , message: message
           , payload: payload
+          , badgeCount: 1
+          , created: new Date()
+          , updated: new Date()
         });
         
         notifications.push(notification);
