@@ -255,12 +255,7 @@ exports.updateDevice = function(req, res) {
   
   // updates the user's device ID
   User.updateDevice(userId, deviceId, function(err, deviceId) {
-    if(err) console.log('Error updating usre deviceId %j', err);
-  });
-
-  // update device ID for all UserRooms
-  UserRoom.updateDevice(userId, deviceId, function(err) {
-    if(err) console.log('Error updating deviceId %j', err);
+    if(err) console.log('Error updating user deviceId %j', err);
   });
 
   res.send(new JsonResponse(null, deviceId));

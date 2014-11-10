@@ -89,7 +89,7 @@ app.all('/api/*', function(req, res, next) {
 
 // Room API
 app.post('/api/rooms', controllers.Rooms.create);
-app.post ('/api/rooms/inviteFriends', oauth.authorise(), controllers.Rooms.inviteFriends);
+app.post('/api/rooms/inviteFriends', oauth.authorise(), controllers.Rooms.inviteFriends);
 app.get ('/api/rooms/nearby', controllers.Rooms.findNearby);
 app.get ('/api/rooms/:idroom', controllers.Rooms.findById);
 app.get ('/api/rooms/:idroom/messages', controllers.Messages.findByRoom);
@@ -109,11 +109,12 @@ app.get ('/api/me', controllers.Users.findCurrent);
 app.put ('/api/me', controllers.Users.update);
 app.put ('/api/me/pic', controllers.Users.updateProfilePic);
 app.get ('/api/me/rooms', controllers.Rooms.findCurrentUser);
-app.put ('/api/me/rooms/reset', controllers.Rooms.resetBadgeCount);
+app.put ('/api/me/rooms/:roomId/read', controllers.Notifications.markRoomAsRead);
 app.put ('/api/me/rooms/:roomId', controllers.Rooms.updateUserRoom);
-app.get ('/api/me/unread', controllers.Rooms.findCurrentUnread);
 app.put ('/api/me/device', controllers.Users.updateDevice);
 app.post('/api/me/removeRoom', controllers.Users.removeRoom);
+app.get ('/api/me/notifications', controllers.Notifications.findCurrentUser);
+app.get ('/api/me/notifications/unread', controllers.Notifications.findCurrentUnread);
 
 // Image API
 app.post('/api/images/upload', controllers.Images.upload);
@@ -125,9 +126,8 @@ app.get ('/api/me/findPotentialFriends', controllers.Friends.findPotentialFriend
 app.post('/api/me/removeFriend', controllers.Friends.removeFriend);
 
 // Notification API
-app.get ('/api/me/notifications', controllers.Notifications.findCurrentUser);
-app.post('/api/me/removeNotification', controllers.Notifications.removeNotification);
-app.put('/api/me/notifications/updateNotificationRead', controllers.Notifications.updateNotificationRead);
+app.del ('/api/notifications/:notificationId', controllers.Notifications.removeNotification);
+app.put ('/api/notifications/:notificationId/read', controllers.Notifications.updateRead);
 
 //
 // DEBUG MOUNTS

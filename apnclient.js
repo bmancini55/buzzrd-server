@@ -92,58 +92,76 @@ feedback.start();
 //
 ////////////////////////////////////////////////////////////
 
-exports.notifyRoom = function(roomId, message, excludeUsers) {
-  debug('notifyRoom %s', roomId);
+/** 
+ * 
+ * @param {Room} room
+ * @param {Message} message
+ * @param {Array} recipients - array of objects
+ * @config userId
+ * @config deviceId
+ * @config badgeCount
+ * @param {String} message
+ * @callback next
+ */
+exports.notifyRoom = function(room, message, recipients) {
+  debug('notifyRoom');
+  
+  // process all recipients
+  recipients.forEach(function(recipient) {    
+    if(recipient.deviceId) {
+      debug('notifyRoom:sending %j', recipient);
 
-  Room.findById(roomId, function(err, room) {
+      // construct notification
+      var note = new apn.Notification();
+      note.expiry = Math.floor(Date.now() / 1000) + 21600; // expire 6 hour from now
+      note.badge = recipient.badgeCount;
+      note.setAlertText(room.name + ': ' + message.message);
+      note.payload = {
+        'type': 'message',
+        'roomId': room._id.toString(),
+        'messageCount': room.messageCount
+      };
+      note.trim();
 
-    if(err) { 
-      console.log('Error retrieving room %j, cannot send notification', err);
+      // send notifications    
+      service.pushNotification(note, recipient.deviceId);
     }
+  });      
+}
 
-    else {
-    
-      // update notification counts
-      UserRoom.updateBadgeCounts(roomId, excludeUsers)
 
-      //  get notifications
-      .then(function(count) {
-        debug('updated %d notifications', count);
-        return UserRoom.getNotifiable(roomId, excludeUsers);
-      })
 
-      // send notifications
-      .then(function(notifications) {
-        debug('found %d notifications', notifications.length);
+exports.notifyRoomInvite = function(invites) {
+  debug('notifyRoomInvite')
 
-        notifications.forEach(function(notification) {
-          if(notification.deviceId) {
-            debug('sending notification to %s', notification.deviceId);
-
-            // construct notification
-            var note = new apn.Notification();
-            note.expiry = Math.floor(Date.now() / 1000) + 3600; // expire 1 hour from now
-            note.badge = notification.badgeCount;
-            note.setAlertText(room.name + ': ' + message);
-            note.payload = { 
-              'roomId': roomId,
-              'messageCount': room.messageCount
-            };
-            note.trim();
-
-            // send notifications    
-            service.pushNotification(note, notification.deviceId);
-          }
-        });
-
-      })
-
-      // handle failure
-      .catch(function(err) {
-        console.log('Error notifying room: %j' + err);
-      });
-
-    }
-
+  var userIds = invites.map(function(invite) { 
+    return invite.recipientId;
   });
+  
+  User.findByIds(userIds)
+  .then(function(users) {
+
+    var usersLookup = {};
+    users.forEach(function(user) {
+      usersLookup[user._id.toString()] = user;
+    });
+
+    invites.forEach(function(invites) {
+      var user = usersLookup[invites.recipientId.toString()];
+      if(user && user.deviceId) {
+        debug('sending notification to %s', user.deviceId);
+
+        var note = new apn.Notification();
+        note.expiry = Math.floor(Date.now() / 1000) + 21600; // expire 6 hours from now
+        note.badge = 1// increment total count by 1...
+        note.setAlertText('Someone invited you to a room: ');
+        note.payload = {
+          'type': 'roominvite',
+          'roomId': roomId          
+        }
+
+      }
+    })
+
+  })
 }

@@ -12,30 +12,74 @@ exports.findCurrentUser = function(req, res) {
 
 	var page = Math.max(req.query.page || 1, 1)
 	, pagesize = Math.min(Math.max(req.query.pagesize || 100, 1), 1000)
-	, user = req.user;
+	, userId = req.userId;
 	
-  Notification.findByUser(user._id).sort({ date: 'desc' }).exec(JsonResponse.expressHandler(res));
+  Notification.findByUser(userId, JsonResponse.expressHandler(res));
 };
 
 /**
- * removeFriend
- * Remove the provided friend from the current user's friend list
+ * Finds the current notifications for a room
  */
-exports.removeNotification = function(req, res) {
-  var user = req.user
-    , notificationId = req.body.notificationId;
+exports.findCurrentUnread = function(req, res) {
+  var userId = req.userId;
 
-  Notification.removeNotification(notificationId, JsonResponse.expressHandler(res));
+  Notification.findUnreadForUser(userId, JsonResponse.expressHandler(res)); 
 }
 
 /**
- * updateNotificationRead
+ * Remove the notification
+ */
+exports.removeNotification = function(req, res) {
+  var userId = req.userId
+    , notificationId = req.param('notificationId');
+
+  Notification.removeNotification(userId, notificationId, JsonResponse.expressHandler(res));
+}
+
+/** 
  * Marks a notification as either being read or not read
  */
-exports.updateNotificationRead = function(req, res) {
-  var user = req.user
-    , notificationId = req.body.notificationId
-    , read = req.body.read;
+exports.updateRead = function(req, res) {
+  var userId = req.userId
+    , notificationId = req.param('notificationId');    
 
-  Notification.updateNotificationRead(notificationId, read, JsonResponse.expressHandler(res));
+  Notification.markAsRead(userId, notificationId, JsonResponse.expressHandler(res));
 }
+
+
+/** 
+ * Marks a room as being read
+ */
+exports.markRoomAsRead = function(req, res) {
+  var roomId = req.param('roomId')
+    , userId = req.userId
+    , badgeCount;
+
+  // find current notification
+  Notification.findByUserAndRoom(userId, roomId)
+
+  // store badge count
+  .then(function(notification) {
+    badgeCount = notification ? notification.badgeCount : 0;
+    return notification;
+  })
+
+  // delete notification if needed
+  .then(function(notification) {    
+    if(notification) {
+      return Notification.removeNotification(userId, notification._id.toString());
+    } 
+  })
+
+  // return results
+  .then(
+    function() {      
+      res.send(new JsonResponse(null, badgeCount))
+    },
+    function(err) {
+      res.status(500).send(new JsonResponse(err));
+    }
+  );
+}
+
+

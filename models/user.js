@@ -76,6 +76,43 @@ UserSchema.statics.findByUsername = function(username, next) {
   this.findOne({ username: username }, next);
 }
 
+
+/**
+ * Finds a list of users by the supplied id array
+ * 
+ * @param {Array} ids
+ * @callback next
+ * @return {Promise}
+ */
+UserSchema.statics.findByIds = function(ids, next) {
+  debug('findByIds');
+  var deferred = Q.defer()
+    , idObjects
+    , $query;
+
+  idObjects = ids.map(function(id) {
+    return new mongoose.Types.ObjectId(id);
+  });
+
+  $query = {
+    _id: { $in: idObjects }
+  };
+
+  User.find($query, function(err, users) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    }
+    else {
+      deferred.resolve(users);
+      if(next) next(null, users);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
 /**
  * Updates the profile picture path
  */
@@ -152,6 +189,8 @@ UserSchema.statics.updateUser = function(userId, user, next) {
 
   this.findOneAndUpdate(select, updates, next);
 }
+
+
 
 ///
 /// Instance methods

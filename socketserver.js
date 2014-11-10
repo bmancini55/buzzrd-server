@@ -1,7 +1,6 @@
 var debug       = require('debug')('socketserver')
   , OAuthModel  = require('./common/oauthmodel')
-  , models      = require('./models')
-  , apnclient   = require('./apnclient');
+  , models      = require('./models');
 
 function create(app) {
 
@@ -115,15 +114,17 @@ function create(app) {
             // broadcast message        
             io.sockets.in(roomId).emit("message", message.toClient());
 
-            // broadcase notifications
+            // broadcast notifications
             var excludeUsers = getUserInRoom(roomId);
-            apnclient.notifyRoom(roomId, message.message, excludeUsers);
+            models.Notification.notifyRoom(roomId, message, excludeUsers, function(err) {
+              if(err) console.error(err);
+            })
 
           });
 
           // add the room to the user's list
           models.UserRoom.addRoom(userId, roomId, user.deviceId, function(err) {
-            if(err) console.log('Error adding room for user: ' + err);
+            if(err) console.error(err);
           });
 
         }

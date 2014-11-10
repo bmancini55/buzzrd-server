@@ -82,10 +82,47 @@ RoomSchema.statics.findById = function(roomId, next) {
       if(next) return next(err);
     }
     else {
-      deferred.resolve(null, room);
+      deferred.resolve(room);
       if(next) return next(null, room);
     }
   });
+
+  return deferred.promise;
+}
+
+
+/**
+ * Finds the rooms by the specified ids
+ * 
+ * @param {Array} roomIds - array of strings
+ * @callback next
+ * @return {Promise}
+ */
+RoomSchema.statics.findByIds = function(roomIds, next) {
+  debug('findByIds');
+
+  var deferred = Q.defer()
+    , $query
+    , roomObjIds;
+
+  roomObjsId = roomIds.map(function(roomId) { return roomId.toString(); });
+
+  $query = {
+    _id: { $in: roomObjsId }
+  };
+
+  Room.find($query, function(err, rooms) {
+    if(err) {
+      deferred.reject(err);
+      if(next) return next(err);
+    }
+    else {
+      deferred.resolve(rooms);
+      if(next) return next(null, rooms);
+    }
+  });
+
+  return deferred.promise;
 }
 
 
@@ -150,126 +187,9 @@ RoomSchema.statics.findNearby = function(options, next) {
   return deferred.promise;
 }
 
-/**
- * Finds the rooms belonging to the specified user by querying the UserRoom
- * collection and then using the results to load the rooms. This could
- * also be used to include user badge counts...
- * 
- * @param {String} userId 
- */ 
-RoomSchema.statics.findByUser = function(userId, next) {
-  debug('findByUser %s', userId);
-  var deferred = Q.defer();
-
-  // First find userroom references
-  UserRoom.findByUser(userId, function(err, userrooms) {
-    if(err) {
-      deferred.reject(err);
-      if(next) return next(err);
-    }
-    else {      
-
-      var roomObjectIds = _.pluck(userrooms, 'roomId')
-        , $query = { _id: { $in: roomObjectIds }}
-        , $sort = { lastMessage: -1 };
-      
-      // Find the actual rooms
-      Room.find($query)
-      .sort($sort)
-      .exec(function(err, rooms) {
-
-        if(err) {
-          deferred.reject(err);
-          if(next) return next(err);
-        }
-        else {
-
-          // attach the userroom info
-          Room.attachUserRooms(rooms, userrooms);
-
-          // resolve the promise
-          deferred.resolve(rooms);
-          if(next) return next(null, rooms);
-        }
-      });
-    }
-  });
-
-  return deferred.promise;
-}
 
 
-/**
- * Finds the unread rooms for the currently authenticated user
- * 
- * @param {String} userId
- * @callback next
- * @return {Promise}
- */
-RoomSchema.statics.findCurrentUnread = function(userId, next) {
-  debug('findCurrentUnread for %s', userId);
-  var deferred = Q.defer();
 
-  // get the userrooms records
-  UserRoom.findUnreadForUser(userId)
-  .then(function(userrooms) {
-
-    var roomObjectIds = _.pluck(userrooms, 'roomId')
-      , $query = { _id: { $in: roomObjectIds }};
-
-    // Find the rooms 
-    Room.find($query, function(err, rooms) {
-      if(err) {
-        deferred.reject(err);
-        if(next) return next(err);
-      } 
-      else {
-
-        // attach userrooms to rooms
-        Room.attachUserRooms(rooms, userrooms);
-
-        // resolve the promise
-        deferred.resolve(rooms);
-        if(next) return next(null, rooms);
-
-      }
-    });
-
-  });
-
-  return deferred.promise;
-}
-
-
-/**
- * Attaches userroom metadata to a list of rooms
- * 
- * @param {Array} rooms 
- * @param {Array} userrooms
- */
-RoomSchema.statics.attachUserRooms = function(rooms, userrooms) {
-  debug('Attaching %d userrooms', userrooms.length);
-
-  // create lookup based on roomId
-  var lookup = _.indexBy(userrooms, 'roomId');
-
-  // process each room in the list
-  rooms.forEach(function(room) {
-
-    // check if the userroom metadata exists
-    var userroom = lookup[room._id];
-    if(userroom) {
-      debug('room %s has notificaitons', room._id.toString());
-      room.notify      = userroom.notify;
-      room.watchedRoom = true;
-      room.newMessages = userroom.badgeCount > 0;
-    } else {
-      room.notify      = false;
-      room.watchedRoom = false;
-      room.newMessages = false;
-    }
-  });
-}
 
 /**
  * findAll

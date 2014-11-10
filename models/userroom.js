@@ -13,59 +13,36 @@ var mongoose    = require('mongoose')
 var UserRoomSchema = new Schema({
   userId: mongoose.Schema.ObjectId,
   roomId: mongoose.Schema.ObjectId,
-  deviceId: String,
-  notify: Boolean,  
-  badgeCount: Number,
+  notify: Boolean,
   created: Date,
   updated: Date  
 });
 
 
 /**
- * Finds the UserRoom records by UserId
+ * Finds the UserRoom records by UserId. This is used to load the
+ * My Rooms records.
  *
  * @param {String} userId
+ * @callback
+ * @return {Promise}
  */
-
 UserRoomSchema.statics.findByUser = function(userId, next) {
   debug('findByUserId for user %s', userId);
-  var $query;
+  var deferred = Q.defer()
+    , $query;
 
   $query = { 
     userId: new mongoose.Types.ObjectId(userId)
   };
 
-  UserRoom.find($query, next);
-}
-
-
-
-/**
- * Retrieves the unread notifications for a user
- *
- * @param {String} userId - the userId to find notifications for
- * @param {Callback} next
- * @return {Promise}
- */
-
-UserRoomSchema.statics.findUnreadForUser = function(userId, next) {
-  debug('findUnreadbyUser for %s', userId);
-
-  var deferred = Q.defer()
-    , $query;
-
-  $query = {
-    userId: new mongoose.Types.ObjectId(userId),
-    badgeCount: { $gt: 0 }
-  };
-
   UserRoom.find($query, function(err, userrooms) {
     if(err) {
       deferred.reject(err);
-      if(next) return next(err);
+      if(next) next(err);
     } else {
       deferred.resolve(userrooms);
-      if(next) return next(userrooms);
+      if(next) next(null, userrooms);
     }
   });
 
@@ -114,6 +91,41 @@ UserRoomSchema.statics.findByUserAndRooms = function(userId, roomIds, next) {
 }
 
 
+/**
+ * Finds the users for a room that have notification enabled for that room.
+ * This will also exclude users passed into the excludeUsers array to filter
+ * out users that are already in the room.
+ *
+ * @param {String} roomId
+ * @param {Array} excludeUsers - array of string values for users to exclude
+ * @callback next
+ * @return {Promise}
+ */
+UserRoomSchema.statics.findNotifiableUsersForRoom = function (roomId, excludeUsers, next){
+  debug('findUsersForRoom for room %s', roomId);  
+  var deferred = Q.defer()
+    , $query;
+
+  $query = {
+    roomId: new mongoose.Types.ObjectId(roomId),
+    notify: true,
+    userId: { $nin: excludeUsers }
+  };
+
+  UserRoom.find($query, function(err, userrooms) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    } else {      
+      deferred.resolve(userrooms);
+      if(next) next(null, userrooms);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
 /** 
  * Adds the UserRoom record by performing an upsert
  * If the UserRoom record already exists it will update the information
@@ -136,10 +148,8 @@ UserRoomSchema.statics.addRoom = function(userId, roomId, deviceId, next) {
     updated: new Date(),
     $setOnInsert: {       
       userId: new mongoose.Types.ObjectId(userId), 
-      roomId: new mongoose.Types.ObjectId(roomId),
-      deviceId: deviceId,
-      notify: true,
-      badgeCount: 0,
+      roomId: new mongoose.Types.ObjectId(roomId),      
+      notify: true,      
       created: new Date()
     }
   };
@@ -171,187 +181,6 @@ UserRoomSchema.statics.removeRoom = function(userId, roomId, next) {
   UserRoom.remove($query, next);        
 }
 
-
-/**
- * Updates the device information for all rooms for a specific user
- *
- * @param {String} userId
- * @param {String} deviceId
- * @param {Function} next
- */
-
-UserRoomSchema.statics.updateDevice = function(userId, deviceId, next) {
-  debug('updateDevice for user %s', userId);
-  var $query, $update, $options;
-
-  $query = { 
-    userId: new mongoose.Types.ObjectId(userId)    
-  };
-
-  $update = {
-    $set: {
-      deviceId: deviceId,
-      updated: new Date()
-    }
-  };
-
-  $options = {
-    multi: true
-  };
-
-  UserRoom.update($query, $update, $options, next);
-}
-
-
-/**
- * Updates the userroom record by resetting the badgecount
- * and updating the timestamp to incidate the last join for the user
- *
- * @param {String} userId
- * @param {String} roomId
- * @param {Function} next 
- */
-
-UserRoomSchema.statics.resetBadgeCount = function(userId, roomId, next) {
-  debug('joinRoom for user %s', userId); 
-
-  var $query = { 
-    userId: new mongoose.Types.ObjectId(userId), 
-    roomId: new mongoose.Types.ObjectId(roomId) 
-  };
-  
-  UserRoom.findOne($query, function(err, userroom) {
-    if(err) return next(err);
-    else {
-      var priorCount = userroom ? userroom.badgeCount : 0;
-
-      if(priorCount > 0) {
-        userroom.badgeCount = 0;
-        userroom.updated = new Date();
-        userroom.save();
-      }
-
-      return next(null, priorCount);
-    }
-  });
-}
-
-
-/**
- * Update the badge counts for a specific room but exclude the users that
- * are currently in the room as supplied by the excludeUsers property
- *
- * @param {String} roomId - The room to update badges for
- * @param {Array} excludeUsers - Array of UsersIds to exclude
- * @param {Callback} next
- */
-
-UserRoomSchema.statics.updateBadgeCounts = function(roomId, excludeUsers, next) {
-  var deferred = new Q.defer()
-    , $query
-    , $update
-    , $options;
-
-  $query = { 
-    userId: { $nin: excludeUsers },
-    roomId: new mongoose.Types.ObjectId(roomId), 
-    notify: true
-  };
-
-  $update = { $inc: { badgeCount: 1 } };  
-  $options = { multi: true };
-
-  UserRoom.update($query, $update, $options, function(err, number, raw) {     
-    if(err) {
-      deferred.reject(err);
-      if(next) next(err);
-    } 
-    else { 
-      deferred.resolve(number);
-      if(next) next(null, number);
-    }
-  });
-
-  // always return the promise
-  return deferred.promise;
-}
-
-
-/**
- * Retrieves the notifications for a room by finding
- * users that want notifications for the room and that aren't currently
- * in the room
- *
- * @param {String} roomId - the room to find the notifications for
- * @param {Array} excludeUsers - Array of UserIds that should be excluded
- * @param {Callback} next
- */
-
-UserRoomSchema.statics.getNotifiable = function(roomId, excludeUsers, next) {
-  debug('getNotifiable for room %s', roomId);
-
-  var deferred = new Q.defer()
-    , $userQuery
-    , $userProj;
-
-  
-  // Setup query for finding user that want notification for the room
-  $userQuery = { 
-    userId: { $nin: excludeUsers },
-    roomId: new mongoose.Types.ObjectId(roomId), 
-    notify: true
-  };
-
-  $userProj = { 
-    _id: false, 
-    userId: true 
-  };
-
-  // Find users that want notification for the room
-  UserRoom.find($userQuery, $userProj, function(err, results) {
-
-    // reject on error
-    // TODO remove boilerplate
-    if(err) {
-      deferred.reject(err);
-      if(next) next(err);
-    }
-
-    // perform aggregation to get notification counts
-    else {
-      debug('found %d notifications', results.length);
-      
-      // create array of userId's
-      var userIds = results.map(function(result) { return result.userId; });
-
-      // perform aggregation for all userId's
-      UserRoom.aggregate([  
-        { $match: { "userId": { $in: userIds } } },
-        { $group: { _id: { userId: "$userId", deviceId: "$deviceId"}, badgeCount: { $sum: "$badgeCount" } } },
-        { $project: { _id: 0, userId: "$_id.userId", deviceId: "$_id.deviceId", badgeCount: "$badgeCount" } }
-      ], 
-      function(err, results) {
-
-        // TODO remove boilerplate
-        if(err) {
-          deferred.reject(err);
-          if(next) next(err);
-        }
-
-        // TODO remove boilerplate
-        else {
-          deferred.resolve(results);
-          if(next) next(results);
-        }
-
-      });  
-
-    }
-  });
-
-  // always return the promise
-  return deferred.promise;
-}
 
 
 /** 
@@ -398,6 +227,9 @@ UserRoomSchema.statics.toggleNotification = function(userId, roomId, notify, nex
 
   });
 }
+
+
+
 
 
 

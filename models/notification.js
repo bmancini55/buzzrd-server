@@ -1,19 +1,22 @@
 // Module dependencies
 var mongoose    = require("mongoose")
   , Q           = require('q')
-  , debug       = require('debug')('room')
-  , Schema      = mongoose.Schema;
+  , _           = require('underscore')
+  , debug       = require('debug')('notification')
+  , Schema      = mongoose.Schema
+  , Room        = require('./room')
+  , User        = require('./user')
+  , UserRoom    = require('./userroom')
+  , apnclient   = require('../apnclient.js');
 
 ///
 /// Schema definition
 ///
 
-var NotificationSchema = new Schema({  
-});
-
 ///
 /// Notification Types
-/// Invitation - 1
+/// Room Invitation - 1
+/// New Room Message - 2
 ///
 
 var NotificationSchema = new Schema({
@@ -21,7 +24,9 @@ var NotificationSchema = new Schema({
   recipientId: { type: Schema.Types.ObjectId, required: true},
   message: { type: String, required: true },
   created: { type: Date, default: Date.now },
+  updated: { type: Date },
   read: { type: Boolean, default: false },
+  badgeCount: { type: Number, default: 0 },
   payload: Schema.Types.Mixed
 });
 
@@ -56,6 +61,7 @@ NotificationSchema.statics.createNotification = function(notification, next) {
   return deferred.promise; 
 }
 
+
 /**
  * Gets a notifications for the provided user
  * 
@@ -65,24 +71,86 @@ NotificationSchema.statics.createNotification = function(notification, next) {
 NotificationSchema.statics.findByUser = function(userId, next) {
   debug('findByUser %s', userId);
 
-  return Notification.find({ recipientId: userId}, next);
+  return Notification
+    .find({ recipientId: userId })
+    .sort({ updated: 'desc' })
+    .exec(next);
+}
+
+
+
+/**
+ * Finds the notification by user and room
+ *
+ * @param {String} userId
+ * @param {String} roomId
+ * @callback
+ * @return {Promise}
+ */
+NotificationSchema.statics.findByUserAndRoom = function(userId, roomId, next) {
+  debug('findByUserAndRoom');
+  var deferred = Q.defer()
+    , $select;
+
+  $select = {
+    recipientId: new mongoose.Types.ObjectId(userId),
+    'payload.roomId': new mongoose.Types.ObjectId(roomId)
+  };
+
+  Notification.findOne($select, function(err, notification) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    } else {
+      deferred.resolve(notification);
+      if(next) next(null, notification);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
+/**
+ * Gets unread notifications for the user
+ * 
+ * @param {String} userId
+ * @callback next
+ */
+NotificationSchema.statics.findUnreadForUser = function(userId, next) {
+  debug('findUnreadForUser %s', userId);
+
+  return Notification.find({ recipientId: new mongoose.Types.ObjectId(userId) }, next);
 }
 
 /**
- * Removes the provided notification
+ * Removes the notification based on the identifier and the corresponding 
+ * user that made the request.
  * 
- * @param {String} notificationId
- *
+ * @param {String} userId
+ * @param {String} notificatinId
+ * @callback
+ * @return {Promise}
  */
-NotificationSchema.statics.removeNotification = function(notificationId, next) {
+NotificationSchema.statics.removeNotification = function(userId, notificationId, next) {
   debug('removeNotification %s', notificationId); 
-  var $query;
+  var deferred = Q.defer()
+    , $query;
 
   $query = { 
-    _id: new mongoose.Types.ObjectId(notificationId)
+    _id: new mongoose.Types.ObjectId(notificationId),
+    recipientId: new mongoose.Types.ObjectId(userId)
   };
   
-  Notification.remove($query, next);        
+  Notification.remove($query, function(err) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    } else {
+      deferred.resolve();
+      if(next) next(null, null);
+    }
+  });
 }
 
 /**
@@ -91,16 +159,346 @@ NotificationSchema.statics.removeNotification = function(notificationId, next) {
  * @param {String} notificationId
  *
  */
-NotificationSchema.statics.updateNotificationRead = function(notificationId, read, next) {
+NotificationSchema.statics.markAsRead = function(userId, notificationId, next) {
   debug('updateNotificationRead %s', notificationId); 
 
-  var select = { _id: new mongoose.Types.ObjectId(notificationId) },
-    updates = { $set: { 
-               read: read,
-             } };
+  var $select
+    , $updates
+
+  $select = { 
+    _id: new mongoose.Types.ObjectId(notificationId),
+    recipientId: new mongoose.Types.ObjectId(userId)
+  };
   
-  this.findOneAndUpdate(select, updates, next);    
+  $updates = { 
+    $set: { 
+      read: true,
+      badgeCount: 0
+    }
+  };
+  
+  Notification.findOneAndUpdate($select, $updates, next);
 }
+
+
+/**
+ * Creates room notification for the usr
+ *
+ * @param {String} roomId - The room to create the notification for
+ * @param {ObjectId} userId - The id specified for the user
+ * @param {Callback} next
+ */
+NotificationSchema.statics.createRoomNotification = function(roomId, userId, next) {
+  debug('createRoomNotification for room %s and user %s', roomId, userId);
+  var deferred = Q.defer();
+
+  var notification = new Notification({    
+    typeId: 2,   
+    recipientId: userId,
+    message: 'Unread messages',
+    created: new Date(),
+    updated: new Date(),
+    read: false,
+    badgeCount: 0,
+    payload: { 
+      roomId: new mongoose.Types.ObjectId(roomId)
+    }  
+  });
+
+  notification.save(function(err, notification) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    } else {
+      deferred.resolve(notification);
+      if(next) next(null, notification);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
+/**
+ * Creates room notifications for each of the supplied users
+ *
+ * @param {String} roomId - The room to update badges for
+ * @param {Array} users - Array of ObjectId instances to insert
+ * @param {Callback} next
+ */
+NotificationSchema.statics.createRoomNotifications = function(roomId, users, next) {
+  debug('createRoomNotifications');
+  var deferred = Q.defer()
+    , requestedIds = _.pluck(users, '_id')
+    , $query;
+
+  $query = { 
+    recipientId: { $in: requestedIds },
+    'payload.roomId': new mongoose.Types.ObjectId(roomId)
+  };
+
+  // find the existing records
+  Notification.find($query, function(err, foundNotifications) {
+    debug('createRoomNotifications: founds %d notifications', foundNotifications.length);
+
+    var foundLookup = _.indexBy(foundNotifications, 'recipientId')      
+      , missingIds = [];
+
+    // get the missing ids
+    requestedIds.forEach(function(requestedId) {       
+      if(!foundLookup[requestedId]) {
+        missingIds.push(requestedId);
+      }
+    });
+
+    // insert all the missing ids 
+    debug('createRoomNotifications: creating %d new notifications', missingIds.length);
+    Q.all(missingIds.map(function(missingId) {
+      return Notification.createRoomNotification(roomId, missingId);
+    }))
+    .then(
+
+      // handle success
+      function(results) {
+        deferred.resolve(results);
+        if(next) next(null, results);
+      }, 
+
+      // handle failure
+      function(err) {
+        deferred.reject(err);
+        if(next) next(err);
+      }
+    );
+
+  });
+ 
+  return deferred.promise;  
+}
+
+/**
+ * Increments the badge counts for a room for the list of users that are
+ * specified. If the notifications don't exist, we create them.
+ *
+ * @param {String} roomId - The room to update badges for
+ * @param {Array} users - Array of ObjectIds for the users
+ * @param {Callback} next
+ */
+NotificationSchema.statics.incRoomBadgeCount = function(roomId, users, next) {
+  debug('incRoomBadgeCount for room %s, and %d users', roomId, users.length);
+  var deferred = new Q.defer()
+    , $query
+    , $update
+    , $options
+    , userIds = _.pluck(users, '_id');
+  
+  $query = {
+    typeId: 2,
+    recipientId: { $in: userIds },
+    'payload.roomId': new mongoose.Types.ObjectId(roomId),
+  };
+
+  $update = { 
+    $inc: { badgeCount: 1 },
+    $set: { updated: new Date() }
+  };
+
+  $options = { multi: true };
+
+  Notification.update($query, $update, $options, function(err, number, raw) {     
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    } 
+    else { 
+      deferred.resolve(number);
+      if(next) next(null, number);
+    }
+  });
+
+  // always return the promise
+  return deferred.promise;
+}
+
+
+/**
+ * Retrieves the notifications for a room by finding
+ * users that want notifications for the room and that aren't currently
+ * in the room
+ *
+ * @param {Array} users - the list of users to get aggregate info for 
+ * @param {Callback} next
+ * @return {Promise}
+ */
+NotificationSchema.statics.getAggregateBadgeCount = function(users, next) {
+  debug('getAggregatedBadgeCount');
+
+  var deferred = new Q.defer()
+    , ids;
+
+  // create array of userId's
+  ids = _.pluck(users, '_id');
+
+  // perform aggregation for all userId's
+  Notification.aggregate([  
+    { $match: { recipientId: { $in: ids } } },
+    { $group: { _id: '$recipientId', badgeCount: { $sum: '$badgeCount' } } }    
+  ], 
+  function(err, results) {
+
+    // TODO remove boilerplate
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    }
+
+    // TODO remove boilerplate
+    else {
+      deferred.resolve(results);
+      if(next) next(results);
+    }
+
+  });
+
+  // always return the promise
+  return deferred.promise;
+}
+
+
+/**
+ * Notifies the room
+ *
+ * @param {String} roomId - The room to update badges for
+ * @param {Array} users - Array of users instances to insert
+ * @param {Callback} next
+ */
+NotificationSchema.statics.notifyRoom = function(roomId, message, excludeUsers, next) {
+  debug('notifyRoom');
+
+  var deferred = Q.defer();
+
+  var scope = {      
+    room: null,
+    users: null,
+    badgeCounts: null
+  };
+  
+
+  // find the room
+  Q.fcall(function() {    
+    debug('notifyRoom: finding room'); 
+
+    // find the room
+    return Room.findById(roomId)
+
+    // scope the room for user later
+    .then(function(room) {
+      debug('notifyRoom: found room %s', room._id);
+      scope.room = room;
+    });    
+  })
+
+
+  // retrieve the users that want to be notified
+  .then(function() {
+    debug('notifyRoom: retrieving users');
+
+    // find the userroom record where notify = true
+    return UserRoom.findNotifiableUsersForRoom(roomId, excludeUsers)
+
+    // join to the user records
+    .then(function(userrooms) {        
+      debug('notifyRoom: found %d userrooms', userrooms.length);
+
+      debug('notifyRoom: finding users');
+      var ids = userrooms.map(function(userroom) { return userroom.userId.toString(); });
+      return User.findByIds(ids)      
+    })
+
+    // add users to scope for later use
+    .then(function(users) {
+      debug('notifyRoom: found %d users', users.length);
+      scope.users = users;
+    });
+  })
+
+
+  // create notifications for the users
+  .then(function() {
+    debug('notifyRoom: creating notifications');
+    
+    return Notification.createRoomNotifications(roomId, scope.users);  
+  })
+
+
+  // increment the badge counts for the room
+  .then(function() {  
+    debug('notifyRoom: incrementing badge counts');
+
+    return Notification.incRoomBadgeCount(roomId, scope.users)
+  })
+
+
+  // get the aggregated badge counts for these users
+  .then(function() {
+    debug('notifyRoom: aggregating badge counts');
+    
+    return Notification.getAggregateBadgeCount(scope.users)
+
+    // add badge count to scope for later use
+    .then(function(badgeCounts) {
+      debug('notifyRoom: aggregated bagde counts for %d users', badgeCounts);
+      scope.badgeCounts = badgeCounts;
+    });
+  })
+  
+
+  // send out notifications
+  .then(function() {      
+    debug('notifyRoom: sending notifications via APNS');
+
+    // create user lookup
+    var userLookup = {};
+    scope.users.forEach(function(user) {
+      userLookup[user._id] = user;
+    });
+
+    // create the apn recipient
+    var apnRecipients = [];
+    scope.badgeCounts.forEach(function(badgeCount) {
+
+      var user = userLookup[badgeCount._id];      
+      if(user.deviceId) {
+        debug('notifyRoom: created apn for %s', user._id);
+
+        var apn = {
+          userId: user._id.toString(),
+          deviceId: user.deviceId,
+          badgeCount: badgeCount.badgeCount
+        };        
+        apnRecipients.push(apn);
+      };
+
+    });
+
+    // send notifications
+    return apnclient.notifyRoom(scope.room, message, apnRecipients);
+  })
+
+  .then(
+    function() {
+      deferred.resolve();
+      if(next) next(null, null);
+    },
+    function(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    }
+  );
+
+  return deferred.promise
+}
+
 
 
 ///
