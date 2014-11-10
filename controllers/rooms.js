@@ -5,11 +5,12 @@ var Q             = require('q')
   , util          = require('util')
   , JsonResponse  = require('jsonresponse')
   , models        = require('../models')
+  , apnclient     = require('../apnclient')
   , Room          = models.Room
   , UserRoom      = models.UserRoom
   , Venue         = models.Venue
   , Message       = models.Message
-  , Notification  = models.Notification;
+  , Notification  = models.Notification
 
 
 /**
@@ -151,62 +152,24 @@ exports.findByUserId = function(req, res) {
  * Invite friends to a room
  */ 
 exports.inviteFriends = function(req, res) {
-  var user = req.user
-    , notificationTypeId = 1 // Invitation
-    , roomId = req.body.roomId
-    , users = JSON.parse(req.body.users)
-    , payload
-    , description
-    , senderName;
+  var sender = req.user
+    , roomId = req.param('roomId')
+    , users = JSON.parse(req.param('users'))
+    , userIds;
 
-    Room.findById(roomId, function(err, room) {
-      message = 'invited you to chat in the room';
+  // map user objects into ids
+  userIds = users.map(function(user) { return user.iduser; });
 
-      debugger;
-
-      if ((user.firstName) && (user.lastName)) {
-        senderName = user.firstName + ' ' + user.lastName;
-      } else {
-        senderName = user.username;
-      }
-
-      payload = {
-        senderId: user._id
-        , roomId: room._id
-        , senderName: senderName
-        , roomName: room.name
-      };
-
-      var notifications = [];
-
-      for (var i = 0; i < users.length; i++) {
-        var notification = new Notification({
-          typeId: notificationTypeId
-          , recipientId: users[i].iduser
-          , message: message
-          , payload: payload
-          , badgeCount: 1
-          , created: new Date()
-          , updated: new Date()
-        });
-        
-        notifications.push(notification);
-      }
-
-      var promises = notifications.map(function(notification) {
- 
-        return Notification.createNotification(notification);  
-
-      });
-
-      Q.all(promises)
-      .then(function() {
-        res.send(new JsonResponse(null, 'success'));
-      })
-      .fail(function(err) {
-        res.send(new JsonResponse(err));
-      });
-    });
+  // perform notifications
+  Notification.notifyInvites(roomId, userIds, sender, function(err, notifications) {
+    if(err) {
+      var result = new JsonResponse(err);
+      console.log('%j', result);
+      res.status(500).send(result);
+    } else {
+      res.send(new JsonResponse(null, 'success'));
+    }
+  });  
 };
 
 

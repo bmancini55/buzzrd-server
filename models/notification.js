@@ -332,7 +332,7 @@ NotificationSchema.statics.incRoomBadgeCount = function(roomId, users, next) {
  * @return {Promise}
  */
 NotificationSchema.statics.getAggregateBadgeCount = function(users, next) {
-  debug('getAggregatedBadgeCount');
+  debug('getAggregateBadgeCount');
 
   var deferred = new Q.defer()
     , ids;
@@ -370,8 +370,10 @@ NotificationSchema.statics.getAggregateBadgeCount = function(users, next) {
  * Notifies the room
  *
  * @param {String} roomId - The room to update badges for
- * @param {Array} users - Array of users instances to insert
- * @param {Callback} next
+ * @param {Message} message - The message that was sent
+ * @param {Array[String]} excludeUsers - The users that are in the room to exclude
+ * @Callback next
+ * @return {Promise}
  */
 NotificationSchema.statics.notifyRoom = function(roomId, message, excludeUsers, next) {
   debug('notifyRoom');
@@ -454,7 +456,7 @@ NotificationSchema.statics.notifyRoom = function(roomId, message, excludeUsers, 
   })
   
 
-  // send out notifications
+  // send out APNS notifications
   .then(function() {      
     debug('notifyRoom: sending notifications via APNS');
 
@@ -500,6 +502,170 @@ NotificationSchema.statics.notifyRoom = function(roomId, message, excludeUsers, 
   return deferred.promise
 }
 
+
+/**
+ * Notifies invitees to a room
+ *
+ * @param {String} roomId - The room to update badges for 
+ * @param {Array[String]} userIds - The users to be invited
+ * @param {User} user - The sender of the invite
+ * @callback next
+ * @return {Promise}
+ */
+NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, next) {
+  debug('notifyInvites');  
+  var deferred = Q.defer() 
+    , scope;
+
+  scope = {
+    sender: sender,
+    room: null,
+    recipients: null,
+    notifications: null,
+    badgeCounts: null
+  };
+
+  // retrieves the room
+  Q.fcall(function() {
+    debug('notifyInvites: retrieving room %s', roomId);
+    return Room.findById(roomId)
+
+    .then(function(room) {
+      debug('notifyInvites: found room %s', room._id);
+      scope.room = room;
+    });
+  })
+
+  // find recipient users
+  .then(function () {
+    debug('notifyInvites: finding  %d users', userIds.length);    
+    return User.findByIds(userIds)
+
+    .then(function(recipients) {
+      scope.recipients = recipients;
+    });
+  })
+
+  // create notifications entries
+  .then(function() {
+    debug('notifyInvites: saving notifications');
+    var recipientLookup
+      , notifications
+      , payload
+      , senderName
+      , promises
+      , message = 'invited you to chat in the room'
+      , sender = scope.sender
+      , room = scope.room      
+      , recipients = scope.recipients;      
+
+    if (sender.firstName && sender.lastName) {
+      senderName = sender.firstName + ' ' + sender.lastName;
+    } else {
+      senderName = sender.username;
+    }
+
+    recipientLookup = {};
+    recipients.forEach(function(recipient) {
+      recipientLookup[recipient._id] = recipient;
+    });
+
+    payload = {
+      senderId: sender._id,
+      roomId: room._id,
+      senderName: senderName,
+      roomName: room.name
+    };
+
+    notifications = [];
+    recipients.forEach(function(recipient) {
+      notifications.push(new Notification({
+        typeId: 1,
+        recipientId: recipient._id,
+        message: message,
+        payload: payload,
+        badgeCount: 1,
+        created: new Date(),
+        updated: new Date()
+      }));
+    });
+
+    // save all of the notifications
+    return Q.all(notifications.map(function(notification) {
+      return Notification.createNotification(notification);  
+    }))
+    .then(function(notifications) {
+      debug('notifyInvites: saved %d invites', notifications.length);
+      scope.notifications = notifications;
+    });
+  })
+
+  // get aggregate badge countds
+  .then(function() {
+    debug('notifyInvites: getting aggregate badge counts');
+    return Notification.getAggregateBadgeCount(scope.recipients)
+
+    .then(function(badgeCounts) {
+      debug('notifyInvites: found %d badgeCounts', badgeCounts.length);
+      scope.badgeCounts = badgeCounts;
+    });
+  })
+
+  // send requests to APNS
+  .then(function() {
+    debug('notifyInvites: sending APNS notification for %d', scope.badgeCounts.length);
+    var userLookup
+      , notificationLookup
+      , room = scope.room
+      , notifications = scope.notifications
+      , users = scope.recipients
+      , badgeCounts = scope.badgeCounts
+      , apnRecipients = [];
+    
+    userLookup = _.indexBy(users, '_id');
+    notificationLookup = _.indexBy(notifications, 'recipientId');    
+    
+    // create the apn recipient    
+    badgeCounts.forEach(function(badgeCount) {
+      var user
+        , notification
+        , messageTitle
+        , apn;
+
+      user = userLookup[badgeCount._id];
+      notification = notificationLookup[badgeCount._id];
+
+      if(user.deviceId) {
+        debug('notifyInvites: created apn for %s', user._id);              
+        apn = {
+          userId: user._id.toString(),
+          deviceId: user.deviceId,
+          badgeCount: badgeCount.badgeCount,
+          message: notification.payload.senderName + ' invited you to chat in the room \'' + notification.payload.roomName + '\''
+        };
+        apnRecipients.push(apn);
+      };
+
+    });
+
+    // send notifications
+    return apnclient.notifyInvites(room, apnRecipients);
+  })
+
+  // handle callback if one exists
+  .then(
+    function() {
+      deferred.resolve(scope.notifications);
+      if(next) next(null, scope.notifications);
+    },
+    function(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    }
+  );
+
+  return deferred.promise;
+}
 
 
 ///

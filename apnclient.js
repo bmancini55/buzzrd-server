@@ -109,7 +109,7 @@ exports.notifyRoom = function(room, message, recipients) {
   // process all recipients
   recipients.forEach(function(recipient) {    
     if(recipient.deviceId) {
-      debug('notifyRoom:sending %j', recipient);
+      debug('notifyRoom: sending %j', recipient);
 
       // construct notification
       var note = new apn.Notification();
@@ -118,8 +118,7 @@ exports.notifyRoom = function(room, message, recipients) {
       note.setAlertText(room.name + ': ' + message.message);
       note.payload = {
         'type': 'message',
-        'roomId': room._id.toString(),
-        'messageCount': room.messageCount
+        'roomId': room._id.toString()        
       };
       note.trim();
 
@@ -130,38 +129,37 @@ exports.notifyRoom = function(room, message, recipients) {
 }
 
 
+/** 
+ * Sends APNS notification for a room invitation 
+ *
+ * @param {Room} room
+ * @param {Array} invites - array of objects
+ * @config userId
+ * @config deviceId
+ * @config badgeCount
+ * @param {String} message
+ * @callback next
+ */
+exports.notifyInvites = function(room, invites) {
+  debug('notifyInvites')
 
-exports.notifyRoomInvite = function(invites) {
-  debug('notifyRoomInvite')
+  // procall all recipients
+  invites.forEach(function(invite) {
+    if(invite.deviceId) {    
+      debug('notifyInvites: sendin %j', invite);
 
-  var userIds = invites.map(function(invite) { 
-    return invite.recipientId;
+      var note = new apn.Notification();
+      note.expiry = Math.floor(Date.now() / 1000) + 21600; // expire 6 hours from now
+      note.badge = invite.badgeCount;
+      note.setAlertText(invite.message);
+      note.payload = {
+        'type': 'invite',
+        'roomId': room._id
+      };
+      note.trim();
+
+      // send notification
+      service.pushNotification(note, invite.deviceId);
+    }
   });
-  
-  User.findByIds(userIds)
-  .then(function(users) {
-
-    var usersLookup = {};
-    users.forEach(function(user) {
-      usersLookup[user._id.toString()] = user;
-    });
-
-    invites.forEach(function(invites) {
-      var user = usersLookup[invites.recipientId.toString()];
-      if(user && user.deviceId) {
-        debug('sending notification to %s', user.deviceId);
-
-        var note = new apn.Notification();
-        note.expiry = Math.floor(Date.now() / 1000) + 21600; // expire 6 hours from now
-        note.badge = 1// increment total count by 1...
-        note.setAlertText('Someone invited you to a room: ');
-        note.payload = {
-          'type': 'roominvite',
-          'roomId': roomId          
-        }
-
-      }
-    })
-
-  })
 }
