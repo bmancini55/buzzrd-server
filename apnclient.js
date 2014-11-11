@@ -117,7 +117,7 @@ exports.notifyRoom = function(room, message, recipients) {
       note.badge = recipient.badgeCount;
       note.setAlertText(room.name + ': ' + message.message);
       note.payload = {
-        'type': 'message',
+        'typeId': 2,
         'roomId': room._id.toString()        
       };
       note.trim();
@@ -153,7 +153,7 @@ exports.notifyInvites = function(room, invites) {
       note.badge = invite.badgeCount;
       note.setAlertText(invite.message);
       note.payload = {
-        'type': 'invite',
+        'typeId': 1,
         'roomId': room._id
       };
       note.trim();
