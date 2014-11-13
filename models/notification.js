@@ -299,6 +299,48 @@ NotificationSchema.statics.upsertUnreadRoomNotifications = function(room, users,
 }
 
 
+/**
+ * Creates a room notification for the user and assumes that one
+ * does not exist already. This method is used by the upsertUnreadRoomNotification
+ * method and makes one off calls for each user that needs to be inserted.
+ *
+ * @param {String} roomId - The room to create the notification for
+ * @param {ObjectId} userId - The id specified for the user
+ * @param {Callback} next
+ * @return {Promise} returns a promise that is fulfilled with the created notification
+ */
+NotificationSchema.statics.createUnreadRoomNotification = function(room, userId, next) {
+  debug('createUnreadRoomNotification for room %s and user %s', room._id, userId);
+  var deferred = Q.defer();
+
+  var notification = new Notification({    
+    typeId: 2,   
+    recipientId: userId,
+    message: '[badgeCount] unread messages in the room',
+    created: new Date(),
+    updated: new Date(),
+    read: false,
+    badgeCount: 1,
+    payload: { 
+      roomId: room._id,
+      roomName: room.name
+    }  
+  });
+
+  notification.save(function(err, notification) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    } else {
+      deferred.resolve(notification);
+      if(next) next(null, notification);
+    }
+  });
+
+  return deferred.promise;
+}
+
+
 
 
 /**
