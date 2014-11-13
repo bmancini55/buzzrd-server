@@ -119,8 +119,13 @@ NotificationSchema.statics.findByUserAndRoom = function(userId, roomId, next) {
  */
 NotificationSchema.statics.findUnreadForUser = function(userId, next) {
   debug('findUnreadForUser %s', userId);
+  var $query;
 
-  return Notification.find({ recipientId: new mongoose.Types.ObjectId(userId) }, next);
+  $query = {
+    recipientId: new mongoose.Types.ObjectId(userId),
+    read: false
+  };
+  return Notification.find($query, next);
 }
 
 /**
