@@ -504,7 +504,7 @@ NotificationSchema.statics.notifyRoom = function(roomId, message, excludeUsers, 
           userId: user._id.toString(),
           deviceId: user.deviceId,
           badgeCount: badgeCount.totalBadgeCount,
-          message: notification.badgeCount + ' unread messages in the room ' + scope.room.name      
+          message: notification.badgeCount + ' unread messages in the room \'' + scope.room.name + '\''
         };        
         apnRecipients.push(apn);
       };

@@ -115,7 +115,7 @@ exports.notifyRoom = function(room, recipients) {
       var note = new apn.Notification();
       note.expiry = Math.floor(Date.now() / 1000) + 21600; // expire 6 hour from now
       note.badge = recipient.badgeCount;
-      note.setAlertText(recipients.message);
+      note.setAlertText(recipient.message);
       note.payload = {
         'typeId': 2,
         'roomId': room._id.toString()        
