@@ -1,5 +1,6 @@
 // Module dependencies
 var Q             = require('q')
+  , _             = require('underscore')
   , util          = require('util')
   , JsonResponse  = require('jsonresponse')
   , models        = require('../models')
@@ -58,17 +59,18 @@ exports.markRoomAsRead = function(req, res) {
   // find current notification
   Notification.findByUserAndRoom(userId, roomId)
 
-  // store badge count
-  .then(function(notification) {
-    badgeCount = notification ? notification.badgeCount : 0;
-    return notification;
+  // get total badge count of notifications
+  .then(function(notifications) {
+    var badgeCounts = _.pluck(notifications, 'badgeCount');    
+    badgeCount = _.reduce(badgeCounts, function(sum, val) { return sum + val; }, 0);
+    return notifications;
   })
 
-  // delete notification if needed
-  .then(function(notification) {    
-    if(notification) {
-      return Notification.removeNotification(userId, notification._id.toString());
-    } 
+  // update all notifications
+  .then(function(notifications) {        
+    return Q.all(notifications.map(function(notification) {
+      return Notification.markAsRead(userId, notification._id.toString());  
+    }));
   })
 
   // return results
@@ -77,6 +79,7 @@ exports.markRoomAsRead = function(req, res) {
       res.send(new JsonResponse(null, badgeCount))
     },
     function(err) {
+      console.log(err);
       res.status(500).send(new JsonResponse(err));
     }
   );

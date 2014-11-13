@@ -97,13 +97,13 @@ NotificationSchema.statics.findByUserAndRoom = function(userId, roomId, next) {
     'payload.roomId': new mongoose.Types.ObjectId(roomId)
   };
 
-  Notification.findOne($select, function(err, notification) {
+  Notification.find($select, function(err, notifications) {
     if(err) {
       deferred.reject(err);
       if(next) next(err);
     } else {
-      deferred.resolve(notification);
-      if(next) next(null, notification);
+      deferred.resolve(notifications);
+      if(next) next(null, notifications);
     }
   });
 
@@ -162,7 +162,8 @@ NotificationSchema.statics.removeNotification = function(userId, notificationId,
 NotificationSchema.statics.markAsRead = function(userId, notificationId, next) {
   debug('updateNotificationRead %s', notificationId); 
 
-  var $select
+  var deferred = Q.defer()
+    , $select
     , $updates
 
   $select = { 
@@ -177,7 +178,15 @@ NotificationSchema.statics.markAsRead = function(userId, notificationId, next) {
     }
   };
   
-  Notification.findOneAndUpdate($select, $updates, next);
+  Notification.findOneAndUpdate($select, $updates, function(err, notification) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);    
+    } else {
+      deferred.resolve(notification);
+      if(next) next(null, notification);
+    }
+  });
 }
 
 
