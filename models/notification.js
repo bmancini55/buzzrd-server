@@ -35,32 +35,6 @@ var NotificationSchema = new Schema({
 /// Static methods
 ///
 
-/**
- * Create a notification
- * 
- * @param {Number} typeId
- * @param {String} recipientId
- * @param {String} message
- * @param {Mixed} payload
- */ 
-NotificationSchema.statics.createNotification = function(notification, next) {
-  var deferred = new Q.defer();
-
-  notification.save(function(err, notification) {
-    if(err) {
-      deferred.reject(err);
-      if(next) next(err);
-    } 
-    else { 
-      deferred.resolve(notification);
-      if(next) next(null, notification);
-    }
-  });
-
-  // always return the promise
-  return deferred.promise; 
-}
-
 
 /**
  * Gets a notifications for the provided user
@@ -195,6 +169,160 @@ NotificationSchema.statics.markAsRead = function(userId, notificationId, next) {
 }
 
 
+/**
+ * Upserts room invite notifications for each of the supplied users.
+ * This method will update the existing notifications by setting them to unread
+ * setting the updated value and sets the badge count to 1. Users that do
+ * not have a notification will have one created. The result set will contain
+ * all of the notifications created or updated.
+ *
+ * @param {Room} room - The room instance to create the notifications
+ * @param {User} sender - the sender of the invitation
+ * @param {Array} users - Array of ObjectId instances to insert
+ * @param {Callback} next
+ * @return {Promise} returns a promise with all of the notifications
+ */
+NotificationSchema.statics.upsertRoomInviteNotifications = function(room, sender, users, next) {
+  debug('upsertRoomInviteNotifications');  
+
+  var deferred = Q.defer()
+    , requestedIds = _.pluck(users, '_id')
+    , $query
+    , $update
+    , updatedNotifications
+    , insertedNotifications;
+
+  $query = { 
+    recipientId: { $in: requestedIds },
+    typeId: 1,
+    'payload.roomId': room._id,
+    'payload.senderId': sender._id
+  };
+
+  $update = {
+    $set: {
+      read: false,
+      updated: new Date(),
+      badgeCount: 1
+    }
+  };
+
+  // update the existing records
+  Q.fcall(function() {
+    var deferred = Q.defer();
+
+    // update
+    Notification.update($query, $update, { multi: true}, function(err) {
+      debug('upsertRoomInviteNotifications: updating notifications');
+      if(err) deferred.reject(err);        
+      
+      // find
+      Notification.find($query, function(err, updated) {
+        debug('upsertRoomInviteNotifications: updated %d notifications', updated.length);
+        if(err) deferred.reject(err);
+
+        updatedNotifications = updated;
+        deferred.resolve(updated);
+      });
+
+    });
+
+    return deferred.promise;
+  })
+  
+  // insert the remainder
+  .then(function() {    
+    var foundLookup = _.indexBy(updatedNotifications, 'recipientId')      
+      , missingIds = [];        
+
+    // get users that need inserts
+    requestedIds.forEach(function(requestedId) {       
+      if(!foundLookup[requestedId]) {
+        missingIds.push(requestedId);
+      }
+    });
+
+    // insert the missing users
+    debug('upsertRoomInviteNotifications: creating %d new notifications', missingIds.length);
+    return Q.all(missingIds.map(function(missingId) {
+      return Notification.createRoomInviteNotification(room, sender, missingId);
+    }))
+    .then(function(inserted) {
+      debug('upsertRoomInviteNotifications: created %d new notifications', inserted.length);
+      insertedNotifications = inserted;
+    });
+  })
+
+  .then(
+
+    // handle success
+    function() {
+      var results = updatedNotifications.concat(insertedNotifications)
+      deferred.resolve(results);
+      if(next) next(null, results);
+    }, 
+
+    // handle failure
+    function(err) {      
+      deferred.reject(err);  
+      if(next) next(err);      
+    }
+  );
+
+  return deferred.promise;
+}
+
+
+/**
+ * Creates a room invite notification for the user and assumes that one
+ * does not exist already. This method is used by the upsertRoomInviteNotification
+ * method and makes one off calls for each user that needs to be inserted.
+ *
+ * @param {Room} room - The room to create the notification for
+ * @param {User} sender - the sender making the invitation
+ * @param {ObjectId} userId - The id specified for the user
+ * @param {Callback} next
+ * @return {Promise} returns a promise that is fulfilled with the created notification
+ */
+NotificationSchema.statics.createRoomInviteNotification = function(room, sender, userId, next) {
+  debug('createRoomInviteNotification for room %s and user %s', room._id, userId);
+  var deferred = Q.defer()
+    , senderName;
+
+  if (sender.firstName && sender.lastName) {
+    senderName = sender.firstName + ' ' + sender.lastName;
+  } else {
+    senderName = sender.username;
+  }
+
+  var notification = new Notification({    
+    typeId: 1,   
+    recipientId: userId,
+    message: 'invited you to chat in the room',
+    created: new Date(),
+    updated: new Date(),
+    read: false,
+    badgeCount: 1,
+    payload: { 
+      roomId: room._id,
+      roomName: room.name,
+      senderId: sender._id,
+      senderName: senderName
+    }
+  });
+
+  notification.save(function(err, notification) {
+    if(err) {
+      deferred.reject(err);
+      if(next) next(err);
+    } else {
+      deferred.resolve(notification);
+      if(next) next(null, notification);
+    }
+  });
+
+  return deferred.promise;
+}
 
 
 /**
@@ -456,7 +584,7 @@ NotificationSchema.statics.notifyRoom = function(roomId, message, excludeUsers, 
     .then(function(notifications) {
       debug('notifyRoom: %d unread message notifications', notifications.length);      
       scope.roomNotifications = notifications;
-    })
+    });
   })
 
 
@@ -573,61 +701,18 @@ NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, nex
     });
   })
 
-  // create notifications entries
+  // upsert notifications entries
   .then(function() {
-    debug('notifyInvites: saving notifications');
-    var recipientLookup
-      , notifications
-      , payload
-      , senderName
-      , promises
-      , message = 'invited you to chat in the room'
-      , sender = scope.sender
-      , room = scope.room      
-      , recipients = scope.recipients;      
+    debug('notifyInvites: upserting notifications');
 
-    if (sender.firstName && sender.lastName) {
-      senderName = sender.firstName + ' ' + sender.lastName;
-    } else {
-      senderName = sender.username;
-    }
-
-    recipientLookup = {};
-    recipients.forEach(function(recipient) {
-      recipientLookup[recipient._id] = recipient;
-    });
-
-    payload = {
-      senderId: sender._id,
-      roomId: room._id,
-      senderName: senderName,
-      roomName: room.name
-    };
-
-    notifications = [];
-    recipients.forEach(function(recipient) {
-      notifications.push(new Notification({
-        typeId: 1,
-        recipientId: recipient._id,
-        message: message,
-        payload: payload,
-        badgeCount: 1,
-        created: new Date(),
-        updated: new Date()
-      }));
-    });
-
-    // save all of the notifications
-    return Q.all(notifications.map(function(notification) {
-      return Notification.createNotification(notification);  
-    }))
+    return Notification.upsertRoomInviteNotifications(scope.room, scope.sender, scope.users)
     .then(function(notifications) {
-      debug('notifyInvites: saved %d invites', notifications.length);
+      debug('notifyInvites: %d unread message notifications', notifications.length);      
       scope.notifications = notifications;
-    });
+    })
   })
 
-  // get aggregate badge countds
+  // get aggregate badge counts
   .then(function() {
     debug('notifyInvites: getting aggregate badge counts');
     return Notification.getAggregateBadgeCount(scope.recipients)
