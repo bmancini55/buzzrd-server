@@ -103,7 +103,7 @@ feedback.start();
  * @param {String} message
  * @callback next
  */
-exports.notifyRoom = function(room, message, recipients) {
+exports.notifyRoom = function(room, recipients) {
   debug('notifyRoom');
   
   // process all recipients
@@ -115,7 +115,7 @@ exports.notifyRoom = function(room, message, recipients) {
       var note = new apn.Notification();
       note.expiry = Math.floor(Date.now() / 1000) + 21600; // expire 6 hour from now
       note.badge = recipient.badgeCount;
-      note.setAlertText(room.name + ': ' + message.message);
+      note.setAlertText(recipients.message);
       note.payload = {
         'typeId': 2,
         'roomId': room._id.toString()        
@@ -146,7 +146,7 @@ exports.notifyInvites = function(room, invites) {
   // procall all recipients
   invites.forEach(function(invite) {
     if(invite.deviceId) {    
-      debug('notifyInvites: sendin %j', invite);
+      debug('notifyInvites: sending %j', invite);
 
       var note = new apn.Notification();
       note.expiry = Math.floor(Date.now() / 1000) + 21600; // expire 6 hours from now
