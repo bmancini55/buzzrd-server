@@ -675,7 +675,7 @@ NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, nex
   scope = {
     sender: sender,
     room: null,
-    recipients: null,
+    users: null,
     notifications: null,
     badgeCounts: null
   };
@@ -696,8 +696,8 @@ NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, nex
     debug('notifyInvites: finding  %d users', userIds.length);    
     return User.findByIds(userIds)
 
-    .then(function(recipients) {
-      scope.recipients = recipients;
+    .then(function(users) {
+      scope.users = users;
     });
   })
 
@@ -715,7 +715,7 @@ NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, nex
   // get aggregate badge counts
   .then(function() {
     debug('notifyInvites: getting aggregate badge counts');
-    return Notification.getAggregateBadgeCount(scope.recipients)
+    return Notification.getAggregateBadgeCount(scope.users)
 
     .then(function(badgeCounts) {
       debug('notifyInvites: found %d badgeCounts', badgeCounts.length);
@@ -730,7 +730,7 @@ NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, nex
       , notificationLookup
       , room = scope.room
       , notifications = scope.notifications
-      , users = scope.recipients
+      , users = scope.users
       , badgeCounts = scope.badgeCounts
       , apnRecipients = [];
     
@@ -744,7 +744,7 @@ NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, nex
         , messageTitle
         , apn;
 
-      user = userLookup[badgeCount._id];
+      user = userLookup[badgeCount._id];      
       notification = notificationLookup[badgeCount._id];
 
       if(user.deviceId) {
@@ -752,7 +752,7 @@ NotificationSchema.statics.notifyInvites = function(roomId, userIds, sender, nex
         apn = {
           userId: user._id.toString(),
           deviceId: user.deviceId,
-          badgeCount: badgeCount.badgeCount,
+          badgeCount: badgeCount.totalBadgeCount,
           message: notification.payload.senderName + ' invited you to chat in the room \'' + notification.payload.roomName + '\''
         };
         apnRecipients.push(apn);
